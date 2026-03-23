@@ -1,21 +1,14 @@
 name: ✨ Feature
-description: Nova funcionalidade para o projeto
-title: "feat(<scope>): <descrição curta>"
-labels: ["feature", "needs-review"]
+description: Nova funcionalidade
+title: "feat(<scope>): "
+labels: ["feature"]
 assignees: []
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## Nova Funcionalidade
-        Preencha os campos abaixo com o máximo de detalhes.
-        Quanto mais contexto, melhor o Copilot entenderá a tarefa.
 
   - type: input
     id: scope
     attributes:
       label: Escopo
-      description: Qual módulo/domínio será afetado?
       placeholder: "ex: usecases, routes, auth, payments"
     validations:
       required: true
@@ -23,9 +16,8 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: Descrição
-      description: Descreva a funcionalidade de forma clara e objetiva
-      placeholder: "O que precisa ser criado? Qual o comportamento esperado?"
+      label: O que precisa ser criado?
+      placeholder: "Descreva a funcionalidade esperada"
     validations:
       required: true
 
@@ -33,36 +25,45 @@ body:
     id: tasks
     attributes:
       label: Tarefas
-      description: Liste as tarefas necessárias
       value: |
         - [ ] Criar schema Zod em `src/schemas/index.ts`
-        - [ ] Criar use case em `src/usecases/`
+        - [ ] Criar use case em `src/usecases/VerbEntidade.ts`
+          - [ ] Definir `InputDto` no mesmo arquivo
+          - [ ] Definir `OutputDto` no mesmo arquivo
+          - [ ] Mapear resultado — nunca retornar model Prisma direto
+          - [ ] Sem `try/catch`
         - [ ] Criar rota em `src/routes/`
-        - [ ] Adicionar erros customizados em `src/errors/index.ts` se necessário
-        - [ ] Verificar documentação Swagger em /docs
+          - [ ] `withTypeProvider<ZodTypeProvider>()`
+          - [ ] `tags` e `summary` no schema
+          - [ ] Validar sessão com `auth.api.getSession` (se protegida)
+          - [ ] Instanciar e chamar o use case
+          - [ ] Tratar erros com `try/catch`
+        - [ ] Adicionar erros em `src/errors/index.ts` se necessário
     validations:
       required: true
 
   - type: textarea
     id: acceptance
     attributes:
-      label: Critérios de Aceite
-      description: Como saberemos que a tarefa está concluída?
+      label: ✅ Critérios de Aceite
+      description: "Defina o que precisa ser verdade para essa issue ser considerada concluída."
       placeholder: |
-        - npm run typecheck passa sem erros
-        - npm run lint passa sem erros
-        - Rota documentada no Swagger com tags e summary
-        - Use case com InputDto e OutputDto mapeados
+        - `npm run typecheck` passa sem erros
+        - `npm run lint` passa sem erros
+        - Zero `any` introduzido
+        - ...
+      value: |
+        - [ ] `npm run typecheck` passa sem erros
+        - [ ] `npm run lint` passa sem erros
+        - [ ] Zero `any` introduzido
+        - [ ] Rota documentada no Swagger com `tags` e `summary`
+        - [ ] Use case com `InputDto` e `OutputDto` mapeados
+        - [ ] Zero model Prisma retornado diretamente
     validations:
       required: true
 
-  - type: dropdown
-    id: priority
+  - type: markdown
     attributes:
-      label: Prioridade
-      options:
-        - 🔴 Alta
-        - 🟡 Média
-        - 🟢 Baixa
-    validations:
-      required: true
+      value: |
+        ---
+        > 📋 **Referências:** `AGENTS.md` · `.github/copilot-instructions.md` · `.github/instructions/conventions.instructions.md`

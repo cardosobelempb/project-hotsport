@@ -1,60 +1,74 @@
 name: 🐛 Bug
-description: Reportar um comportamento inesperado
-title: "fix(<scope>): <descrição curta>"
-labels: ["bug", "needs-triage"]
+description: Comportamento inesperado
+title: "fix(<scope>): "
+labels: ["bug"]
 assignees: []
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## Reporte de Bug
-        Descreva o problema com detalhes para facilitar a correção.
 
   - type: input
     id: scope
     attributes:
       label: Escopo
-      description: Qual módulo/arquivo está com problema?
-      placeholder: "ex: auth, routes/workout-plan, usecases/CreateWorkoutPlan"
+      placeholder: "ex: routes/workout-plan, usecases/CreateWorkoutPlan"
     validations:
       required: true
 
   - type: textarea
     id: description
     attributes:
-      label: Descrição do Bug
-      description: O que está acontecendo de errado?
+      label: O que está acontecendo?
     validations:
       required: true
 
   - type: textarea
     id: reproduction
     attributes:
-      label: Como Reproduzir
-      description: Passo a passo para reproduzir o bug
+      label: Como reproduzir
       placeholder: |
-        1. Fazer POST em /api/workout-plans com payload X
-        2. Observar erro 500 no response
-        3. Log de erro: ...
+        1. Fazer POST /api/... com payload { ... }
+        2. Receber erro 500
+        3. Log: ...
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Comportamento Esperado
-      placeholder: "O que deveria acontecer?"
+      label: O que deveria acontecer?
     validations:
       required: true
 
   - type: textarea
     id: tasks
     attributes:
-      label: Tarefas de Correção
+      label: Tarefas
       value: |
         - [ ] Identificar a causa raiz
         - [ ] Aplicar a correção
-        - [ ] npm run typecheck sem erros
-        - [ ] npm run lint sem erros
+        - [ ] Verificar se o erro está em `src/errors/index.ts`
+        - [ ] Garantir que o `catch` da rota trata o erro corretamente
     validations:
       required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: ✅ Critérios de Aceite
+      description: "Defina o que precisa ser verdade para essa issue ser considerada concluída."
+      placeholder: |
+        - Bug não reproduz mais
+        - `npm run typecheck` passa sem erros
+        - ...
+      value: |
+        - [ ] Bug não reproduz mais
+        - [ ] Nenhum comportamento existente foi quebrado
+        - [ ] `npm run typecheck` passa sem erros
+        - [ ] `npm run lint` passa sem erros
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        > 📋 **Referências:** `AGENTS.md` · `.github/copilot-instructions.md`

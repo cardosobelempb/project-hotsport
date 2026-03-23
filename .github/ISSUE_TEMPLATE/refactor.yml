@@ -1,29 +1,22 @@
 name: ♻️ Refatoração
-description: Melhorar código existente sem mudar comportamento
-title: "refactor(<scope>): <descrição curta>"
+description: Melhorar código sem mudar comportamento
+title: "refactor(<scope>): "
 labels: ["refactor", "tech-debt"]
 assignees: []
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## Refatoração
-        Descreva o que precisa ser melhorado e por quê.
 
   - type: input
     id: scope
     attributes:
       label: Escopo
-      description: Qual módulo/arquivo será refatorado?
-      placeholder: "ex: usecases, routes, schemas"
+      placeholder: "ex: routes, usecases, schemas"
     validations:
       required: true
 
   - type: textarea
     id: current
     attributes:
-      label: Situação Atual
-      description: Qual é o problema com o código atual?
+      label: Situação atual (problema)
       placeholder: "ex: rotas contêm regras de negócio, uso de any, Zod v3..."
     validations:
       required: true
@@ -32,24 +25,34 @@ body:
     id: tasks
     attributes:
       label: Tarefas
-      description: O que precisa ser feito?
       value: |
         - [ ] Mapear todos os arquivos afetados
-        - [ ] Aplicar as mudanças seguindo AGENTS.md e .github/copilot-instructions.md
-        - [ ] npm run typecheck passa sem erros
-        - [ ] npm run lint passa sem erros
-        - [ ] Zero any introduzido
+        - [ ] Aplicar as mudanças seguindo `AGENTS.md`
+        - [ ] Zero `any` introduzido
         - [ ] Zero regras de negócio em rotas
-        - [ ] Zero try/catch em use cases
+        - [ ] Zero `try/catch` em use cases
+        - [ ] Zero model Prisma retornado diretamente
     validations:
       required: true
 
   - type: textarea
     id: acceptance
     attributes:
-      label: Critérios de Aceite
+      label: ✅ Critérios de Aceite
+      description: "Defina o que precisa ser verdade para essa issue ser considerada concluída."
       placeholder: |
-        - Comportamento externo idêntico ao anterior
-        - Todos os checks passando
+        - Comportamento externo idêntico
+        - `npm run typecheck` passa sem erros
+        - ...
+      value: |
+        - [ ] Comportamento externo idêntico ao anterior
+        - [ ] `npm run typecheck` passa sem erros
+        - [ ] `npm run lint` passa sem erros
     validations:
       required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        > 📋 **Referências:** `AGENTS.md` · `.github/copilot-instructions.md` · `.github/instructions/conventions.instructions.md`
