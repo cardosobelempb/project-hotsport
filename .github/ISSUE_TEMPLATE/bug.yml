@@ -1,0 +1,60 @@
+name: 🐛 Bug
+description: Reportar um comportamento inesperado
+title: "fix(<scope>): <descrição curta>"
+labels: ["bug", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Reporte de Bug
+        Descreva o problema com detalhes para facilitar a correção.
+
+  - type: input
+    id: scope
+    attributes:
+      label: Escopo
+      description: Qual módulo/arquivo está com problema?
+      placeholder: "ex: auth, routes/workout-plan, usecases/CreateWorkoutPlan"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Bug
+      description: O que está acontecendo de errado?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Como Reproduzir
+      description: Passo a passo para reproduzir o bug
+      placeholder: |
+        1. Fazer POST em /api/workout-plans com payload X
+        2. Observar erro 500 no response
+        3. Log de erro: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento Esperado
+      placeholder: "O que deveria acontecer?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tarefas de Correção
+      value: |
+        - [ ] Identificar a causa raiz
+        - [ ] Aplicar a correção
+        - [ ] npm run typecheck sem erros
+        - [ ] npm run lint sem erros
+    validations:
+      required: true

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": "backend/src",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "exactOptionalPropertyTypes": true,
+    "paths": {
+      "@/*": [
+        "backend/src/*"
+      ]
+    }
+  },
+  "include": [
+    "backend/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "backend/src/generated"
+  ]
+}

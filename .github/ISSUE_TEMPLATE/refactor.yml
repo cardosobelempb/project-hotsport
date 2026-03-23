@@ -1,0 +1,55 @@
+name: ♻️ Refatoração
+description: Melhorar código existente sem mudar comportamento
+title: "refactor(<scope>): <descrição curta>"
+labels: ["refactor", "tech-debt"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Refatoração
+        Descreva o que precisa ser melhorado e por quê.
+
+  - type: input
+    id: scope
+    attributes:
+      label: Escopo
+      description: Qual módulo/arquivo será refatorado?
+      placeholder: "ex: usecases, routes, schemas"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Situação Atual
+      description: Qual é o problema com o código atual?
+      placeholder: "ex: rotas contêm regras de negócio, uso de any, Zod v3..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tarefas
+      description: O que precisa ser feito?
+      value: |
+        - [ ] Mapear todos os arquivos afetados
+        - [ ] Aplicar as mudanças seguindo AGENTS.md e .github/copilot-instructions.md
+        - [ ] npm run typecheck passa sem erros
+        - [ ] npm run lint passa sem erros
+        - [ ] Zero any introduzido
+        - [ ] Zero regras de negócio em rotas
+        - [ ] Zero try/catch em use cases
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de Aceite
+      placeholder: |
+        - Comportamento externo idêntico ao anterior
+        - Todos os checks passando
+    validations:
+      required: true

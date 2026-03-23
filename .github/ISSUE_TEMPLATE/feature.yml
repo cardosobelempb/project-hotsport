@@ -1,0 +1,68 @@
+name: ✨ Feature
+description: Nova funcionalidade para o projeto
+title: "feat(<scope>): <descrição curta>"
+labels: ["feature", "needs-review"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Nova Funcionalidade
+        Preencha os campos abaixo com o máximo de detalhes.
+        Quanto mais contexto, melhor o Copilot entenderá a tarefa.
+
+  - type: input
+    id: scope
+    attributes:
+      label: Escopo
+      description: Qual módulo/domínio será afetado?
+      placeholder: "ex: usecases, routes, auth, payments"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: Descreva a funcionalidade de forma clara e objetiva
+      placeholder: "O que precisa ser criado? Qual o comportamento esperado?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tarefas
+      description: Liste as tarefas necessárias
+      value: |
+        - [ ] Criar schema Zod em `src/schemas/index.ts`
+        - [ ] Criar use case em `src/usecases/`
+        - [ ] Criar rota em `src/routes/`
+        - [ ] Adicionar erros customizados em `src/errors/index.ts` se necessário
+        - [ ] Verificar documentação Swagger em /docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de Aceite
+      description: Como saberemos que a tarefa está concluída?
+      placeholder: |
+        - npm run typecheck passa sem erros
+        - npm run lint passa sem erros
+        - Rota documentada no Swagger com tags e summary
+        - Use case com InputDto e OutputDto mapeados
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade
+      options:
+        - 🔴 Alta
+        - 🟡 Média
+        - 🟢 Baixa
+    validations:
+      required: true
