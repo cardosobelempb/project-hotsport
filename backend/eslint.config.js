@@ -1,20 +1,12 @@
-import js from '@eslint/js';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import globals from 'globals';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import js from '@eslint/js'
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import globals from 'globals'
 
-/** @type {import('eslint').Linter.Config[]} */
 export default [
-  js.configs.recommended,
   {
-    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.commonjs,
-      },
-    },
+    ignores: ['dist', 'node_modules', 'src/generated'],
   },
   {
     files: ['src/**/*.ts'],
@@ -29,19 +21,16 @@ export default [
       },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
+      '@typescript-eslint': tseslint,
       'simple-import-sort': simpleImportSort,
     },
     rules: {
-      'no-unused-vars': 'off',
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
     },
   },
-  {
-    ignores: ['dist/', 'node_modules/', 'src/generated/', 'routes/'],
-  },
-];
-
+]
