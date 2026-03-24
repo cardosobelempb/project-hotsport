@@ -1,5 +1,5 @@
 require('dotenv').config({ path: '../.env' });
-const db = require("../src/config/db");
+const db = require("../db");
 const { removerUsuarioPorMac } = require("../src/controllers/mikrotikAPIController");
 
 async function verificarExpiracoes() {
