@@ -1,5 +1,7 @@
+import fastifySwagger from '@fastify/swagger';
+import apiReference from '@scalar/fastify-api-reference';
 import fastify from 'fastify';
-import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
 import { authRoutes } from './routes/auth-routes.js';
 import { dashboardRoutes } from './routes/dashboard-routes.js';
@@ -15,6 +17,22 @@ const app = fastify({ logger: true });
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
+
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Hotsport API',
+      description: 'API do sistema Hotsport de gerenciamento de hotspot',
+      version: '1.0.0',
+    },
+    servers: [{ url: `http://localhost:${process.env['PORT'] ?? 4949}` }],
+  },
+  transform: jsonSchemaTransform,
+});
+
+app.register(apiReference, {
+  routePrefix: '/docs',
+});
 
 app.register(authRoutes, { prefix: '/api/auth' });
 app.register(planRoutes, { prefix: '/api/planos' });
@@ -34,4 +52,5 @@ app.listen({ port: PORT, host: '0.0.0.0' }, (err) => {
     process.exit(1);
   }
   app.log.info(`🚀 API rodando na porta ${PORT}`);
+  app.log.info(`📚 Docs disponíveis em http://localhost:${PORT}/docs`);
 });
