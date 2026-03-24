@@ -1,5 +1,14 @@
 import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { prisma } from './db.js';
 
 export const auth = betterAuth({
-  secret: process.env['BETTER_AUTH_SECRET'] ?? 'dev-secret-change-in-production',
+  database: prismaAdapter(prisma, {
+    provider: 'mysql',
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  secret: process.env['BETTER_AUTH_SECRET'] ?? 'hotspot-secret-key',
+  baseURL: process.env['BETTER_AUTH_URL'] ?? 'http://localhost:4949',
 });

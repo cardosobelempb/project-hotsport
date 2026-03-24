@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  created_at DateTime @default(now())
+
+  @@map("admins")
+}
+
+model ConfigMercadoPago {
+  id             Int      @id @default(autoincrement())
+  public_key     String?  @db.VarChar(255)
+  access_token   String?  @db.Text
+  client_id      String?  @db.VarChar(255)
+  client_secret  String?  @db.Text
+  webhook_secret String?  @db.VarChar(255)
+  updated_at     DateTime @default(now()) @updatedAt
+
+  @@map("config_mercadopago")
+}
+
+model EfiConfig {
+  id                Int      @id @default(autoincrement())
+  client_id         String   @db.VarChar(255)
+  client_secret     String   @db.VarChar(255)
+  chave_pix         String   @db.VarChar(255)
+  ambiente          Ambiente @default(sandbox)
+  certificado_nome  String?  @db.VarChar(255)
+  criado_em         DateTime @default(now())
+
+  @@map("efi_config")
+}
+
+enum Ambiente {
+  sandbox
+  producao
+}
+
+model LgpdLogin {
+  id        Int      @id @default(autoincrement())
+  cpf       String   @db.VarChar(14)
+  aceite    Boolean  @default(false)
+  mac       String?  @db.VarChar(50)
+  ip        String?  @db.VarChar(50)
+  criado_em DateTime @default(now())
+  nome      String?  @db.VarChar(100)
+  telefone  String?  @db.VarChar(20)
+
+  @@map("lgpd_logins")
+}
+
+model Mikrotik {
+  id              Int       @id @default(autoincrement())
+  nome            String    @db.VarChar(100)
+  ip              String    @db.VarChar(45)
+  usuario         String    @db.VarChar(100)
+  senha           String    @db.VarChar(255)
+  porta           Int       @default(8728)
+  status          String    @default("Offline") @db.VarChar(20)
+  usuarios_ativos Int       @default(0)
+  criado_em       DateTime  @default(now())
+  end_hotspot     String?   @db.VarChar(255)
+  planos          Plano[]
+
+  @@map("mikrotiks")
+}
+
+model Pagamento {
+  id             Int       @id @default(autoincrement())
+  plano_id       Int
+  email          String?   @db.VarChar(255)
+  nome_plano     String?   @db.VarChar(255)
+  valor          Int
+  status         String?   @db.VarChar(50)
+  mp_pagamento_id BigInt?
+  criado_em      DateTime  @default(now())
+  expira_em      DateTime?
+  atualizado_em  DateTime  @default(now()) @updatedAt
+  mac            String?   @db.VarChar(20)
+  cpf            String?   @db.VarChar(20)
+  IP             String?   @db.VarChar(20)
+
+  @@map("pagamentos")
+}
+
+model Plano {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.VarChar(100)
+  descricao        String?  @db.Text
+  valor            Decimal  @db.Decimal(10, 2)
+  duracao_minutos  Int
+  velocidade_down  String   @db.VarChar(20)
+  velocidade_up    String   @db.VarChar(20)
+  mikrotik_id      Int
+  ativo            Boolean  @default(true)
+  address_pool     String   @default("default-dhcp") @db.VarChar(50)
+  shared_users     Int      @default(10)
+  mikrotik         Mikrotik @relation(fields: [mikrotik_id], references: [id], onDelete: Cascade)
+
+  @@map("planos")
+}
+
+model RadiusUser {
+  id         Int      @id @default(autoincrement())
+  username   String   @db.VarChar(255)
+  plano_id   Int?
+  nas_id     Int?
+  criado_em  DateTime @default(now())
+
+  @@map("radius_users")
+}
+
+model Radcheck {
+  id        Int    @id @default(autoincrement())
+  username  String @db.VarChar(64)
+  attribute String @default("Cleartext-Password") @db.VarChar(64)
+  op        String @default(":=") @db.Char(2)
+  value     String @db.VarChar(253)
+
+  @@map("radcheck")
+}
+
+model Radreply {
+  id        Int    @id @default(autoincrement())
+  username  String @db.VarChar(64)
+  attribute String @db.VarChar(64)
+  op        String @default(":=") @db.Char(2)
+  value     String @db.VarChar(253)
+
+  @@map("radreply")
+}
+
+model Radusergroup {
+  username  String @db.VarChar(64)
+  groupname String @db.VarChar(64)
+  priority  Int    @default(1)
+
+  @@id([username, groupname])
+  @@map("radusergroup")
+}

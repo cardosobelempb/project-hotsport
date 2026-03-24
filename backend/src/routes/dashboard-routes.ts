@@ -1,36 +1,27 @@
-import { fromNodeHeaders } from 'better-auth/node';
-import { type FastifyInstance } from 'fastify';
-import { type ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { GetDashboardStats } from '../usecases/GetDashboardStats.js';
+import { ErrorSchema, DashboardStatsSchema } from '../schemas/index.js';
 
-import { auth } from '../lib/auth.js';
-import { DashboardSchema,ErrorSchema } from '../schemas/index.js';
-
-export const dashboardRoutes = async (app: FastifyInstance): Promise<void> => {
+export const dashboardRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
     url: '/',
     schema: {
       tags: ['Dashboard'],
-      summary: 'Obter métricas gerais do painel administrativo',
+      summary: 'Obter estatísticas do dashboard',
       response: {
-        200: DashboardSchema,
-        401: ErrorSchema,
+        200: DashboardStatsSchema,
         500: ErrorSchema,
       },
     },
-    handler: async (request, reply) => {
+    handler: async (_request, reply) => {
       try {
-        const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
-        if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(200).send({
-          total_planos: 0,
-          total_pagamentos: 0,
-          total_mikrotiks: 0,
-          total_usuarios_radius: 0,
-        });
+        const result = await new GetDashboardStats().execute();
+        return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
+        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
       }
     },
   });

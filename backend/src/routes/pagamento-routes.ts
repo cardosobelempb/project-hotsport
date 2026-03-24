@@ -1,29 +1,29 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { GetRadiusUsers, CreateRadiusUser, DeleteRadiusUser } from '../usecases/RadiusUseCases.js';
+import { GetPayments, ProcessPayment, UpdatePaymentStatus } from '../usecases/PaymentUseCases.js';
 import {
   ErrorSchema,
-  RadiusUserSchema,
-  CreateRadiusUserSchema,
+  PagamentoSchema,
+  CreatePagamentoSchema,
 } from '../schemas/index.js';
 import { NotFoundError } from '../errors/index.js';
 
-export const radiusRoutes = async (app: FastifyInstance) => {
+export const pagamentoRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['RADIUS'],
-      summary: 'Listar usuários RADIUS',
+      tags: ['Pagamentos'],
+      summary: 'Listar todos os pagamentos',
       response: {
-        200: z.array(RadiusUserSchema),
+        200: z.array(PagamentoSchema),
         500: ErrorSchema,
       },
     },
     handler: async (_request, reply) => {
       try {
-        const result = await new GetRadiusUsers().execute();
+        const result = await new GetPayments().execute();
         return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
@@ -36,23 +36,17 @@ export const radiusRoutes = async (app: FastifyInstance) => {
     method: 'POST',
     url: '/',
     schema: {
-      tags: ['RADIUS'],
-      summary: 'Criar usuário RADIUS',
-      body: CreateRadiusUserSchema,
+      tags: ['Pagamentos'],
+      summary: 'Registrar pagamento',
+      body: CreatePagamentoSchema,
       response: {
-        201: RadiusUserSchema,
+        201: PagamentoSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
       try {
-        const body = request.body;
-        const result = await new CreateRadiusUser().execute({
-          username: body.username,
-          password: body.password,
-          plano_id: body.plano_id ?? null,
-          nas_id: body.nas_id ?? null,
-        });
+        const result = await new ProcessPayment().execute(request.body);
         return reply.status(201).send(result);
       } catch (error) {
         app.log.error(error);
@@ -62,22 +56,26 @@ export const radiusRoutes = async (app: FastifyInstance) => {
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'DELETE',
-    url: '/:id',
+    method: 'PATCH',
+    url: '/:id/status',
     schema: {
-      tags: ['RADIUS'],
-      summary: 'Deletar usuário RADIUS',
+      tags: ['Pagamentos'],
+      summary: 'Atualizar status do pagamento',
       params: z.object({ id: z.coerce.number().int() }),
+      body: z.object({ status: z.string().min(1) }),
       response: {
-        204: z.null(),
+        200: PagamentoSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
       try {
-        await new DeleteRadiusUser().execute({ id: request.params.id });
-        return reply.status(204).send(null);
+        const result = await new UpdatePaymentStatus().execute({
+          id: request.params.id,
+          status: request.body.status,
+        });
+        return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
         if (error instanceof NotFoundError) {

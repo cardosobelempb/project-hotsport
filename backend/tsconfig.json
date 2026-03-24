@@ -18,11 +18,11 @@
     }
   },
   "include": [
-    "./src/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "./src/generated"
+    "src/generated"
   ]
 }

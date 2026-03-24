@@ -1,23 +1,42 @@
-interface InputDto {
-  _?: never;
-}
+import { prisma } from '../lib/db.js';
 
-interface OutputDto {
-  total_clientes: number;
-  planos_ativos: number;
-  receita_mensal: number;
-  conexoes_ativas: number;
-  pagamentos_pendentes: number;
+interface DashboardStatsOutputDto {
+  total_planos: number;
+  total_mikrotiks: number;
+  total_pagamentos: number;
+  total_radius_users: number;
+  pagamentos_aprovados: number;
+  receita_total: number;
 }
 
 export class GetDashboardStats {
-  async execute(_dto: InputDto = {}): Promise<OutputDto> {
+  async execute(): Promise<DashboardStatsOutputDto> {
+    const [
+      total_planos,
+      total_mikrotiks,
+      total_pagamentos,
+      total_radius_users,
+      pagamentos_aprovados,
+      receitaAggregate,
+    ] = await Promise.all([
+      prisma.plano.count(),
+      prisma.mikrotik.count(),
+      prisma.pagamento.count(),
+      prisma.radiusUser.count(),
+      prisma.pagamento.count({ where: { status: 'approved' } }),
+      prisma.pagamento.aggregate({
+        _sum: { valor: true },
+        where: { status: 'approved' },
+      }),
+    ]);
+
     return {
-      total_clientes: 0,
-      planos_ativos: 0,
-      receita_mensal: 0,
-      conexoes_ativas: 0,
-      pagamentos_pendentes: 0,
+      total_planos,
+      total_mikrotiks,
+      total_pagamentos,
+      total_radius_users,
+      pagamentos_aprovados,
+      receita_total: receitaAggregate._sum.valor ?? 0,
     };
   }
 }
