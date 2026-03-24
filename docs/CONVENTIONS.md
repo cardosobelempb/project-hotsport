@@ -405,3 +405,37 @@ export class ForbiddenError extends AppError {
   return reply.status(500).send({ error: "Internal server error", code: "INTERNAL_SERVER_ERROR" })
 }
 ```
+
+---
+
+## Regras de Documentação (obrigatório)
+
+Todo desenvolvimento deve manter a documentação atualizada. **Nenhum PR deve ser mergeado com docs desatualizados.**
+
+### O que atualizar em cada situação
+
+| Situação                                          | Docs a atualizar                                     |
+| ------------------------------------------------- | ---------------------------------------------------- |
+| Nova feature ou endpoint                          | `docs/API.md`                                        |
+| Mudança em autenticação, roles ou geração de JWT  | `docs/ARCHITECTURE.md`                               |
+| Mudança no banco de dados ou schema Prisma        | `docs/DATABASE.md` e/ou `docs/MIGRATION.md`          |
+| Nova migração SQL                                 | `docs/MIGRATION.md`                                  |
+| Mudança em variáveis de ambiente                  | `docs/ENVIRONMENT.md`                                |
+| Mudança em integração RADIUS ou tabelas `radius`  | `docs/RADIUS.md`                                     |
+
+### Regras para issues e PRs
+
+- Todo PR deve indicar no template/descrição: **"Docs impactados"** (ex: `API.md`, `DATABASE.md`, `nenhum`).
+- Ao criar uma issue, **sempre preencher** o campo **"O que precisa ser criado?"** — não deixar em branco.
+- Se a issue não impactar docs, explicar brevemente o motivo no campo de docs.
+
+### Checklist de documentação antes do merge
+
+```
+[ ] docs/API.md atualizado (se há novos endpoints ou mudança de contrato)
+[ ] docs/ARCHITECTURE.md atualizado (se há mudança em auth/JWT/roles/estrutura)
+[ ] docs/DATABASE.md ou docs/MIGRATION.md atualizado (se há mudança de schema/migração)
+[ ] docs/RADIUS.md atualizado (se há mudança na integração FreeRADIUS)
+[ ] Campo "Docs impactados" preenchido no PR
+[ ] Issue com campo "O que precisa ser criado?" preenchido
+```

@@ -156,3 +156,83 @@ npx prisma studio
 
 O schema legado está em `backend/jobs/estrutura.sql`.  
 Ao criar modelos Prisma, mantenha os nomes de tabela e coluna compatíveis com o SQL existente via `@map` e `@@map`.
+
+---
+
+## Postgres + Prisma + FreeRADIUS
+
+### Separação de schemas
+
+O banco Postgres é dividido em dois schemas para evitar acoplamento entre o app e o FreeRADIUS:
+
+| Schema   | Responsável   | Tecnologia       | IDs             |
+| -------- | ------------- | ---------------- | --------------- |
+| `public` | App (backend) | Prisma + Fastify | UUID (`@db.Uuid`) |
+| `radius` | FreeRADIUS    | Schema oficial PostgreSQL do FR | serial/bigserial |
+
+> Não force UUID no schema `radius` — o schema oficial do FreeRADIUS usa `serial/bigserial` e isso garante compatibilidade em upgrades.
+
+O Prisma gerencia exclusivamente o schema `public`. Para ler tabelas do `radius` (ex: relatórios de sessão via `radacct`), use queries raw ou uma conexão separada read-only.
+
+### Tabelas do app (`public`)
+
+As tabelas do app são gerenciadas pelo Prisma com IDs UUID:
+
+- `users` — usuários do sistema com roles (RBAC)
+- `mikrotiks` — equipamentos cadastrados
+- `planos` — planos de acesso (velocidade, duração, valor)
+- `pagamentos` — histórico de pagamentos
+- `vouchers` — vouchers de acesso gerados pelo backend
+- `config_mercadopago`, `efi_config` — configs de pagamento
+- `lgpd_logins` — registros de aceite LGPD
+
+### `users` e roles (RBAC)
+
+A tabela `admins` do schema legado é substituída por `users` com enum de roles:
+
+```prisma
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  SUPPORT
+  FINANCE
+  OPERATOR
+}
+
+model User {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String    @unique
+  password    String
+  role        UserRole  @default(ADMIN)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  @@map("users")
+  @@schema("public")
+}
+```
+
+- `SUPER_ADMIN` — acesso total
+- `ADMIN` — operações administrativas gerais
+- `SUPPORT` — leitura e ações limitadas de suporte
+- `FINANCE` — acesso a pagamentos e configurações financeiras
+- `OPERATOR` — operação de MikroTiks e planos
+
+### Tabelas do FreeRADIUS (`radius`)
+
+As tabelas do schema `radius` **não são gerenciadas pelo Prisma**. Elas devem ser criadas com o schema SQL oficial do FreeRADIUS para PostgreSQL (disponível em `raddb/mods-config/sql/main/postgresql/schema.sql`).
+
+Principais tabelas (ver `docs/RADIUS.md` para detalhes):
+
+| Tabela         | Função                                      |
+| -------------- | ------------------------------------------- |
+| `radcheck`     | Credenciais de autenticação por usuário     |
+| `radreply`     | Atributos enviados ao NAS após aceite       |
+| `radusergroup` | Associação usuário ↔ grupo                  |
+| `radgroupcheck`| Verificações por grupo                      |
+| `radgroupreply`| Atributos de resposta por grupo             |
+| `radacct`      | Contabilização (sessões, tráfego, tempo)    |
+| `radpostauth`  | Log pós-autenticação (aceites/rejeições)    |
+| `nas`          | Clientes RADIUS (MikroTiks)                 |

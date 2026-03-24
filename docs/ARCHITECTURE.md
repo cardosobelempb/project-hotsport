@@ -105,3 +105,54 @@ Resposta JSON tipada
                 │
            [WhatsApp Web]
 ```
+
+---
+
+## Project Hotspot — Decisões de Arquitetura
+
+### Estrutura modular por domínio
+
+O backend é organizado por domínio, seguindo separação em três camadas:
+
+```
+backend/src/<dominio>/
+├── domain/              → entidades, interfaces, regras de domínio puro
+├── application/         → use cases (sem Fastify, sem try/catch)
+└── infrastructure/
+    ├── controllers/     → 1 controller por endpoint (gera JWT, trata erros)
+    └── routes/
+        └── <dominio>.router.ts  → 1 router por domínio
+```
+
+> Exemplo: `backend/src/auth/infrastructure/controllers/LoginController.ts`
+
+### Responsabilidades por camada
+
+| Camada             | Responsabilidade                                       | Proibido                         |
+| ------------------ | ------------------------------------------------------ | -------------------------------- |
+| `domain/`          | Entidades e regras de negócio puras                    | Imports de infra/Fastify/Prisma  |
+| `application/`     | Use cases — lógica de negócio + OutputDto              | `try/catch`, retornar model ORM  |
+| `infrastructure/`  | Controllers + rotas + JWT + tratamento de erros        | Regras de negócio                |
+
+### JWT
+
+- O **JWT é gerado no controller** (camada de infra).
+- Os **use cases não geram JWT** — devolvem apenas dados de domínio.
+- Payload mínimo recomendado: `{ sub: user.id, role: user.role }`.
+
+### Tratamento de Erros
+
+- Use cases lançam erros customizados de `src/errors/index.ts` (ex: `AppError`, `NotFoundError`).
+- Controllers capturam esses erros com `try/catch` e retornam JSON no formato:
+
+```json
+{ "error": "mensagem", "code": "CODIGO_DO_ERRO" }
+```
+
+- **Nunca** retorne stack traces ou detalhes internos ao cliente.
+
+### Comunicação com MikroTiks (VPN)
+
+- A comunicação entre o servidor central e os MikroTiks é feita via **VPN** (WireGuard recomendado).
+- A VPN garante que portas sensíveis (RADIUS 1812/1813, API RouterOS 8728/8729) não fiquem expostas na internet.
+- Cada MikroTik conecta como peer VPN ao servidor central.
