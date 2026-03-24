@@ -1,5 +1,6 @@
-import { prisma } from '../lib/db.js';
 import { NotFoundError } from '../errors/index.js';
+import type { Prisma } from '../generated/prisma/index.js';
+import { prisma } from '../lib/db.js';
 
 interface PlanoOutputDto {
   id: number;
@@ -109,9 +110,9 @@ export class UpdatePlan {
     if (!exists) throw new NotFoundError('Plano não encontrado');
 
     // Filter out undefined values to avoid exactOptionalPropertyTypes issues
-    const updateData: Partial<typeof data> = {};
+    const updateData: Prisma.PlanoUncheckedUpdateInput = {};
     if (data.nome !== undefined) updateData.nome = data.nome;
-    if ('descricao' in data) updateData.descricao = data.descricao;
+    if (data.descricao !== undefined) updateData.descricao = data.descricao;
     if (data.valor !== undefined) updateData.valor = data.valor;
     if (data.duracao_minutos !== undefined) updateData.duracao_minutos = data.duracao_minutos;
     if (data.velocidade_down !== undefined) updateData.velocidade_down = data.velocidade_down;

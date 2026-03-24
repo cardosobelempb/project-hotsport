@@ -1,13 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { GetPayments, ProcessPayment, UpdatePaymentStatus } from '../usecases/PaymentUseCases.js';
+
+import { NotFoundError } from '../errors/index.js';
 import {
+  CreatePagamentoSchema,
   ErrorSchema,
   PagamentoSchema,
-  CreatePagamentoSchema,
 } from '../schemas/index.js';
-import { NotFoundError } from '../errors/index.js';
+import { GetPayments, ProcessPayment, UpdatePaymentStatus } from '../usecases/PaymentUseCases.js';
 
 export const pagamentoRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

@@ -1,5 +1,5 @@
-import { prisma } from '../lib/db.js';
 import { NotFoundError } from '../errors/index.js';
+import { prisma } from '../lib/db.js';
 
 interface RadiusUserOutputDto {
   id: number;
