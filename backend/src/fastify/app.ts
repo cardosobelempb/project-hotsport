@@ -5,6 +5,7 @@ import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from 'fast
 
 import { AppError } from '../errors/index.js';
 import { adminRoutes } from '../routes/admin-routes.js';
+import { adminRouter } from '../routes/admin.router.js';
 import { authRoutes } from '../routes/auth-routes.js';
 import { dashboardRoutes } from '../routes/dashboard-routes.js';
 import { healthRoutes } from '../routes/health-routes.js';
@@ -60,6 +61,7 @@ export const buildApp = (): FastifyInstance => {
   app.register(healthRoutes, { prefix: '/health' });
   app.register(authRoutes, { prefix: '/api/auth' });
   app.register(adminRoutes, { prefix: '/api/admin' });
+  app.register(adminRouter, { prefix: '/api/admin' });
   app.register(planRoutes, { prefix: '/api/planos' });
   app.register(mikrotikRoutes, { prefix: '/api/mikrotiks' });
   app.register(paymentRoutes, { prefix: '/api/pagamentos' });

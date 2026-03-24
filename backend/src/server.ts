@@ -6,6 +6,7 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
 import { authRoutes } from './routes/auth-routes.js';
+import { adminRouter } from './routes/admin.router.js';
 import { meRoutes } from './routes/me-routes.js';
 import { planRoutes } from './routes/plan-routes.js';
 import { mikrotikRoutes } from './routes/mikrotik-routes.js';
@@ -39,6 +40,7 @@ async function start() {
   });
 
   await app.register(authRoutes, { prefix: '/api/auth' });
+  await app.register(adminRouter, { prefix: '/api/admin' });
   await app.register(meRoutes, { prefix: '/api' });
   await app.register(planRoutes, { prefix: '/api/planos' });
   await app.register(mikrotikRoutes, { prefix: '/api/mikrotiks' });
