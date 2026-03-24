@@ -4,8 +4,6 @@ const pool = require('../db');
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
-const SECRET_KEY = process.env.JWT_SECRET || "chave_secreta_muito_forte"
-
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
   console.log("📩 Requisição recebida:", { email, senha });

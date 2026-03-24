@@ -1,7 +1,11 @@
-import pg from 'pg';
+import { Pool } from 'pg';
 
-// Database connection pool for direct queries (legacy MySQL queries are handled separately)
-// Prisma client will be added after prisma:generate is run
-export const pool = new pg.Pool({
-  connectionString: process.env['DATABASE_URL'],
+const db = new Pool({
+  host: process.env['DB_HOST'],
+  user: process.env['DB_USER'],
+  password: process.env['DB_PASSWORD'],
+  database: process.env['DB_NAME'],
+  port: process.env['DB_PORT'] ? Number(process.env['DB_PORT']) : 5432,
 });
+
+export default db;
