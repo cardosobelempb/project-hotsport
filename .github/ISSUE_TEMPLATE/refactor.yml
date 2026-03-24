@@ -9,7 +9,7 @@ body:
     id: scope
     attributes:
       label: Escopo
-      placeholder: "ex: routes, usecases, schemas"
+      placeholder: "ex: admin, auth, pagamentos, mikrotik, radius"
     validations:
       required: true
 
@@ -17,7 +17,7 @@ body:
     id: current
     attributes:
       label: Situação atual (problema)
-      placeholder: "ex: rotas contêm regras de negócio, uso de any, Zod v3..."
+      placeholder: "ex: controller contém regras de negócio, uso de any, SQL direto no use case, JWT gerado fora do controller..."
     validations:
       required: true
 
@@ -27,11 +27,18 @@ body:
       label: Tarefas
       value: |
         - [ ] Mapear todos os arquivos afetados
-        - [ ] Aplicar as mudanças seguindo `AGENTS.md`
-        - [ ] Zero `any` introduzido
-        - [ ] Zero regras de negócio em rotas
-        - [ ] Zero `try/catch` em use cases
-        - [ ] Zero model Prisma retornado diretamente
+        - [ ] Mover/criar contrato de repositório em `backend/src/<dominio>/domain/repositories/`
+        - [ ] Mover/criar implementação de repositório em `backend/src/<dominio>/infrastructure/repositories/`
+        - [ ] Mover/ajustar use case em `backend/src/<dominio>/application/usecases/`
+          - [ ] Remover `try/catch`
+          - [ ] Remover imports de Fastify
+          - [ ] Remover SQL/DB direto (usar repositório injetado)
+          - [ ] Remover geração de JWT
+        - [ ] Mover/ajustar controller para `backend/src/<dominio>/infrastructure/controllers/<dominio>-<acao>.controller.ts`
+          - [ ] Garantir 1 controller = 1 endpoint
+          - [ ] JWT gerado via `backend/src/common/infrastructure/auth/jwt.ts` (payload mínimo: `sub`)
+          - [ ] Erros via `AppError` com resposta `{ error, code }`
+        - [ ] Garantir router em `backend/src/<dominio>/infrastructure/routes/<dominio>.router.ts`
     validations:
       required: true
 
@@ -42,12 +49,35 @@ body:
       description: "Defina o que precisa ser verdade para essa issue ser considerada concluída."
       placeholder: |
         - Comportamento externo idêntico
-        - `npm run typecheck` passa sem erros
+        - `npm run typecheck` passa sem erros (backend)
         - ...
       value: |
         - [ ] Comportamento externo idêntico ao anterior
-        - [ ] `npm run typecheck` passa sem erros
+        - [ ] `npm run typecheck` passa sem erros (backend)
         - [ ] `npm run lint` passa sem erros
+        - [ ] Zero `any` introduzido
+        - [ ] Arquivos nos paths corretos (`backend/src/<dominio>/...`)
+        - [ ] Use case sem `try/catch`, sem Fastify, sem SQL direto, sem gerar JWT
+        - [ ] Controller com no máximo 1 endpoint; JWT via helper comum
+        - [ ] Erros respondidos no formato `{ error, code }`
+    validations:
+      required: true
+
+  - type: textarea
+    id: rules
+    attributes:
+      label: 📐 Padrões Arquiteturais (obrigatório confirmar)
+      description: "Confirme que os padrões abaixo serão seguidos nesta issue."
+      value: |
+        - [ ] Estrutura por domínio: `backend/src/<dominio>/domain/`, `application/`, `infrastructure/`
+        - [ ] Contratos de repositório em `domain/repositories/` (sem dependências de banco)
+        - [ ] Implementações de repositório em `infrastructure/repositories/`
+        - [ ] 1 controller por endpoint em `infrastructure/controllers/`
+        - [ ] 1 router por domínio em `infrastructure/routes/<dominio>.router.ts`
+        - [ ] Use case: sem `try/catch`, sem Fastify, sem SQL/DB direto, sem gerar JWT
+        - [ ] JWT gerado no controller via `backend/src/common/infrastructure/auth/jwt.ts` (payload mínimo: `sub`)
+        - [ ] Erros via `AppError`; resposta HTTP no formato `{ error, code }`
+        - [ ] Sem `any`; `npm run typecheck` (backend) deve passar
     validations:
       required: true
 
