@@ -4,6 +4,7 @@ import fastify from 'fastify';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
 import { AppError } from './errors/index.js';
+import { adminRoutes } from './routes/admin-routes.js';
 import { authRoutes } from './routes/auth-routes.js';
 import { dashboardRoutes } from './routes/dashboard-routes.js';
 import { lgpdRoutes } from './routes/lgpd-routes.js';
@@ -27,7 +28,7 @@ app.setErrorHandler((error, request, reply) => {
     return reply.status(error.statusCode).send({ error: error.message, code: error.code });
   }
 
-  if (error.validation) {
+  if (error instanceof Error && 'validation' in error) {
     return reply.status(400).send({ error: 'Validation error', code: 'VALIDATION_ERROR' });
   }
 
@@ -51,6 +52,7 @@ app.register(apiReference, {
 });
 
 app.register(authRoutes, { prefix: '/api/auth' });
+app.register(adminRoutes, { prefix: '/api/admin' });
 app.register(planRoutes, { prefix: '/api/planos' });
 app.register(mikrotikRoutes, { prefix: '/api/mikrotiks' });
 app.register(paymentRoutes, { prefix: '/api/pagamentos' });
