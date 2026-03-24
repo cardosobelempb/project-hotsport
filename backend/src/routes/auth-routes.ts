@@ -1,9 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { AuthenticateAdmin } from '../usecases/AuthenticateAdmin.js';
+import { loginAdminHandler } from '../handlers/admin/login.js';
 import { ErrorSchema, LoginSchema, LoginOutputSchema } from '../schemas/index.js';
-import { UnauthorizedError } from '../errors/index.js';
 
 export const authRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -19,19 +18,7 @@ export const authRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
-    handler: async (request, reply) => {
-      try {
-        const useCase = new AuthenticateAdmin();
-        const result = await useCase.execute(request.body);
-        return reply.status(200).send(result);
-      } catch (error) {
-        app.log.error(error);
-        if (error instanceof UnauthorizedError) {
-          return reply.status(401).send({ error: error.message, code: error.code });
-        }
-        return reply.status(500).send({ error: 'Erro interno no servidor', code: 'INTERNAL_SERVER_ERROR' });
-      }
-    },
+    handler: loginAdminHandler,
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
