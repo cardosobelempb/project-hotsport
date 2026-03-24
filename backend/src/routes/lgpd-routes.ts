@@ -1,12 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { RegisterLgpdConsent, GetLgpdData } from '../usecases/LgpdUseCases.js';
+
 import {
   ErrorSchema,
   LgpdLoginSchema,
   RegisterLgpdSchema,
 } from '../schemas/index.js';
+import { GetLgpdData,RegisterLgpdConsent } from '../usecases/LgpdUseCases.js';
 
 export const lgpdRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

@@ -1,21 +1,22 @@
 import 'dotenv/config';
-import Fastify from 'fastify';
+
 import fastifyCors from '@fastify/cors';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import Fastify from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
-import { authRoutes } from './routes/auth-routes.js';
 import { adminRouter } from './routes/admin.router.js';
+import { authRoutes } from './routes/auth-routes.js';
+import { dashboardRoutes } from './routes/dashboard-routes.js';
+import { efiRoutes } from './routes/efi-routes.js';
+import { lgpdRoutes } from './routes/lgpd-routes.js';
 import { meRoutes } from './routes/me-routes.js';
-import { planRoutes } from './routes/plan-routes.js';
+import { mercadoPagoRoutes } from './routes/mercadopago-routes.js';
 import { mikrotikRoutes } from './routes/mikrotik-routes.js';
 import { pagamentoRoutes } from './routes/pagamento-routes.js';
+import { planRoutes } from './routes/plan-routes.js';
 import { radiusRoutes } from './routes/radius-routes.js';
-import { dashboardRoutes } from './routes/dashboard-routes.js';
-import { lgpdRoutes } from './routes/lgpd-routes.js';
-import { efiRoutes } from './routes/efi-routes.js';
-import { mercadoPagoRoutes } from './routes/mercadopago-routes.js';
 
 const app = Fastify({ logger: true });
 

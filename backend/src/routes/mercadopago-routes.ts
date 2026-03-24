@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+
+import { ConfigMercadoPagoSchema, ErrorSchema, SaveMercadoPagoConfigSchema } from '../schemas/index.js';
 import { GetMercadoPagoConfig, SaveMercadoPagoConfig } from '../usecases/MercadoPagoUseCases.js';
-import { ErrorSchema, ConfigMercadoPagoSchema, SaveMercadoPagoConfigSchema } from '../schemas/index.js';
 
 export const mercadoPagoRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

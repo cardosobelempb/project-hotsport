@@ -152,3 +152,33 @@ export const ConfigMercadoPagoSchema = z.object({
 });
 
 export const SaveMercadoPagoConfigSchema = ConfigMercadoPagoSchema.omit({ id: true }).partial();
+
+// Generic
+export const MessageSchema = z.object({
+  message: z.string(),
+});
+
+export const ParamsIdSchema = z.object({
+  id: z.string(),
+});
+
+// Limpeza
+export const LimpezaResponseSchema = z.object({
+  message: z.string(),
+  affected: z.number().int(),
+});
+
+// Status
+export const StatusSchema = z.object({
+  ok: z.boolean(),
+});
+
+// WhatsApp
+export const WhatsappStatusSchema = z.object({
+  status: z.string(),
+  message: z.string().optional(),
+});
+
+// Aliases for backward compatibility
+export const PagamentoListSchema = z.array(PagamentoSchema);
+export const PlanoCreateSchema = PlanoSchema.omit({ id: true });

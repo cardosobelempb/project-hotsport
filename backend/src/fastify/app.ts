@@ -4,8 +4,8 @@ import fastify, { FastifyInstance } from 'fastify';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
 import { AppError } from '../errors/index.js';
-import { adminRoutes } from '../routes/admin-routes.js';
 import { adminRouter } from '../routes/admin.router.js';
+import { adminRoutes } from '../routes/admin-routes.js';
 import { authRoutes } from '../routes/auth-routes.js';
 import { dashboardRoutes } from '../routes/dashboard-routes.js';
 import { healthRoutes } from '../routes/health-routes.js';

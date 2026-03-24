@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
+
+import { DashboardStatsSchema,ErrorSchema } from '../schemas/index.js';
 import { GetDashboardStats } from '../usecases/GetDashboardStats.js';
-import { ErrorSchema, DashboardStatsSchema } from '../schemas/index.js';
 
 export const dashboardRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
