@@ -1,13 +1,15 @@
 require('dotenv').config({ path: '../.env' });
 const db = require("../db");
+const dayjs = require("dayjs");
 const { removerUsuarioPorMac } = require("../src/controllers/mikrotikAPIController");
 
 async function verificarExpiracoes() {
   try {
+    const now = dayjs().format("YYYY-MM-DD HH:mm:ss");
     const [expirados] = await db.query(`
   SELECT mac, ip FROM pagamentos
-  WHERE expira_em IS NOT NULL AND expira_em <= NOW() AND status = 'approved'
-`);
+  WHERE expira_em IS NOT NULL AND expira_em <= ? AND status = 'approved'
+`, [now]);
 
 console.log(`🔍 Expirados encontrados:`, expirados.length);
 
