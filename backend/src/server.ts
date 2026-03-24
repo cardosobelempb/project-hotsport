@@ -6,7 +6,7 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
 import { authRoutes } from './routes/auth-routes.js';
-import { adminRouter } from './routes/admin.router.js';
+import { adminRouter } from './admin/infrastructure/routes/admin.router.js';
 import { meRoutes } from './routes/me-routes.js';
 import { planRoutes } from './routes/plan-routes.js';
 import { mikrotikRoutes } from './routes/mikrotik-routes.js';
