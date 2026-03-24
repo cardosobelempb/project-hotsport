@@ -105,3 +105,7 @@ export const WhatsappSendSchema = z.object({
   telefone: z.string().min(10, 'Telefone inválido'),
   mensagem: z.string().min(1, 'Mensagem é obrigatória'),
 });
+
+export const StatusSchema = z.object({
+  ok: z.boolean(),
+});

@@ -9,6 +9,7 @@ import { mikrotikRoutes } from './routes/mikrotik-routes.js';
 import { paymentRoutes } from './routes/payment-routes.js';
 import { planRoutes } from './routes/plan-routes.js';
 import { radiusRoutes } from './routes/radius-routes.js';
+import { statusRoutes } from './routes/status-routes.js';
 
 const app = fastify({ logger: true });
 
@@ -23,6 +24,7 @@ app.register(radiusRoutes, { prefix: '/api/radius' });
 app.register(lgpdRoutes, { prefix: '/api/lgpd' });
 app.register(mercadoPagoRoutes, { prefix: '/api/config-mercadopago' });
 app.register(dashboardRoutes, { prefix: '/api/dashboard' });
+app.register(statusRoutes, { prefix: '/status' });
 
 const PORT = process.env['PORT'] ? Number(process.env['PORT']) : 4949;
 
