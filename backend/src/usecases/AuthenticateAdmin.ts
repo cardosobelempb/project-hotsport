@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { prisma } from '../lib/db.js';
+
+import { signJwt } from '../auth/jwt.js';
 import { UnauthorizedError } from '../errors/index.js';
+import { prisma } from '../lib/db.js';
 
 interface InputDto {
   email: string;
@@ -26,8 +27,7 @@ export class AuthenticateAdmin {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    const secret = process.env['JWT_SECRET'] ?? 'chave_secreta_muito_forte';
-    const token = jwt.sign({ id: admin.id, email: admin.email }, secret, { expiresIn: '1d' });
+    const token = signJwt({ sub: String(admin.id), role: 'admin' });
 
     return { token };
   }

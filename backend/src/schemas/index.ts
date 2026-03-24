@@ -15,6 +15,11 @@ export const LoginOutputSchema = z.object({
   token: z.string(),
 });
 
+export const JwtMeOutputSchema = z.object({
+  sub: z.string(),
+  role: z.string().optional(),
+});
+
 // Admin
 export const AdminSchema = z.object({
   id: z.number().int(),
