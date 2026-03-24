@@ -7,6 +7,7 @@ import { AppError } from '../errors/index.js';
 import { adminRoutes } from '../routes/admin-routes.js';
 import { authRoutes } from '../routes/auth-routes.js';
 import { dashboardRoutes } from '../routes/dashboard-routes.js';
+import { healthRoutes } from '../routes/health-routes.js';
 import { lgpdRoutes } from '../routes/lgpd-routes.js';
 import { mercadoPagoRoutes } from '../routes/mercadopago-routes.js';
 import { mikrotikRoutes } from '../routes/mikrotik-routes.js';
@@ -43,7 +44,7 @@ export const buildApp = (): FastifyInstance => {
         description: 'API do sistema Hotsport de gerenciamento de hotspot',
         version: '1.0.0',
       },
-      servers: [{ url: `http://localhost:${process.env['PORT'] ?? 4949}` }],
+      servers: [{ url: `http://localhost:${process.env['PORT'] ?? 3001}` }],
     },
     transform: jsonSchemaTransform,
   });
@@ -56,6 +57,7 @@ export const buildApp = (): FastifyInstance => {
     },
   });
 
+  app.register(healthRoutes, { prefix: '/health' });
   app.register(authRoutes, { prefix: '/api/auth' });
   app.register(adminRoutes, { prefix: '/api/admin' });
   app.register(planRoutes, { prefix: '/api/planos' });
