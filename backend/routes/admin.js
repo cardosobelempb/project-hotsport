@@ -1,11 +1,8 @@
 const express = require("express")
 const router = express.Router()
 const pool = require('../db');
-const db = require("../db")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
-
-const SECRET_KEY = process.env.JWT_SECRET || "chave_secreta_muito_forte"
 
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
