@@ -5,17 +5,17 @@ import { z } from 'zod';
 
 import { NotFoundError } from '../errors/index.js';
 import { auth } from '../lib/auth.js';
-import { ErrorSchema, MessageSchema,RadiusUserSchema } from '../schemas/index.js';
+import { ErrorSchema, MessageSchema,PagamentoSchema } from '../schemas/index.js';
 
-export const radiusRoutes = async (app: FastifyInstance): Promise<void> => {
+export const pagamentosRoutes = async (app: FastifyInstance): Promise<void> => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
     url: '/',
     schema: {
-      tags: ['Radius'],
-      summary: 'Listar todos os usuários RADIUS cadastrados',
+      tags: ['Pagamentos'],
+      summary: 'Listar todos os pagamentos registrados',
       response: {
-        200: z.array(RadiusUserSchema),
+        200: z.array(PagamentoSchema),
         401: ErrorSchema,
         500: ErrorSchema,
       },
@@ -33,19 +33,16 @@ export const radiusRoutes = async (app: FastifyInstance): Promise<void> => {
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/',
+    method: 'GET',
+    url: '/:id',
     schema: {
-      tags: ['Radius'],
-      summary: 'Criar usuário RADIUS',
-      body: z.object({
-        username: z.string().min(1),
-        plano_id: z.number().int().nullable().optional(),
-        nas_id: z.number().int().nullable().optional(),
-      }),
+      tags: ['Pagamentos'],
+      summary: 'Buscar pagamento por ID',
+      params: z.object({ id: z.coerce.number().int() }),
       response: {
-        201: RadiusUserSchema,
+        200: PagamentoSchema,
         401: ErrorSchema,
+        404: ErrorSchema,
         500: ErrorSchema,
       },
     },
@@ -53,15 +50,10 @@ export const radiusRoutes = async (app: FastifyInstance): Promise<void> => {
       try {
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(201).send({
-          id: 1,
-          username: request.body.username,
-          plano_id: request.body.plano_id ?? null,
-          nas_id: request.body.nas_id ?? null,
-          criado_em: null,
-        });
+        throw new NotFoundError('Pagamento não encontrado');
       } catch (error) {
         app.log.error(error);
+        if (error instanceof NotFoundError) return reply.status(404).send({ error: error.message, code: error.code });
         return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
       }
     },
@@ -71,8 +63,8 @@ export const radiusRoutes = async (app: FastifyInstance): Promise<void> => {
     method: 'DELETE',
     url: '/:id',
     schema: {
-      tags: ['Radius'],
-      summary: 'Remover usuário RADIUS',
+      tags: ['Pagamentos'],
+      summary: 'Cancelar/remover pagamento',
       params: z.object({ id: z.coerce.number().int() }),
       response: {
         200: MessageSchema,
@@ -85,7 +77,7 @@ export const radiusRoutes = async (app: FastifyInstance): Promise<void> => {
       try {
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(200).send({ message: 'Usuário RADIUS removido com sucesso' });
+        return reply.status(200).send({ message: 'Pagamento removido com sucesso' });
       } catch (error) {
         app.log.error(error);
         if (error instanceof NotFoundError) return reply.status(404).send({ error: error.message, code: error.code });

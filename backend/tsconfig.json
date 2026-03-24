@@ -4,26 +4,19 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "strict": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
-    "exactOptionalPropertyTypes": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    "exactOptionalPropertyTypes": true
   },
   "include": [
-    "./src/**/*",
-    "./server.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "./src/generated"
+    "src/generated"
   ]
 }

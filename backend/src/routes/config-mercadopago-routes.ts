@@ -4,18 +4,19 @@ import { type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { auth } from '../lib/auth.js';
-import { ErrorSchema, MessageSchema } from '../schemas/index.js';
+import { ConfigMercadoPagoSchema,ErrorSchema } from '../schemas/index.js';
 
-export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
+export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<void> => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
-    url: '/perfil',
+    url: '/',
     schema: {
-      tags: ['Admin'],
-      summary: 'Obter perfil do administrador autenticado',
+      tags: ['Configurações'],
+      summary: 'Obter configurações do Mercado Pago',
       response: {
-        200: z.object({ id: z.number().int(), email: z.string() }),
+        200: ConfigMercadoPagoSchema,
         401: ErrorSchema,
+        404: ErrorSchema,
         500: ErrorSchema,
       },
     },
@@ -23,7 +24,14 @@ export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
       try {
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(200).send({ id: 1, email: session.user.email });
+        return reply.status(200).send({
+          id: 1,
+          public_key: null,
+          access_token: null,
+          client_id: null,
+          client_secret: null,
+          webhook_secret: null,
+        });
       } catch (error) {
         app.log.error(error);
         return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
@@ -33,16 +41,19 @@ export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
 
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'PUT',
-    url: '/senha',
+    url: '/',
     schema: {
-      tags: ['Admin'],
-      summary: 'Alterar senha do administrador',
+      tags: ['Configurações'],
+      summary: 'Atualizar configurações do Mercado Pago',
       body: z.object({
-        senha_atual: z.string().min(1),
-        nova_senha: z.string().min(6),
+        public_key: z.string().nullable().optional(),
+        access_token: z.string().nullable().optional(),
+        client_id: z.string().nullable().optional(),
+        client_secret: z.string().nullable().optional(),
+        webhook_secret: z.string().nullable().optional(),
       }),
       response: {
-        200: MessageSchema,
+        200: ConfigMercadoPagoSchema,
         401: ErrorSchema,
         500: ErrorSchema,
       },
@@ -51,7 +62,14 @@ export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
       try {
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(200).send({ message: 'Senha alterada com sucesso' });
+        return reply.status(200).send({
+          id: 1,
+          public_key: request.body.public_key ?? null,
+          access_token: request.body.access_token ?? null,
+          client_id: request.body.client_id ?? null,
+          client_secret: request.body.client_secret ?? null,
+          webhook_secret: request.body.webhook_secret ?? null,
+        });
       } catch (error) {
         app.log.error(error);
         return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
