@@ -6,11 +6,8 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
-import { adminRouter } from './routes/admin.router.js';
 import { authRoutes } from './routes/auth-routes.js';
-import { dashboardRoutes } from './routes/dashboard-routes.js';
-import { efiRoutes } from './routes/efi-routes.js';
-import { lgpdRoutes } from './routes/lgpd-routes.js';
+import { adminRouter } from './admin/infrastructure/routes/admin.router.js';
 import { meRoutes } from './routes/me-routes.js';
 import { mercadoPagoRoutes } from './routes/mercadopago-routes.js';
 import { mikrotikRoutes } from './routes/mikrotik-routes.js';
