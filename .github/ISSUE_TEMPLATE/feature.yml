@@ -9,7 +9,7 @@ body:
     id: scope
     attributes:
       label: Escopo
-      placeholder: "ex: usecases, routes, auth, payments"
+      placeholder: "ex: admin, auth, pagamentos, mikrotik, radius"
     validations:
       required: true
 
@@ -26,19 +26,25 @@ body:
     attributes:
       label: Tarefas
       value: |
-        - [ ] Criar schema Zod em `src/schemas/index.ts`
-        - [ ] Criar use case em `src/usecases/VerbEntidade.ts`
+        - [ ] Criar contrato (interface) em `backend/src/<dominio>/domain/repositories/<dominio>.repository.ts`
+        - [ ] Criar use case em `backend/src/<dominio>/application/usecases/<dominio>-<acao>.usecase.ts`
           - [ ] Definir `InputDto` no mesmo arquivo
           - [ ] Definir `OutputDto` no mesmo arquivo
-          - [ ] Mapear resultado — nunca retornar model Prisma direto
+          - [ ] Injetar repositório via constructor — sem acesso DB direto
           - [ ] Sem `try/catch`
-        - [ ] Criar rota em `src/routes/`
-          - [ ] `withTypeProvider<ZodTypeProvider>()`
-          - [ ] `tags` e `summary` no schema
-          - [ ] Validar sessão com `auth.api.getSession` (se protegida)
-          - [ ] Instanciar e chamar o use case
-          - [ ] Tratar erros com `try/catch`
-        - [ ] Adicionar erros em `src/errors/index.ts` se necessário
+          - [ ] Sem imports de Fastify
+          - [ ] Sem geração de JWT
+          - [ ] Retornar `OutputDto` mapeado — nunca o model do banco direto
+        - [ ] Criar implementação de repositório em `backend/src/<dominio>/infrastructure/repositories/`
+        - [ ] Criar controller em `backend/src/<dominio>/infrastructure/controllers/<dominio>-<acao>.controller.ts`
+          - [ ] 1 controller = 1 endpoint
+          - [ ] Instanciar repositório e use case
+          - [ ] Gerar JWT (se necessário) via `backend/src/common/infrastructure/auth/jwt.ts` (payload mínimo: `sub`)
+          - [ ] Tratar erros via `AppError` respondendo `{ error, code }`
+        - [ ] Criar/atualizar router em `backend/src/<dominio>/infrastructure/routes/<dominio>.router.ts`
+          - [ ] 1 router por domínio
+          - [ ] Registrar endpoint no router
+        - [ ] Registrar router no `backend/src/server.ts` (se novo domínio)
     validations:
       required: true
 
@@ -48,17 +54,38 @@ body:
       label: ✅ Critérios de Aceite
       description: "Defina o que precisa ser verdade para essa issue ser considerada concluída."
       placeholder: |
-        - `npm run typecheck` passa sem erros
+        - `npm run typecheck` passa sem erros (backend)
         - `npm run lint` passa sem erros
         - Zero `any` introduzido
         - ...
       value: |
-        - [ ] `npm run typecheck` passa sem erros
+        - [ ] `npm run typecheck` passa sem erros (backend)
         - [ ] `npm run lint` passa sem erros
         - [ ] Zero `any` introduzido
-        - [ ] Rota documentada no Swagger com `tags` e `summary`
+        - [ ] Arquivos nos paths corretos (`backend/src/<dominio>/...`)
         - [ ] Use case com `InputDto` e `OutputDto` mapeados
-        - [ ] Zero model Prisma retornado diretamente
+        - [ ] Use case sem `try/catch`, sem Fastify, sem SQL direto, sem gerar JWT
+        - [ ] Controller com no máximo 1 endpoint; JWT gerado via helper comum
+        - [ ] Erros respondidos no formato `{ error, code }`
+        - [ ] Endpoint funcionando conforme descrito
+    validations:
+      required: true
+
+  - type: textarea
+    id: rules
+    attributes:
+      label: 📐 Padrões Arquiteturais (obrigatório confirmar)
+      description: "Confirme que os padrões abaixo serão seguidos nesta issue."
+      value: |
+        - [ ] Estrutura por domínio: `backend/src/<dominio>/domain/`, `application/`, `infrastructure/`
+        - [ ] Contratos de repositório em `domain/repositories/` (sem dependências de banco)
+        - [ ] Implementações de repositório em `infrastructure/repositories/`
+        - [ ] 1 controller por endpoint em `infrastructure/controllers/`
+        - [ ] 1 router por domínio em `infrastructure/routes/<dominio>.router.ts`
+        - [ ] Use case: sem `try/catch`, sem Fastify, sem SQL/DB direto, sem gerar JWT
+        - [ ] JWT gerado no controller via `backend/src/common/infrastructure/auth/jwt.ts` (payload mínimo: `sub`)
+        - [ ] Erros via `AppError`; resposta HTTP no formato `{ error, code }`
+        - [ ] Sem `any`; `npm run typecheck` (backend) deve passar
     validations:
       required: true
 
