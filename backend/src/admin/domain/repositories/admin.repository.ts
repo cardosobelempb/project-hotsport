@@ -1,10 +1,9 @@
-export interface AdminEntity {
+export interface AdminDomainEntity {
   id: number;
   email: string;
-  password: string;
-  createdAt: Date;
+  passwordHash: string;
 }
 
 export interface IAdminRepository {
-  findByEmail(email: string): Promise<AdminEntity | null>;
+  findByEmail(email: string): Promise<AdminDomainEntity | null>;
 }

@@ -9,26 +9,26 @@ export interface AdminLoginInputDto {
 }
 
 export interface AdminLoginOutputDto {
-  id: number;
+  adminId: string;
   email: string;
 }
 
 export class AdminLoginUseCase {
-  constructor(private readonly repository: IAdminRepository) {}
+  constructor(private readonly adminRepository: IAdminRepository) {}
 
   async execute({ email, senha }: AdminLoginInputDto): Promise<AdminLoginOutputDto> {
-    const admin = await this.repository.findByEmail(email);
+    const admin = await this.adminRepository.findByEmail(email);
 
     if (!admin) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    const isSenhaValida = await bcrypt.compare(senha, admin.password);
+    const isSenhaValida = await bcrypt.compare(senha, admin.passwordHash);
 
     if (!isSenhaValida) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    return { id: admin.id, email: admin.email };
+    return { adminId: String(admin.id), email: admin.email };
   }
 }
