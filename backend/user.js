@@ -2,7 +2,7 @@
 require('dotenv').config() // <-- ESSENCIAL
 
 const bcrypt = require('bcryptjs')
-const db = require('./src/config/db')
+const db = require('./db')
 
 async function criarAdmin() {
   const hash = await bcrypt.hash('admin123', 10)

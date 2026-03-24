@@ -3,6 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { UnauthorizedError } from '../errors/index.js';
 import { ErrorSchema, LoginResponseSchema, LoginSchema } from '../schemas/index.js';
+import { LoginAdmin } from '../usecases/LoginAdmin.js';
 
 export const authRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -22,10 +23,10 @@ export const authRoutes = async (app: FastifyInstance) => {
       try {
         const { email, senha } = request.body;
 
-        void email;
-        void senha;
+        const useCase = new LoginAdmin();
+        const result = await useCase.execute({ email, senha });
 
-        throw new UnauthorizedError('Credenciais inválidas');
+        return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
         if (error instanceof UnauthorizedError) {
