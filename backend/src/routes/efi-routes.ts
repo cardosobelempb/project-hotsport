@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+
+import { EfiConfigSchema, ErrorSchema, SaveEfiConfigSchema } from '../schemas/index.js';
 import { GetEfiConfig, SaveEfiConfig } from '../usecases/EfiUseCases.js';
-import { ErrorSchema, EfiConfigSchema, SaveEfiConfigSchema } from '../schemas/index.js';
 
 export const efiRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

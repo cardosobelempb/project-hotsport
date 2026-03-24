@@ -1,20 +1,21 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+
+import { NotFoundError } from '../errors/index.js';
 import {
-  GetMikrotiks,
-  GetMikrotik,
-  CreateMikrotik,
-  UpdateMikrotik,
-  DeleteMikrotik,
-} from '../usecases/MikrotikUseCases.js';
-import {
+  CreateMikrotikSchema,
   ErrorSchema,
   MikrotikSchema,
-  CreateMikrotikSchema,
   UpdateMikrotikSchema,
 } from '../schemas/index.js';
-import { NotFoundError } from '../errors/index.js';
+import {
+  CreateMikrotik,
+  DeleteMikrotik,
+  GetMikrotik,
+  GetMikrotiks,
+  UpdateMikrotik,
+} from '../usecases/MikrotikUseCases.js';
 
 export const mikrotikRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -114,7 +115,7 @@ export const mikrotikRoutes = async (app: FastifyInstance) => {
           ...(body.usuario !== undefined ? { usuario: body.usuario } : {}),
           ...(body.senha !== undefined ? { senha: body.senha } : {}),
           ...(body.porta !== undefined ? { porta: body.porta } : {}),
-          ...('end_hotspot' in body ? { end_hotspot: body.end_hotspot } : {}),
+          ...('end_hotspot' in body && body.end_hotspot !== undefined ? { end_hotspot: body.end_hotspot } : {}),
         });
         return reply.status(200).send(result);
       } catch (error) {

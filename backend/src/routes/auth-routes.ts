@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+
 import { loginAdminHandler } from '../handlers/admin/login.js';
-import { ErrorSchema, LoginSchema, LoginOutputSchema } from '../schemas/index.js';
+import { ErrorSchema, LoginOutputSchema,LoginSchema } from '../schemas/index.js';
 
 export const authRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
