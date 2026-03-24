@@ -1,14 +1,15 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { GetPlans, CreatePlan, UpdatePlan, DeletePlan } from '../usecases/PlanUseCases.js';
+
+import { NotFoundError } from '../errors/index.js';
 import {
+  CreatePlanoSchema,
   ErrorSchema,
   PlanoSchema,
-  CreatePlanoSchema,
   UpdatePlanoSchema,
 } from '../schemas/index.js';
-import { NotFoundError } from '../errors/index.js';
+import { CreatePlan, DeletePlan,GetPlans, UpdatePlan } from '../usecases/PlanUseCases.js';
 
 export const planRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

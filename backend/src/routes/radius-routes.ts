@@ -1,13 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { GetRadiusUsers, CreateRadiusUser, DeleteRadiusUser } from '../usecases/RadiusUseCases.js';
+
+import { NotFoundError } from '../errors/index.js';
 import {
+  CreateRadiusUserSchema,
   ErrorSchema,
   RadiusUserSchema,
-  CreateRadiusUserSchema,
 } from '../schemas/index.js';
-import { NotFoundError } from '../errors/index.js';
+import { CreateRadiusUser, DeleteRadiusUser,GetRadiusUsers } from '../usecases/RadiusUseCases.js';
 
 export const radiusRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({

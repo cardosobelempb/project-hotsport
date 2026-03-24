@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 
@@ -75,7 +76,8 @@ export const paymentRoutes = async (app: FastifyInstance) => {
       try {
         const data = request.body;
         return reply.status(201).send({
-          id: 'placeholder',
+          id: 0,
+          criado_em: dayjs().toISOString(),
           ...data,
         });
       } catch (error) {
