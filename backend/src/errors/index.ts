@@ -38,3 +38,9 @@ export class UnauthorizedError extends AppError {
     super(msg, 401, 'UNAUTHORIZED_ERROR');
   }
 }
+
+export class WhatsappError extends AppError {
+  constructor(msg = 'Falha ao enviar mensagem via WhatsApp') {
+    super(msg, 502, 'WHATSAPP_ERROR');
+  }
+}
