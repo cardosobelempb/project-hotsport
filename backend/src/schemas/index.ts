@@ -179,20 +179,10 @@ export const WhatsappStatusSchema = z.object({
   message: z.string().optional(),
 });
 
-// User (OTP authentication)
-export const UserSchema = z.object({
-  id: z.uuid(),
-  cpf: z.string().min(11).max(14),
-  name: z.string().nullable(),
-  phone: z.string().nullable(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
-});
-
-export const CreateUserSchema = z.object({
-  cpf: z.string().min(11).max(14),
-  name: z.string().optional(),
-  phone: z.string().optional(),
+// OTP
+export const OtpRequestBodySchema = z.object({
+  cpf: z.string().regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, 'CPF deve ter 11 dígitos'),
+  telefone: z.string().regex(/^\+?[\d\s\-().]{10,20}$/, 'Telefone inválido'),
 });
 
 // UserOtp
@@ -218,10 +208,12 @@ export const VerifyOtpSchema = z.object({
 });
 
 export const VerifyOtpOutputSchema = z.object({
+  verified: z.boolean(),
   userId: z.uuid(),
   cpf: z.string(),
   name: z.string().nullable(),
   phone: z.string().nullable(),
+  nextStep: z.enum(['login', 'register', 'entitlement']),
 });
 
 // Aliases for backward compatibility

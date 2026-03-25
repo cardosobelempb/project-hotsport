@@ -1,10 +1,12 @@
+import axios from 'axios';
 import bcrypt from 'bcryptjs';
+import { randomInt } from 'crypto';
 import dayjs from 'dayjs';
 
 import { RateLimitError } from '../errors/index.js';
 import { prisma } from '../lib/db.js';
 
-// ── RequestOtp ────────────────────────────────────────────────────────────────
+// ── CPF validation ────────────────────────────────────────────────────────────
 
 const OTP_MIN_INTERVAL_SECONDS = 60;
 const OTP_MAX_PER_HOUR = 5;
@@ -13,15 +15,12 @@ const MSG_HOURLY_LIMIT = 'Limite de solicitações atingido. Tente novamente em 
 
 interface RequestOtpInputDto {
   cpf: string;
-  phone: string;
-  name?: string;
+  telefone: string;
 }
 
-interface RequestOtpOutputDto {
-  /** Plain-text OTP to be sent via WhatsApp (never stored) */
-  otp: string;
-  expiresAt: string;
-  userId: string;
+interface OutputDto {
+  status: 'enviado' | 'erro';
+  detail?: string;
 }
 
 /**
@@ -56,26 +55,44 @@ export class RequestOtp {
         name: dto.name ?? null,
       },
     });
+    if (recentOtp) {
+      throw new ConflictError('Aguarde antes de solicitar um novo código OTP');
+    }
 
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const hash = await bcrypt.hash(otp, 10);
-    const expiresAt = dayjs().add(10, 'minute').toDate();
+    const otp = String(randomInt(100_000, 1_000_000));
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = dayjs().add(5, 'minute').toDate();
 
-    await prisma.userOtp.create({
+    const whatsappUrl =
+      process.env['WHATSAPP_SERVER_URL'] ?? 'http://127.0.0.1:3030';
+    const whatsappToken = process.env['WHATSAPP_SERVER_TOKEN'] ?? '';
+
+    const mensagem = `Seu código de acesso é: *${otp}*\nEle expira em 5 minutos. Não compartilhe com ninguém.`;
+
+    await axios
+      .post(
+        `${whatsappUrl}/send`,
+        { telefone: telefoneNormalizado, mensagem },
+        {
+          headers: { 'x-whatsapp-token': whatsappToken },
+          timeout: 10_000,
+        },
+      )
+      .catch(() => {
+        throw new WhatsappError();
+      });
+
+    await prisma.otpRequest.create({
       data: {
-        user_id: user.id,
-        hash,
+        cpf: cpfNormalizado,
+        telefone: telefoneNormalizado,
+        otp_hash: otpHash,
         expires_at: expiresAt,
-        attempts: 0,
-        used: false,
+        max_attempts: 5,
       },
     });
 
-    return {
-      otp,
-      expiresAt: dayjs(expiresAt).toISOString(),
-      userId: user.id,
-    };
+    return { status: 'enviado' };
   }
 
   /**
