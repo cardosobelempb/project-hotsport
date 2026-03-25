@@ -2,8 +2,10 @@ import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
+import { ConflictError, ValidationError, WhatsappError } from '../errors/index.js';
 import { loginAdminHandler } from '../handlers/admin/login.js';
-import { ErrorSchema, LoginOutputSchema,LoginSchema } from '../schemas/index.js';
+import { ErrorSchema, LoginOutputSchema, LoginSchema, OtpRequestBodySchema, OtpRequestResponseSchema } from '../schemas/index.js';
+import { RequestOtp } from '../usecases/RequestOtp.js';
 
 export const authRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -42,6 +44,40 @@ export const authRoutes = async (app: FastifyInstance) => {
         return reply.status(401).send({ error: 'Token não fornecido', code: 'UNAUTHORIZED_ERROR' });
       }
       return reply.status(200).send({ valid: true });
+    },
+  });
+
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: 'POST',
+    url: '/otp/request',
+    schema: {
+      tags: ['Auth'],
+      summary: 'Solicitar OTP via WhatsApp (CPF + telefone)',
+      body: OtpRequestBodySchema,
+      response: {
+        200: OtpRequestResponseSchema,
+        409: ErrorSchema,
+        422: ErrorSchema,
+        500: ErrorSchema,
+      },
+    },
+    handler: async (request, reply) => {
+      try {
+        const result = await new RequestOtp().execute(request.body);
+        return reply.status(200).send(result);
+      } catch (error) {
+        app.log.error(error);
+        if (error instanceof ValidationError) {
+          return reply.status(422).send({ error: error.message, code: error.code });
+        }
+        if (error instanceof ConflictError) {
+          return reply.status(409).send({ error: error.message, code: error.code });
+        }
+        if (error instanceof WhatsappError) {
+          return reply.status(200).send({ status: 'erro', detail: error.message });
+        }
+        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+      }
     },
   });
 };
