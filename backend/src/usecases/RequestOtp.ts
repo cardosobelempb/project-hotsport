@@ -3,46 +3,17 @@ import bcrypt from 'bcryptjs';
 import { randomInt } from 'crypto';
 import dayjs from 'dayjs';
 
-import { ConflictError, ValidationError, WhatsappError } from '../errors/index.js';
+import { RateLimitError } from '../errors/index.js';
 import { prisma } from '../lib/db.js';
 
 // ── CPF validation ────────────────────────────────────────────────────────────
 
-function normalizeCpf(cpf: string): string {
-  return cpf.replace(/\D/g, '');
-}
+const OTP_MIN_INTERVAL_SECONDS = 60;
+const OTP_MAX_PER_HOUR = 5;
+const MSG_COOLDOWN = 'Aguarde 60 segundos antes de solicitar um novo código.';
+const MSG_HOURLY_LIMIT = 'Limite de solicitações atingido. Tente novamente em uma hora.';
 
-function isValidCpf(cpf: string): boolean {
-  const digits = normalizeCpf(cpf);
-
-  if (digits.length !== 11) return false;
-  if (/^(\d)\1{10}$/.test(digits)) return false;
-
-  const calcDigit = (len: number): number => {
-    const remainder =
-      (digits
-        .slice(0, len)
-        .split('')
-        .reduce((sum, d, i) => sum + Number(d) * (len + 1 - i), 0) *
-        10) %
-      11;
-    return remainder >= 10 ? 0 : remainder;
-  };
-
-  return calcDigit(9) === Number(digits[9]) && calcDigit(10) === Number(digits[10]);
-}
-
-// ── Phone normalization ───────────────────────────────────────────────────────
-
-function normalizeTelefone(telefone: string): string {
-  const digits = telefone.replace(/\D/g, '');
-  if (digits.startsWith('55') && digits.length >= 12) return digits;
-  return `55${digits}`;
-}
-
-// ── DTOs ─────────────────────────────────────────────────────────────────────
-
-interface InputDto {
+interface RequestOtpInputDto {
   cpf: string;
   telefone: string;
 }
@@ -52,23 +23,36 @@ interface OutputDto {
   detail?: string;
 }
 
-// ── Use Case ─────────────────────────────────────────────────────────────────
-
+/**
+ * Upserts the User record by CPF, generates a 6-digit OTP, hashes it with
+ * bcrypt and stores it in UserOtp. Returns the plain-text OTP so the caller
+ * (route/WhatsApp gateway) can dispatch it.
+ *
+ * Rate limits are enforced before any write:
+ *   - Max 1 request per 60 seconds per CPF or phone
+ *   - Max 5 requests per hour per CPF or phone
+ *
+ * No try/catch — errors propagate to the route layer.
+ */
 export class RequestOtp {
-  async execute({ cpf, telefone }: InputDto): Promise<OutputDto> {
-    const cpfNormalizado = normalizeCpf(cpf);
-    if (!isValidCpf(cpfNormalizado)) {
-      throw new ValidationError('CPF inválido');
-    }
+  async execute(dto: RequestOtpInputDto): Promise<RequestOtpOutputDto> {
+    const now = dayjs();
+    const oneHourAgo = now.subtract(1, 'hour').toDate();
+    const cooldownThreshold = now.subtract(OTP_MIN_INTERVAL_SECONDS, 'second').toDate();
 
-    const telefoneNormalizado = normalizeTelefone(telefone);
+    await this.checkRateLimitByCpf(dto.cpf, oneHourAgo, cooldownThreshold);
+    await this.checkRateLimitByPhone(dto.phone, oneHourAgo, cooldownThreshold);
 
-    const recentOtp = await prisma.otpRequest.findFirst({
-      where: {
-        cpf: cpfNormalizado,
-        used: false,
-        expires_at: { gt: dayjs().toDate() },
-        criado_em: { gt: dayjs().subtract(2, 'minute').toDate() },
+    const user = await prisma.user.upsert({
+      where: { cpf: dto.cpf },
+      update: {
+        phone: dto.phone,
+        ...(dto.name !== undefined ? { name: dto.name } : {}),
+      },
+      create: {
+        cpf: dto.cpf,
+        phone: dto.phone,
+        name: dto.name ?? null,
       },
     });
     if (recentOtp) {
@@ -109,5 +93,68 @@ export class RequestOtp {
     });
 
     return { status: 'enviado' };
+  }
+
+  /**
+   * Checks rate limits for a given CPF.
+   * Does nothing if the user does not yet exist (first-time request).
+   */
+  private async checkRateLimitByCpf(
+    cpf: string,
+    oneHourAgo: Date,
+    cooldownThreshold: Date,
+  ): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { cpf },
+      select: { id: true },
+    });
+
+    if (!user) return;
+
+    const lastOtp = await prisma.userOtp.findFirst({
+      where: { user_id: user.id },
+      orderBy: { created_at: 'desc' },
+      select: { created_at: true },
+    });
+
+    if (lastOtp && lastOtp.created_at > cooldownThreshold) {
+      throw new RateLimitError(MSG_COOLDOWN);
+    }
+
+    const cpfRequestsLastHour = await prisma.userOtp.count({
+      where: { user_id: user.id, created_at: { gte: oneHourAgo } },
+    });
+
+    if (cpfRequestsLastHour >= OTP_MAX_PER_HOUR) {
+      throw new RateLimitError(MSG_HOURLY_LIMIT);
+    }
+  }
+
+  /**
+   * Checks rate limits across all users sharing the same phone number.
+   * Protects against CPF-hopping abuse with the same device/phone.
+   */
+  private async checkRateLimitByPhone(
+    phone: string,
+    oneHourAgo: Date,
+    cooldownThreshold: Date,
+  ): Promise<void> {
+    const lastOtpByPhone = await prisma.userOtp.findFirst({
+      where: { user: { phone } },
+      orderBy: { created_at: 'desc' },
+      select: { created_at: true },
+    });
+
+    if (lastOtpByPhone && lastOtpByPhone.created_at > cooldownThreshold) {
+      throw new RateLimitError(MSG_COOLDOWN);
+    }
+
+    const phoneRequestsLastHour = await prisma.userOtp.count({
+      where: { user: { phone }, created_at: { gte: oneHourAgo } },
+    });
+
+    if (phoneRequestsLastHour >= OTP_MAX_PER_HOUR) {
+      throw new RateLimitError(MSG_HOURLY_LIMIT);
+    }
   }
 }
