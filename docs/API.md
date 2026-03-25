@@ -127,6 +127,117 @@ export async function clienteRoutes(app: FastifyInstance) {
 
 ---
 
+## Autenticação via OTP
+
+### `POST /auth/otp/request`
+
+Solicita um código OTP de 6 dígitos para o número de WhatsApp informado. O código é armazenado com hash bcrypt e tem validade de **5 minutos**. Existe um rate-limit de **1 requisição a cada 2 minutos** por CPF.
+
+**Body (JSON):**
+
+| Campo      | Tipo     | Obrigatório | Descrição                                               |
+| ---------- | -------- | ----------- | ------------------------------------------------------- |
+| `cpf`      | `string` | ✅          | CPF do usuário (com ou sem formatação, 11–14 caracteres) |
+| `phone`    | `string` | ✅          | Telefone no formato E.164 ou local (10–20 caracteres)    |
+| `name`     | `string` | ❌          | Nome completo do usuário (opcional)                      |
+
+> **Formato de telefone E.164:** `+5591999999999` (código do país + DDD + número). O backend normaliza automaticamente adicionando o prefixo `55` caso ausente.
+
+**Exemplo de request:**
+
+```json
+{
+  "cpf": "123.456.789-01",
+  "phone": "+5591999999999"
+}
+```
+
+**Respostas:**
+
+| Status | Corpo                                                                 | Descrição                                   |
+| ------ | --------------------------------------------------------------------- | ------------------------------------------- |
+| `200`  | `{ "message": "Código enviado com sucesso" }`                         | OTP gerado e enviado via WhatsApp           |
+| `500`  | `{ "error": "Erro interno ao gerar OTP", "code": "INTERNAL_SERVER_ERROR" }` | Falha interna                         |
+
+**Exemplo de resposta 200:**
+
+```json
+{ "message": "Código enviado com sucesso" }
+```
+
+**Exemplo de resposta 500:**
+
+```json
+{
+  "error": "Erro interno ao gerar OTP",
+  "code": "INTERNAL_SERVER_ERROR"
+}
+```
+
+---
+
+### `POST /auth/otp/verify`
+
+Valida o código OTP informado. Após verificação bem-sucedida, o OTP é marcado como usado. Máximo de **5 tentativas** por OTP.
+
+**Body (JSON):**
+
+| Campo  | Tipo     | Obrigatório | Descrição                                |
+| ------ | -------- | ----------- | ---------------------------------------- |
+| `cpf`  | `string` | ✅          | CPF do usuário (11–14 caracteres)        |
+| `otp`  | `string` | ✅          | Código OTP de exatamente 6 dígitos       |
+
+**Exemplo de request:**
+
+```json
+{
+  "cpf": "12345678901",
+  "otp": "483921"
+}
+```
+
+**Respostas:**
+
+| Status | Corpo                                                                                 | Descrição                                               |
+| ------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `200`  | Ver schema abaixo                                                                     | OTP válido — retorna dados do usuário e próximo passo   |
+| `400`  | `{ "error": "Nenhum OTP válido encontrado.", "code": "OTP_NOT_FOUND" }`               | Nenhum OTP ativo/válido encontrado para o CPF           |
+| `401`  | `{ "error": "Código OTP inválido.", "code": "OTP_INVALID" }`                          | OTP incorreto                                           |
+| `404`  | `{ "error": "Usuário não encontrado para o CPF informado", "code": "NOT_FOUND_ERROR" }` | CPF não cadastrado                                    |
+| `429`  | `{ "error": "Número máximo de tentativas atingido.", "code": "OTP_MAX_ATTEMPTS" }`    | Limite de 5 tentativas excedido — solicitar novo código |
+| `500`  | `{ "error": "Erro interno ao verificar OTP", "code": "INTERNAL_SERVER_ERROR" }`       | Falha interna                                           |
+
+**Schema da resposta 200:**
+
+| Campo       | Tipo                                          | Descrição                                                 |
+| ----------- | --------------------------------------------- | --------------------------------------------------------- |
+| `verified`  | `boolean`                                     | Sempre `true` em caso de sucesso                          |
+| `userId`    | `string` (UUID)                               | ID do usuário autenticado                                 |
+| `cpf`       | `string`                                      | CPF normalizado (somente dígitos)                         |
+| `name`      | `string \| null`                              | Nome completo do usuário (pode ser nulo)                  |
+| `phone`     | `string \| null`                              | Telefone do usuário (pode ser nulo)                       |
+| `nextStep`  | `"login" \| "register" \| "entitlement"`      | Próximo passo a ser executado pelo cliente                |
+
+> **Valores de `nextStep`:**
+> - `"login"` — usuário possui pagamento ativo; pode fazer login direto.
+> - `"register"` — usuário não possui nome cadastrado; deve completar o cadastro.
+> - `"entitlement"` — usuário cadastrado mas sem plano ativo; deve adquirir um plano.
+
+**Exemplo de resposta 200:**
+
+```json
+{
+  "verified": true,
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "cpf": "12345678901",
+  "name": "João da Silva",
+  "phone": "5591999999999",
+  "nextStep": "login"
+}
+```
+
+---
+
 ## Endpoints por Domínio
 
 | Domínio    | Prefixo           | Auth?             |
@@ -192,7 +303,17 @@ Envia uma mensagem via WhatsApp.
 x-whatsapp-token: <WHATSAPP_SERVER_TOKEN>
 ```
 
-**Body:**
+**Body (JSON):**
+
+| Campo      | Tipo     | Obrigatório | Descrição                                                              |
+| ---------- | -------- | ----------- | ---------------------------------------------------------------------- |
+| `telefone` | `string` | ✅          | Número de destino no formato E.164 sem `+` (ex: `5591999999999`)       |
+| `mensagem` | `string` | ✅          | Texto da mensagem a ser enviada                                        |
+
+> **Formato E.164:** o número deve conter o código do país (`55` para Brasil) + DDD + número, sem espaços, hífens ou `+`. Exemplo: `5591999999999`.
+
+**Exemplo de request:**
+
 ```json
 {
   "telefone": "5591999999999",
@@ -200,14 +321,30 @@ x-whatsapp-token: <WHATSAPP_SERVER_TOKEN>
 }
 ```
 
-**Resposta 200:**
+**Respostas:**
+
+| Status | Corpo                                                           | Descrição                                              |
+| ------ | --------------------------------------------------------------- | ------------------------------------------------------ |
+| `200`  | `{ "sucesso": true, "mensagem": "Enviado com sucesso." }`       | Mensagem enviada com sucesso                           |
+| `400`  | `{ "error": "Telefone e mensagem são obrigatórios." }`          | Body incompleto — campos `telefone` ou `mensagem` ausentes |
+| `401`  | `{ "error": "Unauthorized", "code": "UNAUTHORIZED" }`           | Token ausente ou inválido no header `x-whatsapp-token` |
+| `500`  | `{ "error": "Falha ao enviar mensagem." }`                      | Erro interno ao enviar (ex: falha no WPPConnect)       |
+| `503`  | `{ "error": "WhatsApp ainda não está pronto." }`                | Cliente WhatsApp ainda não conectado/autenticado       |
+
+**Exemplo de resposta 200:**
+
 ```json
 { "sucesso": true, "mensagem": "Enviado com sucesso." }
 ```
 
-**Resposta 401:**
+**Exemplo de resposta 401:**
 ```json
 { "error": "Unauthorized", "code": "UNAUTHORIZED" }
+```
+
+**Exemplo de resposta 503:**
+```json
+{ "error": "WhatsApp ainda não está pronto." }
 ```
 
 ### Exemplo de chamada do backend
