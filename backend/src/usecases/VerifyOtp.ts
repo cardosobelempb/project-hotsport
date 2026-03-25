@@ -8,16 +8,20 @@ import { prisma } from '../lib/db.js';
 
 const MAX_ATTEMPTS = 5;
 
+type NextStep = 'login' | 'register' | 'entitlement';
+
 interface VerifyOtpInputDto {
   cpf: string;
   otp: string;
 }
 
 interface VerifyOtpOutputDto {
+  verified: boolean;
   userId: string;
   cpf: string;
   name: string | null;
   phone: string | null;
+  nextStep: NextStep;
 }
 
 /**
@@ -72,11 +76,36 @@ export class VerifyOtp {
       data: { used: true },
     });
 
+    const nextStep = await this.determineNextStep(dto.cpf, user.name);
+
     return {
+      verified: true,
       userId: user.id,
       cpf: user.cpf,
       name: user.name,
       phone: user.phone,
+      nextStep,
     };
+  }
+
+  private async hasActivePayment(cpf: string): Promise<boolean> {
+    const payment = await prisma.pagamento.findFirst({
+      where: {
+        cpf,
+        status: 'approved',
+        expira_em: { gt: dayjs().toDate() },
+      },
+    });
+    return payment !== null;
+  }
+
+  private async determineNextStep(cpf: string, name: string | null): Promise<NextStep> {
+    if (await this.hasActivePayment(cpf)) {
+      return 'login';
+    }
+    if (!name) {
+      return 'register';
+    }
+    return 'entitlement';
   }
 }

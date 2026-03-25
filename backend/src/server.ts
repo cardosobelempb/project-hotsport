@@ -45,7 +45,7 @@ async function start() {
   await app.register(mikrotikRoutes, { prefix: '/api/mikrotiks' });
   await app.register(pagamentoRoutes, { prefix: '/api/pagamentos' });
   await app.register(radiusRoutes, { prefix: '/api/radius' });
-  await app.register(otpRoutes, { prefix: '/api/otp' });
+  await app.register(otpRoutes, { prefix: '/auth/otp' });
   await app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   await app.register(lgpdRoutes, { prefix: '/api/lgpd' });
   await app.register(efiRoutes, { prefix: '/api/efi' });

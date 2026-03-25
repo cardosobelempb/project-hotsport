@@ -218,10 +218,12 @@ export const VerifyOtpSchema = z.object({
 });
 
 export const VerifyOtpOutputSchema = z.object({
+  verified: z.boolean(),
   userId: z.uuid(),
   cpf: z.string(),
   name: z.string().nullable(),
   phone: z.string().nullable(),
+  nextStep: z.enum(['login', 'register', 'entitlement']),
 });
 
 // Aliases for backward compatibility
