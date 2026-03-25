@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ConflictError, ValidationError, WhatsappError } from '../errors/index.js';
 import { loginAdminHandler } from '../handlers/admin/login.js';
 import { ErrorSchema, LoginOutputSchema, LoginSchema, OtpRequestBodySchema, OtpRequestResponseSchema } from '../schemas/index.js';
+import { CreateOtpAuditLog, type OtpAuditEvent } from '../usecases/CreateOtpAuditLog.js';
 import { RequestOtp } from '../usecases/RequestOtp.js';
 
 export const authRoutes = async (app: FastifyInstance) => {
@@ -62,11 +63,30 @@ export const authRoutes = async (app: FastifyInstance) => {
       },
     },
     handler: async (request, reply) => {
+      const { cpf, telefone } = request.body;
+      const ip = request.ip;
+      const auditLog = new CreateOtpAuditLog();
+
+      await auditLog.execute({ event: 'otp_requested', cpf, telefone, ip }).catch(err =>
+        app.log.warn({ err }, 'OTP audit log write failed'),
+      );
+
       try {
         const result = await new RequestOtp().execute(request.body);
+        await auditLog.execute({ event: 'otp_sent', cpf, telefone, ip }).catch(err =>
+          app.log.warn({ err }, 'OTP audit log write failed'),
+        );
         return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
+        const detail = error instanceof Error ? error.message : null;
+        let auditEvent: OtpAuditEvent = 'otp_request_error';
+        if (error instanceof ValidationError) auditEvent = 'otp_validation_error';
+        else if (error instanceof ConflictError) auditEvent = 'otp_throttled';
+        else if (error instanceof WhatsappError) auditEvent = 'otp_whatsapp_error';
+        await auditLog.execute({ event: auditEvent, cpf, telefone, ip, ...(detail !== null && { detail }) }).catch(err =>
+          app.log.warn({ err }, 'OTP audit log write failed'),
+        );
         if (error instanceof ValidationError) {
           return reply.status(422).send({ error: error.message, code: error.code });
         }
