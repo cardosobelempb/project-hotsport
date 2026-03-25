@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Admin {
@@ -107,6 +108,36 @@ model Plano {
   mikrotik         Mikrotik @relation(fields: [mikrotik_id], references: [id], onDelete: Cascade)
 
   @@map("planos")
+}
+
+// ── User (autenticação OTP via WhatsApp) ─────────────────────────────────────
+
+model User {
+  id         String    @id @default(uuid()) @db.Uuid
+  cpf        String    @unique @db.VarChar(14)
+  name       String?   @db.VarChar(100)
+  phone      String?   @db.VarChar(20)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  otps       UserOtp[]
+
+  @@index([cpf])
+  @@map("users")
+}
+
+model UserOtp {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  hash       String   @db.VarChar(255)
+  expires_at DateTime
+  attempts   Int      @default(0)
+  used       Boolean  @default(false)
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@map("user_otps")
 }
 
 model RadiusUser {
