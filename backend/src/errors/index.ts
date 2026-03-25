@@ -38,3 +38,9 @@ export class UnauthorizedError extends AppError {
     super(msg, 401, 'UNAUTHORIZED_ERROR');
   }
 }
+
+export class RateLimitError extends AppError {
+  constructor(msg = 'Rate limit exceeded') {
+    super(msg, 429, 'RATE_LIMIT_ERROR');
+  }
+}
