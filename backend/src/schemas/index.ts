@@ -179,6 +179,17 @@ export const WhatsappStatusSchema = z.object({
   message: z.string().optional(),
 });
 
+// OTP
+export const OtpRequestBodySchema = z.object({
+  cpf: z.string().regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, 'CPF deve ter 11 dígitos'),
+  telefone: z.string().regex(/^\+?[\d\s\-().]{10,20}$/, 'Telefone inválido'),
+});
+
+export const OtpRequestResponseSchema = z.object({
+  status: z.enum(['enviado', 'erro']),
+  detail: z.string().optional(),
+});
+
 // Aliases for backward compatibility
 export const PagamentoListSchema = z.array(PagamentoSchema);
 export const PlanoCreateSchema = PlanoSchema.omit({ id: true });

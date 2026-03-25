@@ -147,3 +147,17 @@ model Radusergroup {
   @@id([username, groupname])
   @@map("radusergroup")
 }
+
+model OtpRequest {
+  id           Int      @id @default(autoincrement())
+  cpf          String   @db.VarChar(14)
+  telefone     String   @db.VarChar(20)
+  otp_hash     String   @db.VarChar(255)
+  expires_at   DateTime
+  attempts     Int      @default(0)
+  max_attempts Int      @default(5)
+  used         Boolean  @default(false)
+  criado_em    DateTime @default(now())
+
+  @@map("otp_requests")
+}
