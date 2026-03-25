@@ -179,6 +179,51 @@ export const WhatsappStatusSchema = z.object({
   message: z.string().optional(),
 });
 
+// User (OTP authentication)
+export const UserSchema = z.object({
+  id: z.uuid(),
+  cpf: z.string().min(11).max(14),
+  name: z.string().nullable(),
+  phone: z.string().nullable(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
+});
+
+export const CreateUserSchema = z.object({
+  cpf: z.string().min(11).max(14),
+  name: z.string().optional(),
+  phone: z.string().optional(),
+});
+
+// UserOtp
+export const UserOtpSchema = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  expires_at: z.iso.datetime(),
+  attempts: z.number().int(),
+  used: z.boolean(),
+  created_at: z.iso.datetime(),
+});
+
+// OTP request/verify
+export const RequestOtpSchema = z.object({
+  cpf: z.string().min(11).max(14),
+  phone: z.string().min(10).max(20),
+  name: z.string().optional(),
+});
+
+export const VerifyOtpSchema = z.object({
+  cpf: z.string().min(11).max(14),
+  otp: z.string().length(6),
+});
+
+export const VerifyOtpOutputSchema = z.object({
+  userId: z.uuid(),
+  cpf: z.string(),
+  name: z.string().nullable(),
+  phone: z.string().nullable(),
+});
+
 // Aliases for backward compatibility
 export const PagamentoListSchema = z.array(PagamentoSchema);
 export const PlanoCreateSchema = PlanoSchema.omit({ id: true });
