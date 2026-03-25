@@ -185,6 +185,11 @@ export const OtpRequestBodySchema = z.object({
   telefone: z.string().regex(/^\+?[\d\s\-().]{10,20}$/, 'Telefone inválido'),
 });
 
+export const OtpRequestResponseSchema = z.object({
+  status: z.enum(['enviado', 'erro']),
+  detail: z.string().optional(),
+});
+
 // UserOtp
 export const UserOtpSchema = z.object({
   id: z.uuid(),
@@ -214,6 +219,32 @@ export const VerifyOtpOutputSchema = z.object({
   name: z.string().nullable(),
   phone: z.string().nullable(),
   nextStep: z.enum(['login', 'register', 'entitlement']),
+});
+
+// OTP audit events
+export const OtpAuditEventSchema = z.enum([
+  'otp_requested',
+  'otp_sent',
+  'otp_whatsapp_error',
+  'otp_throttled',
+  'otp_validation_error',
+  'otp_request_error',
+  'otp_verify_attempt',
+  'otp_verified',
+  'otp_invalid',
+  'otp_max_attempts',
+  'otp_not_found',
+  'otp_user_not_found',
+]);
+
+export const OtpAuditLogSchema = z.object({
+  id: z.number().int(),
+  event: OtpAuditEventSchema,
+  cpf: z.string(),
+  telefone: z.string().nullable(),
+  ip: z.string().nullable(),
+  detail: z.string().nullable(),
+  criado_em: z.iso.datetime(),
 });
 
 // Aliases for backward compatibility

@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Admin {
@@ -193,4 +192,51 @@ model OtpRequest {
   criado_em    DateTime @default(now())
 
   @@map("otp_requests")
+}
+
+// ── OTP Audit Log (compliance / LGPD) ────────────────────────────────────────
+//
+// Registra todos os eventos relevantes do fluxo OTP para auditoria e LGPD.
+//
+// Eventos registrados:
+//   otp_requested        – solicitação recebida (início do fluxo)
+//   otp_sent             – mensagem WhatsApp enviada com sucesso
+//   otp_whatsapp_error   – falha no envio via WhatsApp
+//   otp_throttled        – bloqueio por solicitação recente (rate-limit)
+//   otp_validation_error – CPF ou telefone inválido
+//   otp_request_error    – erro genérico na solicitação
+//   otp_verify_attempt   – tentativa de verificação recebida
+//   otp_verified         – OTP verificado com sucesso
+//   otp_invalid          – código OTP incorreto
+//   otp_max_attempts     – número máximo de tentativas atingido (bloqueio)
+//   otp_not_found        – nenhum OTP válido encontrado para o usuário
+//   otp_user_not_found   – CPF não encontrado na base de usuários
+//
+// Query mínima para auditoria:
+//   -- Todos os eventos de um CPF:
+//   SELECT * FROM otp_audit_logs WHERE cpf = '<cpf>' ORDER BY criado_em DESC;
+//
+//   -- Eventos em intervalo de datas:
+//   SELECT event, COUNT(*) FROM otp_audit_logs
+//     WHERE criado_em BETWEEN '<inicio>' AND '<fim>' GROUP BY event;
+//
+//   -- Detecção de bloqueios nas últimas 24h:
+//   SELECT cpf, ip, criado_em FROM otp_audit_logs
+//     WHERE event = 'otp_max_attempts'
+//       AND criado_em > NOW() - INTERVAL '24 hours'
+//     ORDER BY criado_em DESC;
+
+model OtpAuditLog {
+  id        Int      @id @default(autoincrement())
+  event     String   @db.VarChar(50)
+  cpf       String   @db.VarChar(14)
+  telefone  String?  @db.VarChar(20)
+  ip        String?  @db.VarChar(45)
+  detail    String?  @db.VarChar(500)
+  criado_em DateTime @default(now())
+
+  @@index([cpf])
+  @@index([event])
+  @@index([criado_em])
+  @@map("otp_audit_logs")
 }
