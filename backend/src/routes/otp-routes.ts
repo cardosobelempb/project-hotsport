@@ -21,6 +21,8 @@ export const otpRoutes = async (app: FastifyInstance) => {
    * in UserOtp and returns a generic success message.
    * The plain-text OTP is logged at debug level so the WhatsApp layer (or any
    * downstream job) can pick it up and dispatch it.
+   *
+   * Rate-limited: max 1 request per 60 s and max 5 per hour, per CPF and phone.
    */
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',
@@ -31,6 +33,7 @@ export const otpRoutes = async (app: FastifyInstance) => {
       body: RequestOtpSchema,
       response: {
         200: MessageSchema,
+        429: ErrorSchema,
         500: ErrorSchema,
       },
     },
@@ -54,6 +57,13 @@ export const otpRoutes = async (app: FastifyInstance) => {
         );
         return reply.status(200).send({ message: 'Código enviado com sucesso' });
       } catch (error) {
+        if (error instanceof RateLimitError) {
+          app.log.warn(
+            { cpf: request.body.cpf, phone: request.body.phone, code: error.code },
+            'OTP rate limit exceeded — possible abuse attempt',
+          );
+          return reply.status(429).send({ error: error.message, code: error.code });
+        }
         app.log.error(error);
         const detail = error instanceof Error ? error.message : null;
         await auditLog.execute({ event: 'otp_request_error', cpf, telefone: phone, ip, ...(detail !== null && { detail }) }).catch(err =>
@@ -125,6 +135,12 @@ export const otpRoutes = async (app: FastifyInstance) => {
           return reply.status(404).send({ error: error.message, code: error.code });
         }
         if (error instanceof AppError) {
+          if (error.code === 'OTP_MAX_ATTEMPTS') {
+            app.log.warn(
+              { cpf: request.body.cpf, code: error.code },
+              'OTP max attempts exceeded — possible brute-force attempt',
+            );
+          }
           return reply.status(error.statusCode).send({ error: error.message, code: error.code });
         }
         return reply

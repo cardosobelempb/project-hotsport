@@ -121,6 +121,7 @@ model User {
   otps       UserOtp[]
 
   @@index([cpf])
+  @@index([phone])
   @@map("users")
 }
 
@@ -136,6 +137,7 @@ model UserOtp {
 
   @@index([user_id])
   @@index([expires_at])
+  @@index([user_id, created_at])
   @@map("user_otps")
 }
 

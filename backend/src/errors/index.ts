@@ -39,8 +39,8 @@ export class UnauthorizedError extends AppError {
   }
 }
 
-export class WhatsappError extends AppError {
-  constructor(msg = 'Falha ao enviar mensagem via WhatsApp') {
-    super(msg, 502, 'WHATSAPP_ERROR');
+export class RateLimitError extends AppError {
+  constructor(msg = 'Rate limit exceeded') {
+    super(msg, 429, 'RATE_LIMIT_ERROR');
   }
 }
