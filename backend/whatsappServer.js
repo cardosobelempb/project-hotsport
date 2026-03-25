@@ -1,13 +1,35 @@
+require("dotenv").config();
+
 const express = require("express");
-const cors = require("cors");
 const wppconnect = require("@wppconnect-team/wppconnect");
 const { setClient } = require("./src/controllers/whatsappController");
 
 const app = express();
-const PORT = 3030;
+const PORT = process.env.WHATSAPP_SERVER_PORT || 3030;
+const WHATSAPP_SERVER_TOKEN = process.env.WHATSAPP_SERVER_TOKEN;
+
+if (!WHATSAPP_SERVER_TOKEN) {
+  console.error("❌ WHATSAPP_SERVER_TOKEN não está definido. Encerrando servidor.");
+  process.exit(1);
+}
 
 app.use(express.json());
-app.use(cors());
+
+function maskPhone(telefone) {
+  if (!telefone || String(telefone).length < 4) return "****";
+  const str = String(telefone);
+  return `****${str.slice(-4)}`;
+}
+
+function requireWhatsappToken(req, res, next) {
+  const token = req.headers["x-whatsapp-token"];
+  const timestamp = new Date().toISOString();
+  if (token !== WHATSAPP_SERVER_TOKEN) {
+    console.warn(`[${timestamp}] [/send] 401 Unauthorized - IP: ${req.ip}`);
+    return res.status(401).json({ error: "Unauthorized", code: "UNAUTHORIZED" });
+  }
+  next();
+}
 
 let client = null;
 let isClientReady = false;
@@ -48,8 +70,12 @@ app.get("/status", (req, res) => {
   res.json({ status: "CONECTADO" });
 });
 
-app.post("/send", async (req, res) => {
+app.post("/send", requireWhatsappToken, async (req, res) => {
   const { telefone, mensagem } = req.body;
+  const timestamp = new Date().toISOString();
+  const maskedPhone = maskPhone(telefone);
+
+  console.log(`[${timestamp}] [/send] Requisição recebida - Telefone: ${maskedPhone}`);
 
   if (!telefone || !mensagem) {
     return res.status(400).json({ error: "Telefone e mensagem são obrigatórios." });
@@ -61,13 +87,14 @@ app.post("/send", async (req, res) => {
 
   try {
     await client.sendText(`${telefone}@c.us`, mensagem);
+    console.log(`[${timestamp}] [/send] ✅ Mensagem enviada para ${maskedPhone}`);
     res.json({ sucesso: true, mensagem: "Enviado com sucesso." });
   } catch (err) {
-    console.error("Erro ao enviar mensagem:", err);
+    console.error(`[${timestamp}] [/send] ❌ Erro ao enviar para ${maskedPhone}:`, err);
     res.status(500).json({ error: "Falha ao enviar mensagem." });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor WhatsApp rodando na porta ${PORT}`);
+app.listen(PORT, "127.0.0.1", () => {
+  console.log(`🚀 Servidor WhatsApp rodando em 127.0.0.1:${PORT}`);
 });

@@ -139,3 +139,104 @@ export async function clienteRoutes(app: FastifyInstance) {
 | WhatsApp   | `/api/whatsapp`   | ✅                |
 | Radius     | `/api/radius`     | ✅                |
 | Admin      | `/api/admin`      | ✅ (role: admin)  |
+
+---
+
+## Microserviço WhatsApp (`whatsappServer.js`)
+
+O `whatsappServer.js` é um microserviço Express independente que gerencia a conexão com o WhatsApp via `@wppconnect-team/wppconnect`. Ele **não é exposto publicamente** — escuta apenas em `127.0.0.1` (loopback).
+
+### Porta e bind
+
+```
+127.0.0.1:3030  (padrão — configurável via WHATSAPP_SERVER_PORT)
+```
+
+### Autenticação via token
+
+Toda requisição ao endpoint `/send` **deve** incluir o header `x-whatsapp-token` com o valor correto. Caso contrário, a resposta será `401 Unauthorized`.
+
+```
+x-whatsapp-token: <valor de WHATSAPP_SERVER_TOKEN>
+```
+
+### Variáveis de ambiente
+
+| Variável                  | Descrição                                           | Obrigatório |
+| ------------------------- | --------------------------------------------------- | ----------- |
+| `WHATSAPP_SERVER_TOKEN`   | Token secreto para autenticar chamadas ao `/send`   | ✅          |
+| `WHATSAPP_SERVER_PORT`    | Porta do microserviço (padrão: `3030`)              | ❌          |
+
+### Endpoints
+
+#### `GET /status`
+
+Verifica se o cliente WhatsApp está pronto.
+
+**Resposta 200:**
+```json
+{ "status": "CONECTADO" }
+```
+
+**Resposta 503:**
+```json
+{ "status": "AGUARDANDO_CONEXAO" }
+```
+
+#### `POST /send`
+
+Envia uma mensagem via WhatsApp.
+
+**Header obrigatório:**
+```
+x-whatsapp-token: <WHATSAPP_SERVER_TOKEN>
+```
+
+**Body:**
+```json
+{
+  "telefone": "5591999999999",
+  "mensagem": "Seu código OTP é: 123456"
+}
+```
+
+**Resposta 200:**
+```json
+{ "sucesso": true, "mensagem": "Enviado com sucesso." }
+```
+
+**Resposta 401:**
+```json
+{ "error": "Unauthorized", "code": "UNAUTHORIZED" }
+```
+
+### Exemplo de chamada do backend
+
+```ts
+import axios from 'axios';
+
+await axios.post('http://127.0.0.1:3030/send', {
+  telefone: '5591999999999',
+  mensagem: `Seu código de acesso é: ${otp}`
+}, {
+  headers: {
+    'x-whatsapp-token': process.env.WHATSAPP_SERVER_TOKEN
+  }
+});
+```
+
+### Logs de auditoria
+
+Toda requisição ao `/send` gera logs no stdout com timestamp, status e número de destino:
+
+```
+[2024-01-15T10:30:00.000Z] [/send] Requisição recebida - Telefone: 5591999999999
+[2024-01-15T10:30:01.200Z] [/send] ✅ Mensagem enviada para 5591999999999
+```
+
+Tokens inválidos também são logados:
+
+```
+[2024-01-15T10:31:00.000Z] [/send] 401 Unauthorized - IP: 127.0.0.1
+```
+
