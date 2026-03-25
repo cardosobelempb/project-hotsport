@@ -8,117 +8,117 @@ datasource db {
 }
 
 model Admin {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique @db.VarChar(255)
-  password   String   @db.VarChar(255)
-  created_at DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("admins")
 }
 
 model ConfigMercadoPago {
-  id             Int      @id @default(autoincrement())
-  public_key     String?  @db.VarChar(255)
-  access_token   String?  @db.Text
-  client_id      String?  @db.VarChar(255)
-  client_secret  String?  @db.Text
-  webhook_secret String?  @db.VarChar(255)
-  updated_at     DateTime @default(now()) @updatedAt
+  id            Int      @id @default(autoincrement())
+  publicKey     String?  @db.VarChar(255) @map("public_key")
+  accessToken   String?  @db.Text @map("access_token")
+  clientId      String?  @db.VarChar(255) @map("client_id")
+  clientSecret  String?  @db.Text @map("client_secret")
+  webhookSecret String?  @db.VarChar(255) @map("webhook_secret")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("config_mercadopago")
 }
 
 model EfiConfig {
-  id                Int      @id @default(autoincrement())
-  client_id         String   @db.VarChar(255)
-  client_secret     String   @db.VarChar(255)
-  chave_pix         String   @db.VarChar(255)
-  ambiente          Ambiente @default(sandbox)
-  certificado_nome  String?  @db.VarChar(255)
-  criado_em         DateTime @default(now())
+  id              Int         @id @default(autoincrement())
+  clientId        String      @db.VarChar(255) @map("client_id")
+  clientSecret    String      @db.VarChar(255) @map("client_secret")
+  pixKey          String      @db.VarChar(255) @map("pix_key")
+  environment     Environment @default(SANDBOX)
+  certificateName String?     @db.VarChar(255) @map("certificate_name")
+  createdAt       DateTime    @default(now()) @map("created_at")
 
   @@map("efi_config")
 }
 
-enum Ambiente {
-  sandbox
-  producao
+enum Environment {
+  SANDBOX
+  PRODUCTION
 }
 
 model LgpdLogin {
   id        Int      @id @default(autoincrement())
   cpf       String   @db.VarChar(14)
-  aceite    Boolean  @default(false)
+  consent   Boolean  @default(false)
   mac       String?  @db.VarChar(50)
   ip        String?  @db.VarChar(50)
-  criado_em DateTime @default(now())
-  nome      String?  @db.VarChar(100)
-  telefone  String?  @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  name      String?  @db.VarChar(100)
+  phone     String?  @db.VarChar(20)
 
   @@map("lgpd_logins")
 }
 
 model Mikrotik {
-  id              Int       @id @default(autoincrement())
-  nome            String    @db.VarChar(100)
-  ip              String    @db.VarChar(45)
-  usuario         String    @db.VarChar(100)
-  senha           String    @db.VarChar(255)
-  porta           Int       @default(8728)
-  status          String    @default("Offline") @db.VarChar(20)
-  usuarios_ativos Int       @default(0)
-  criado_em       DateTime  @default(now())
-  end_hotspot     String?   @db.VarChar(255)
-  planos          Plano[]
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(100)
+  ip             String   @db.VarChar(45)
+  username       String   @db.VarChar(100)
+  password       String   @db.VarChar(255)
+  port           Int      @default(8728)
+  status         String   @default("Offline") @db.VarChar(20)
+  activeUsers    Int      @default(0) @map("active_users")
+  createdAt      DateTime @default(now()) @map("created_at")
+  hotspotAddress String?  @db.VarChar(255) @map("hotspot_address")
+  plans          Plan[]
 
   @@map("mikrotiks")
 }
 
-model Pagamento {
-  id             Int       @id @default(autoincrement())
-  plano_id       Int
-  email          String?   @db.VarChar(255)
-  nome_plano     String?   @db.VarChar(255)
-  valor          Int
-  status         String?   @db.VarChar(50)
-  mp_pagamento_id BigInt?
-  criado_em      DateTime  @default(now())
-  expira_em      DateTime?
-  atualizado_em  DateTime  @default(now()) @updatedAt
-  mac            String?   @db.VarChar(20)
-  cpf            String?   @db.VarChar(20)
-  IP             String?   @db.VarChar(20)
+model Payment {
+  id          Int       @id @default(autoincrement())
+  planId      Int       @map("plan_id")
+  email       String?   @db.VarChar(255)
+  planName    String?   @db.VarChar(255) @map("plan_name")
+  amount      Int
+  status      String?   @db.VarChar(50)
+  mpPaymentId BigInt?   @map("mp_payment_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  expiresAt   DateTime? @map("expires_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  mac         String?   @db.VarChar(20)
+  cpf         String?   @db.VarChar(20)
+  ip          String?   @db.VarChar(20)
 
-  @@map("pagamentos")
+  @@map("payments")
 }
 
-model Plano {
-  id               Int      @id @default(autoincrement())
-  nome             String   @db.VarChar(100)
-  descricao        String?  @db.Text
-  valor            Decimal  @db.Decimal(10, 2)
-  duracao_minutos  Int
-  velocidade_down  String   @db.VarChar(20)
-  velocidade_up    String   @db.VarChar(20)
-  mikrotik_id      Int
-  ativo            Boolean  @default(true)
-  address_pool     String   @default("default-dhcp") @db.VarChar(50)
-  shared_users     Int      @default(10)
-  mikrotik         Mikrotik @relation(fields: [mikrotik_id], references: [id], onDelete: Cascade)
+model Plan {
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(100)
+  description     String?  @db.Text
+  amount          Decimal  @db.Decimal(10, 2)
+  durationMinutes Int      @map("duration_minutes")
+  downloadSpeed   String   @db.VarChar(20) @map("download_speed")
+  uploadSpeed     String   @db.VarChar(20) @map("upload_speed")
+  mikrotikId      Int      @map("mikrotik_id")
+  active          Boolean  @default(true)
+  addressPool     String   @default("default-dhcp") @db.VarChar(50) @map("address_pool")
+  sharedUsers     Int      @default(10) @map("shared_users")
+  mikrotik        Mikrotik @relation(fields: [mikrotikId], references: [id], onDelete: Cascade)
 
-  @@map("planos")
+  @@map("plans")
 }
 
-// ── User (autenticação OTP via WhatsApp) ─────────────────────────────────────
+// ── User (OTP authentication via WhatsApp) ───────────────────────────────────
 
 model User {
-  id         String    @id @default(uuid()) @db.Uuid
-  cpf        String    @unique @db.VarChar(14)
-  name       String?   @db.VarChar(100)
-  phone      String?   @db.VarChar(20)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  otps       UserOtp[]
+  id        String    @id @default(uuid()) @db.Uuid
+  cpf       String    @unique @db.VarChar(14)
+  name      String?   @db.VarChar(100)
+  phone     String?   @db.VarChar(20)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  otps      UserOtp[]
 
   @@index([cpf])
   @@index([phone])
@@ -126,27 +126,27 @@ model User {
 }
 
 model UserOtp {
-  id         String   @id @default(uuid()) @db.Uuid
-  user_id    String   @db.Uuid
-  hash       String   @db.VarChar(255)
-  expires_at DateTime
-  attempts   Int      @default(0)
-  used       Boolean  @default(false)
-  created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid @map("user_id")
+  hash      String   @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([user_id])
-  @@index([expires_at])
-  @@index([user_id, created_at])
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([userId, createdAt])
   @@map("user_otps")
 }
 
 model RadiusUser {
-  id         Int      @id @default(autoincrement())
-  username   String   @db.VarChar(255)
-  plano_id   Int?
-  nas_id     Int?
-  criado_em  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  username  String   @db.VarChar(255)
+  planId    Int?     @map("plan_id")
+  nasId     Int?     @map("nas_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("radius_users")
 }
@@ -181,62 +181,62 @@ model Radusergroup {
 }
 
 model OtpRequest {
-  id           Int      @id @default(autoincrement())
-  cpf          String   @db.VarChar(14)
-  telefone     String   @db.VarChar(20)
-  otp_hash     String   @db.VarChar(255)
-  expires_at   DateTime
-  attempts     Int      @default(0)
-  max_attempts Int      @default(5)
-  used         Boolean  @default(false)
-  criado_em    DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  cpf         String   @db.VarChar(14)
+  phone       String   @db.VarChar(20)
+  otpHash     String   @db.VarChar(255) @map("otp_hash")
+  expiresAt   DateTime @map("expires_at")
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(5) @map("max_attempts")
+  used        Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("otp_requests")
 }
 
 // ── OTP Audit Log (compliance / LGPD) ────────────────────────────────────────
 //
-// Registra todos os eventos relevantes do fluxo OTP para auditoria e LGPD.
+// Records all relevant events from the OTP flow for audit and LGPD purposes.
 //
-// Eventos registrados:
-//   otp_requested        – solicitação recebida (início do fluxo)
-//   otp_sent             – mensagem WhatsApp enviada com sucesso
-//   otp_whatsapp_error   – falha no envio via WhatsApp
-//   otp_throttled        – bloqueio por solicitação recente (rate-limit)
-//   otp_validation_error – CPF ou telefone inválido
-//   otp_request_error    – erro genérico na solicitação
-//   otp_verify_attempt   – tentativa de verificação recebida
-//   otp_verified         – OTP verificado com sucesso
-//   otp_invalid          – código OTP incorreto
-//   otp_max_attempts     – número máximo de tentativas atingido (bloqueio)
-//   otp_not_found        – nenhum OTP válido encontrado para o usuário
-//   otp_user_not_found   – CPF não encontrado na base de usuários
+// Recorded events:
+//   otp_requested        – request received (start of flow)
+//   otp_sent             – WhatsApp message sent successfully
+//   otp_whatsapp_error   – WhatsApp delivery failure
+//   otp_throttled        – blocked by recent request (rate-limit)
+//   otp_validation_error – invalid CPF or phone number
+//   otp_request_error    – generic request error
+//   otp_verify_attempt   – verification attempt received
+//   otp_verified         – OTP verified successfully
+//   otp_invalid          – incorrect OTP code
+//   otp_max_attempts     – maximum attempts reached (blocked)
+//   otp_not_found        – no valid OTP found for user
+//   otp_user_not_found   – CPF not found in the user database
 //
-// Query mínima para auditoria:
-//   -- Todos os eventos de um CPF:
-//   SELECT * FROM otp_audit_logs WHERE cpf = '<cpf>' ORDER BY criado_em DESC;
+// Minimal audit query:
+//   -- All events for a CPF:
+//   SELECT * FROM otp_audit_logs WHERE cpf = '<cpf>' ORDER BY created_at DESC;
 //
-//   -- Eventos em intervalo de datas:
+//   -- Events in a date range:
 //   SELECT event, COUNT(*) FROM otp_audit_logs
-//     WHERE criado_em BETWEEN '<inicio>' AND '<fim>' GROUP BY event;
+//     WHERE created_at BETWEEN '<start>' AND '<end>' GROUP BY event;
 //
-//   -- Detecção de bloqueios nas últimas 24h:
-//   SELECT cpf, ip, criado_em FROM otp_audit_logs
+//   -- Blocked events in the last 24h:
+//   SELECT cpf, ip, created_at FROM otp_audit_logs
 //     WHERE event = 'otp_max_attempts'
-//       AND criado_em > NOW() - INTERVAL '24 hours'
-//     ORDER BY criado_em DESC;
+//       AND created_at > NOW() - INTERVAL '24 hours'
+//     ORDER BY created_at DESC;
 
 model OtpAuditLog {
   id        Int      @id @default(autoincrement())
   event     String   @db.VarChar(50)
   cpf       String   @db.VarChar(14)
-  telefone  String?  @db.VarChar(20)
+  phone     String?  @db.VarChar(20)
   ip        String?  @db.VarChar(45)
   detail    String?  @db.VarChar(500)
-  criado_em DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([cpf])
   @@index([event])
-  @@index([criado_em])
+  @@index([createdAt])
   @@map("otp_audit_logs")
 }

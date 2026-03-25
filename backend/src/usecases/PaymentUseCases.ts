@@ -1,92 +1,92 @@
 import { NotFoundError } from '../errors/index.js';
 import { prisma } from '../lib/db.js';
 
-interface PagamentoOutputDto {
+interface PaymentOutputDto {
   id: number;
-  plano_id: number;
+  planId: number;
   email: string | null;
-  nome_plano: string | null;
-  valor: number;
+  planName: string | null;
+  amount: number;
   status: string | null;
-  mp_pagamento_id: number | null;
-  criado_em: string;
-  expira_em: string | null;
+  mpPaymentId: number | null;
+  createdAt: string;
+  expiresAt: string | null;
   mac: string | null;
   cpf: string | null;
-  IP: string | null;
+  ip: string | null;
 }
 
-function mapPagamento(p: {
+function mapPayment(p: {
   id: number;
-  plano_id: number;
+  planId: number;
   email: string | null;
-  nome_plano: string | null;
-  valor: number;
+  planName: string | null;
+  amount: number;
   status: string | null;
-  mp_pagamento_id: bigint | null;
-  criado_em: Date;
-  expira_em: Date | null;
+  mpPaymentId: bigint | null;
+  createdAt: Date;
+  expiresAt: Date | null;
   mac: string | null;
   cpf: string | null;
-  IP: string | null;
-}): PagamentoOutputDto {
+  ip: string | null;
+}): PaymentOutputDto {
   return {
     id: p.id,
-    plano_id: p.plano_id,
+    planId: p.planId,
     email: p.email,
-    nome_plano: p.nome_plano,
-    valor: p.valor,
+    planName: p.planName,
+    amount: p.amount,
     status: p.status,
-    mp_pagamento_id: p.mp_pagamento_id !== null ? Number(p.mp_pagamento_id) : null,
-    criado_em: p.criado_em.toISOString(),
-    expira_em: p.expira_em ? p.expira_em.toISOString() : null,
+    mpPaymentId: p.mpPaymentId !== null ? Number(p.mpPaymentId) : null,
+    createdAt: p.createdAt.toISOString(),
+    expiresAt: p.expiresAt ? p.expiresAt.toISOString() : null,
     mac: p.mac,
     cpf: p.cpf,
-    IP: p.IP,
+    ip: p.ip,
   };
 }
 
 // ── GetPayments ───────────────────────────────────────────────────────────────
 
 export class GetPayments {
-  async execute(): Promise<PagamentoOutputDto[]> {
-    const pagamentos = await prisma.pagamento.findMany({ orderBy: { id: 'desc' } });
-    return pagamentos.map(mapPagamento);
+  async execute(): Promise<PaymentOutputDto[]> {
+    const payments = await prisma.payment.findMany({ orderBy: { id: 'desc' } });
+    return payments.map(mapPayment);
   }
 }
 
 // ── ProcessPayment ────────────────────────────────────────────────────────────
 
 interface ProcessPaymentInputDto {
-  plano_id: number;
+  planId: number;
   email?: string | null;
-  nome_plano?: string | null;
-  valor: number;
+  planName?: string | null;
+  amount: number;
   status?: string | null;
-  mp_pagamento_id?: number | null;
-  expira_em?: string | null;
+  mpPaymentId?: number | null;
+  expiresAt?: string | null;
   mac?: string | null;
   cpf?: string | null;
-  IP?: string | null;
+  ip?: string | null;
 }
 
 export class ProcessPayment {
-  async execute(dto: ProcessPaymentInputDto): Promise<PagamentoOutputDto> {
-    const pagamento = await prisma.pagamento.create({
+  async execute(dto: ProcessPaymentInputDto): Promise<PaymentOutputDto> {
+    const payment = await prisma.payment.create({
       data: {
-        plano_id: dto.plano_id,
+        planId: dto.planId,
         email: dto.email ?? null,
-        nome_plano: dto.nome_plano ?? null,
-        valor: dto.valor,
+        planName: dto.planName ?? null,
+        amount: dto.amount,
         status: dto.status ?? null,
-        mp_pagamento_id: dto.mp_pagamento_id ?? null,
-        expira_em: dto.expira_em ? new Date(dto.expira_em) : null,
+        mpPaymentId: dto.mpPaymentId ?? null,
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
         mac: dto.mac ?? null,
         cpf: dto.cpf ?? null,
-        IP: dto.IP ?? null,
+        ip: dto.ip ?? null,
       },
     });
-    return mapPagamento(pagamento);
+    return mapPayment(payment);
   }
 }
 
@@ -98,10 +98,10 @@ interface UpdatePaymentStatusInputDto {
 }
 
 export class UpdatePaymentStatus {
-  async execute({ id, status }: UpdatePaymentStatusInputDto): Promise<PagamentoOutputDto> {
-    const exists = await prisma.pagamento.findUnique({ where: { id } });
-    if (!exists) throw new NotFoundError('Pagamento não encontrado');
-    const pagamento = await prisma.pagamento.update({ where: { id }, data: { status } });
-    return mapPagamento(pagamento);
+  async execute({ id, status }: UpdatePaymentStatusInputDto): Promise<PaymentOutputDto> {
+    const exists = await prisma.payment.findUnique({ where: { id } });
+    if (!exists) throw new NotFoundError('Payment not found');
+    const payment = await prisma.payment.update({ where: { id }, data: { status } });
+    return mapPayment(payment);
   }
 }

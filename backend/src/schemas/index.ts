@@ -8,7 +8,7 @@ export const ErrorSchema = z.object({
 // Auth
 export const LoginSchema = z.object({
   email: z.email(),
-  senha: z.string().min(1),
+  password: z.string().min(1),
 });
 
 export const LoginOutputSchema = z.object({
@@ -24,22 +24,22 @@ export const JwtMeOutputSchema = z.object({
 export const AdminSchema = z.object({
   id: z.number().int(),
   email: z.email(),
-  created_at: z.string(),
+  createdAt: z.string(),
 });
 
-// Plano
+// Plan
 export const PlanoSchema = z.object({
   id: z.number().int(),
-  nome: z.string(),
-  descricao: z.string().nullable(),
-  valor: z.number(),
-  duracao_minutos: z.number().int(),
-  velocidade_down: z.string(),
-  velocidade_up: z.string(),
-  mikrotik_id: z.number().int(),
-  ativo: z.boolean(),
-  address_pool: z.string(),
-  shared_users: z.number().int(),
+  name: z.string(),
+  description: z.string().nullable(),
+  amount: z.number(),
+  durationMinutes: z.number().int(),
+  downloadSpeed: z.string(),
+  uploadSpeed: z.string(),
+  mikrotikId: z.number().int(),
+  active: z.boolean(),
+  addressPool: z.string(),
+  sharedUsers: z.number().int(),
 });
 
 export const CreatePlanoSchema = PlanoSchema.omit({ id: true });
@@ -48,107 +48,107 @@ export const UpdatePlanoSchema = PlanoSchema.omit({ id: true }).partial();
 // Mikrotik
 export const MikrotikSchema = z.object({
   id: z.number().int(),
-  nome: z.string(),
+  name: z.string(),
   ip: z.string(),
-  usuario: z.string(),
-  senha: z.string(),
-  porta: z.number().int(),
+  username: z.string(),
+  password: z.string(),
+  port: z.number().int(),
   status: z.string(),
-  usuarios_ativos: z.number().int(),
-  criado_em: z.string(),
-  end_hotspot: z.string().nullable(),
+  activeUsers: z.number().int(),
+  createdAt: z.string(),
+  hotspotAddress: z.string().nullable(),
 });
 
-export const CreateMikrotikSchema = MikrotikSchema.omit({ id: true, status: true, usuarios_ativos: true, criado_em: true });
+export const CreateMikrotikSchema = MikrotikSchema.omit({ id: true, status: true, activeUsers: true, createdAt: true });
 export const UpdateMikrotikSchema = CreateMikrotikSchema.partial();
 
-// Pagamento
+// Payment
 export const PagamentoSchema = z.object({
   id: z.number().int(),
-  plano_id: z.number().int(),
+  planId: z.number().int(),
   email: z.string().nullable(),
-  nome_plano: z.string().nullable(),
-  valor: z.number().int(),
+  planName: z.string().nullable(),
+  amount: z.number().int(),
   status: z.string().nullable(),
-  mp_pagamento_id: z.number().nullable(),
-  criado_em: z.string(),
-  expira_em: z.string().nullable(),
+  mpPaymentId: z.number().nullable(),
+  createdAt: z.string(),
+  expiresAt: z.string().nullable(),
   mac: z.string().nullable(),
   cpf: z.string().nullable(),
-  IP: z.string().nullable(),
+  ip: z.string().nullable(),
 });
 
-export const CreatePagamentoSchema = PagamentoSchema.omit({ id: true, criado_em: true });
+export const CreatePagamentoSchema = PagamentoSchema.omit({ id: true, createdAt: true });
 
 // Radius
 export const RadiusUserSchema = z.object({
   id: z.number().int(),
   username: z.string(),
-  plano_id: z.number().int().nullable(),
-  nas_id: z.number().int().nullable(),
-  criado_em: z.string(),
+  planId: z.number().int().nullable(),
+  nasId: z.number().int().nullable(),
+  createdAt: z.string(),
 });
 
 export const CreateRadiusUserSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
-  plano_id: z.number().int().optional(),
-  nas_id: z.number().int().optional(),
+  planId: z.number().int().optional(),
+  nasId: z.number().int().optional(),
 });
 
 // Dashboard
 export const DashboardStatsSchema = z.object({
-  total_planos: z.number().int(),
-  total_mikrotiks: z.number().int(),
-  total_pagamentos: z.number().int(),
-  total_radius_users: z.number().int(),
-  pagamentos_aprovados: z.number().int(),
-  receita_total: z.number(),
+  totalPlans: z.number().int(),
+  totalMikrotiks: z.number().int(),
+  totalPayments: z.number().int(),
+  totalRadiusUsers: z.number().int(),
+  approvedPayments: z.number().int(),
+  totalRevenue: z.number(),
 });
 
 // LGPD
 export const LgpdLoginSchema = z.object({
   id: z.number().int(),
   cpf: z.string(),
-  aceite: z.boolean(),
+  consent: z.boolean(),
   mac: z.string().nullable(),
   ip: z.string().nullable(),
-  criado_em: z.string(),
-  nome: z.string().nullable(),
-  telefone: z.string().nullable(),
+  createdAt: z.string(),
+  name: z.string().nullable(),
+  phone: z.string().nullable(),
 });
 
 export const RegisterLgpdSchema = z.object({
   cpf: z.string().min(11).max(14),
-  aceite: z.boolean(),
+  consent: z.boolean(),
   mac: z.string().optional(),
   ip: z.string().optional(),
-  nome: z.string().optional(),
-  telefone: z.string().optional(),
+  name: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 // EfiConfig
 export const EfiConfigSchema = z.object({
   id: z.number().int(),
-  client_id: z.string(),
-  client_secret: z.string(),
-  chave_pix: z.string(),
-  ambiente: z.enum(['sandbox', 'producao']),
-  certificado_nome: z.string().nullable(),
+  clientId: z.string(),
+  clientSecret: z.string(),
+  pixKey: z.string(),
+  environment: z.enum(['SANDBOX', 'PRODUCTION']),
+  certificateName: z.string().nullable(),
 });
 
-export const SaveEfiConfigSchema = EfiConfigSchema.omit({ id: true, certificado_nome: true }).extend({
-  certificado_nome: z.string().optional(),
+export const SaveEfiConfigSchema = EfiConfigSchema.omit({ id: true, certificateName: true }).extend({
+  certificateName: z.string().optional(),
 });
 
 // ConfigMercadoPago
 export const ConfigMercadoPagoSchema = z.object({
   id: z.number().int(),
-  public_key: z.string().nullable(),
-  access_token: z.string().nullable(),
-  client_id: z.string().nullable(),
-  client_secret: z.string().nullable(),
-  webhook_secret: z.string().nullable(),
+  publicKey: z.string().nullable(),
+  accessToken: z.string().nullable(),
+  clientId: z.string().nullable(),
+  clientSecret: z.string().nullable(),
+  webhookSecret: z.string().nullable(),
 });
 
 export const SaveMercadoPagoConfigSchema = ConfigMercadoPagoSchema.omit({ id: true }).partial();
@@ -182,7 +182,7 @@ export const WhatsappStatusSchema = z.object({
 // OTP
 export const OtpRequestBodySchema = z.object({
   cpf: z.string().regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, 'CPF deve ter 11 dígitos'),
-  telefone: z.string().regex(/^\+?[\d\s\-().]{10,20}$/, 'Telefone inválido'),
+  phone: z.string().regex(/^\+?[\d\s\-().]{10,20}$/, 'Telefone inválido'),
 });
 
 export const OtpRequestResponseSchema = z.object({
@@ -241,10 +241,10 @@ export const OtpAuditLogSchema = z.object({
   id: z.number().int(),
   event: OtpAuditEventSchema,
   cpf: z.string(),
-  telefone: z.string().nullable(),
+  phone: z.string().nullable(),
   ip: z.string().nullable(),
   detail: z.string().nullable(),
-  criado_em: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 // Aliases for backward compatibility

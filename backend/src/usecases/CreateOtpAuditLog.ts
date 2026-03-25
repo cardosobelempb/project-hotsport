@@ -21,7 +21,7 @@ export type OtpAuditEvent =
 interface InputDto {
   event: OtpAuditEvent;
   cpf: string;
-  telefone?: string;
+  phone?: string;
   ip?: string;
   detail?: string;
 }
@@ -41,7 +41,7 @@ export class CreateOtpAuditLog {
       data: {
         event: dto.event,
         cpf: dto.cpf,
-        telefone: dto.telefone ?? null,
+        phone: dto.phone ?? null,
         ip: dto.ip ?? null,
         detail: dto.detail ?? null,
       },

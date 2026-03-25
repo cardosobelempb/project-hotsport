@@ -3,33 +3,33 @@ import { prisma } from '../lib/db.js';
 interface LgpdOutputDto {
   id: number;
   cpf: string;
-  aceite: boolean;
+  consent: boolean;
   mac: string | null;
   ip: string | null;
-  criado_em: string;
-  nome: string | null;
-  telefone: string | null;
+  createdAt: string;
+  name: string | null;
+  phone: string | null;
 }
 
 function mapLgpd(l: {
   id: number;
   cpf: string;
-  aceite: boolean;
+  consent: boolean;
   mac: string | null;
   ip: string | null;
-  criado_em: Date;
-  nome: string | null;
-  telefone: string | null;
+  createdAt: Date;
+  name: string | null;
+  phone: string | null;
 }): LgpdOutputDto {
   return {
     id: l.id,
     cpf: l.cpf,
-    aceite: l.aceite,
+    consent: l.consent,
     mac: l.mac,
     ip: l.ip,
-    criado_em: l.criado_em.toISOString(),
-    nome: l.nome,
-    telefone: l.telefone,
+    createdAt: l.createdAt.toISOString(),
+    name: l.name,
+    phone: l.phone,
   };
 }
 
@@ -37,11 +37,11 @@ function mapLgpd(l: {
 
 interface RegisterLgpdConsentInputDto {
   cpf: string;
-  aceite: boolean;
+  consent: boolean;
   mac?: string;
   ip?: string;
-  nome?: string;
-  telefone?: string;
+  name?: string;
+  phone?: string;
 }
 
 export class RegisterLgpdConsent {
@@ -49,11 +49,11 @@ export class RegisterLgpdConsent {
     const record = await prisma.lgpdLogin.create({
       data: {
         cpf: dto.cpf,
-        aceite: dto.aceite,
+        consent: dto.consent,
         mac: dto.mac ?? null,
         ip: dto.ip ?? null,
-        nome: dto.nome ?? null,
-        telefone: dto.telefone ?? null,
+        name: dto.name ?? null,
+        phone: dto.phone ?? null,
       },
     });
     return mapLgpd(record);

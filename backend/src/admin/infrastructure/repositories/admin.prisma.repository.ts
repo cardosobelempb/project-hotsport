@@ -11,7 +11,7 @@ export class AdminPrismaRepository implements IAdminRepository {
       id: admin.id,
       email: admin.email,
       password: admin.password,
-      createdAt: admin.created_at,
+      createdAt: admin.createdAt,
     };
   }
 }

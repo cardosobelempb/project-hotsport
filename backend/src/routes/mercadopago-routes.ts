@@ -44,11 +44,11 @@ export const mercadoPagoRoutes = async (app: FastifyInstance) => {
       try {
         const body = request.body;
         const result = await new SaveMercadoPagoConfig().execute({
-          ...('public_key' in body ? { public_key: body.public_key ?? null } : {}),
-          ...('access_token' in body ? { access_token: body.access_token ?? null } : {}),
-          ...('client_id' in body ? { client_id: body.client_id ?? null } : {}),
-          ...('client_secret' in body ? { client_secret: body.client_secret ?? null } : {}),
-          ...('webhook_secret' in body ? { webhook_secret: body.webhook_secret ?? null } : {}),
+          ...('publicKey' in body ? { publicKey: body.publicKey ?? null } : {}),
+          ...('accessToken' in body ? { accessToken: body.accessToken ?? null } : {}),
+          ...('clientId' in body ? { clientId: body.clientId ?? null } : {}),
+          ...('clientSecret' in body ? { clientSecret: body.clientSecret ?? null } : {}),
+          ...('webhookSecret' in body ? { webhookSecret: body.webhookSecret ?? null } : {}),
         });
         return reply.status(200).send(result);
       } catch (error) {

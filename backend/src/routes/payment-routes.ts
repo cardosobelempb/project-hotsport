@@ -66,7 +66,7 @@ export const paymentRoutes = async (app: FastifyInstance) => {
     schema: {
       tags: ['Pagamentos'],
       summary: 'Registrar novo pagamento',
-      body: PagamentoSchema.omit({ id: true, criado_em: true }),
+      body: PagamentoSchema.omit({ id: true, createdAt: true }),
       response: {
         201: PagamentoSchema,
         500: ErrorSchema,
@@ -77,7 +77,7 @@ export const paymentRoutes = async (app: FastifyInstance) => {
         const data = request.body;
         return reply.status(201).send({
           id: 0,
-          criado_em: dayjs().toISOString(),
+          createdAt: dayjs().toISOString(),
           ...data,
         });
       } catch (error) {

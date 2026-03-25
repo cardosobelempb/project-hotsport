@@ -77,16 +77,16 @@ export const planRoutes = async (app: FastifyInstance) => {
         const body = request.body;
         const result = await new UpdatePlan().execute({
           id,
-          ...(body.nome !== undefined ? { nome: body.nome } : {}),
-          ...('descricao' in body ? { descricao: body.descricao } : {}),
-          ...(body.valor !== undefined ? { valor: body.valor } : {}),
-          ...(body.duracao_minutos !== undefined ? { duracao_minutos: body.duracao_minutos } : {}),
-          ...(body.velocidade_down !== undefined ? { velocidade_down: body.velocidade_down } : {}),
-          ...(body.velocidade_up !== undefined ? { velocidade_up: body.velocidade_up } : {}),
-          ...(body.mikrotik_id !== undefined ? { mikrotik_id: body.mikrotik_id } : {}),
-          ...(body.ativo !== undefined ? { ativo: body.ativo } : {}),
-          ...(body.address_pool !== undefined ? { address_pool: body.address_pool } : {}),
-          ...(body.shared_users !== undefined ? { shared_users: body.shared_users } : {}),
+          ...(body.name !== undefined ? { name: body.name } : {}),
+          ...('description' in body ? { description: body.description } : {}),
+          ...(body.amount !== undefined ? { amount: body.amount } : {}),
+          ...(body.durationMinutes !== undefined ? { durationMinutes: body.durationMinutes } : {}),
+          ...(body.downloadSpeed !== undefined ? { downloadSpeed: body.downloadSpeed } : {}),
+          ...(body.uploadSpeed !== undefined ? { uploadSpeed: body.uploadSpeed } : {}),
+          ...(body.mikrotikId !== undefined ? { mikrotikId: body.mikrotikId } : {}),
+          ...(body.active !== undefined ? { active: body.active } : {}),
+          ...(body.addressPool !== undefined ? { addressPool: body.addressPool } : {}),
+          ...(body.sharedUsers !== undefined ? { sharedUsers: body.sharedUsers } : {}),
         });
         return reply.status(200).send(result);
       } catch (error) {

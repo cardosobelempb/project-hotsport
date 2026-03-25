@@ -6,27 +6,25 @@ import dayjs from 'dayjs';
 import { RateLimitError } from '../errors/index.js';
 import { prisma } from '../lib/db.js';
 
-// ── CPF validation ────────────────────────────────────────────────────────────
-
 const OTP_MIN_INTERVAL_SECONDS = 60;
 const OTP_MAX_PER_HOUR = 5;
-const MSG_COOLDOWN = 'Aguarde 60 segundos antes de solicitar um novo código.';
-const MSG_HOURLY_LIMIT = 'Limite de solicitações atingido. Tente novamente em uma hora.';
+const MSG_COOLDOWN = 'Please wait 60 seconds before requesting a new code.';
+const MSG_HOURLY_LIMIT = 'Request limit reached. Try again in one hour.';
 
 interface RequestOtpInputDto {
   cpf: string;
-  telefone: string;
+  phone: string;
+  name?: string;
 }
 
-interface OutputDto {
-  status: 'enviado' | 'erro';
+interface RequestOtpOutputDto {
+  status: 'sent' | 'error';
   detail?: string;
 }
 
 /**
  * Upserts the User record by CPF, generates a 6-digit OTP, hashes it with
- * bcrypt and stores it in UserOtp. Returns the plain-text OTP so the caller
- * (route/WhatsApp gateway) can dispatch it.
+ * bcrypt and stores it in UserOtp. Sends the OTP via WhatsApp gateway.
  *
  * Rate limits are enforced before any write:
  *   - Max 1 request per 60 seconds per CPF or phone
@@ -55,44 +53,38 @@ export class RequestOtp {
         name: dto.name ?? null,
       },
     });
-    if (recentOtp) {
-      throw new ConflictError('Aguarde antes de solicitar um novo código OTP');
-    }
 
     const otp = String(randomInt(100_000, 1_000_000));
     const otpHash = await bcrypt.hash(otp, 10);
     const expiresAt = dayjs().add(5, 'minute').toDate();
 
-    const whatsappUrl =
-      process.env['WHATSAPP_SERVER_URL'] ?? 'http://127.0.0.1:3030';
+    const whatsappUrl = process.env['WHATSAPP_SERVER_URL'] ?? 'http://127.0.0.1:3030';
     const whatsappToken = process.env['WHATSAPP_SERVER_TOKEN'] ?? '';
 
-    const mensagem = `Seu código de acesso é: *${otp}*\nEle expira em 5 minutos. Não compartilhe com ninguém.`;
+    const message = `Your access code is: *${otp}*\nIt expires in 5 minutes. Do not share it with anyone.`;
 
     await axios
       .post(
         `${whatsappUrl}/send`,
-        { telefone: telefoneNormalizado, mensagem },
+        { phone: dto.phone, message },
         {
           headers: { 'x-whatsapp-token': whatsappToken },
           timeout: 10_000,
         },
       )
       .catch(() => {
-        throw new WhatsappError();
+        throw new Error('WhatsApp delivery failed');
       });
 
-    await prisma.otpRequest.create({
+    await prisma.userOtp.create({
       data: {
-        cpf: cpfNormalizado,
-        telefone: telefoneNormalizado,
-        otp_hash: otpHash,
-        expires_at: expiresAt,
-        max_attempts: 5,
+        userId: user.id,
+        hash: otpHash,
+        expiresAt,
       },
     });
 
-    return { status: 'enviado' };
+    return { status: 'sent' };
   }
 
   /**
@@ -112,17 +104,17 @@ export class RequestOtp {
     if (!user) return;
 
     const lastOtp = await prisma.userOtp.findFirst({
-      where: { user_id: user.id },
-      orderBy: { created_at: 'desc' },
-      select: { created_at: true },
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
     });
 
-    if (lastOtp && lastOtp.created_at > cooldownThreshold) {
+    if (lastOtp && lastOtp.createdAt > cooldownThreshold) {
       throw new RateLimitError(MSG_COOLDOWN);
     }
 
     const cpfRequestsLastHour = await prisma.userOtp.count({
-      where: { user_id: user.id, created_at: { gte: oneHourAgo } },
+      where: { userId: user.id, createdAt: { gte: oneHourAgo } },
     });
 
     if (cpfRequestsLastHour >= OTP_MAX_PER_HOUR) {
@@ -141,16 +133,16 @@ export class RequestOtp {
   ): Promise<void> {
     const lastOtpByPhone = await prisma.userOtp.findFirst({
       where: { user: { phone } },
-      orderBy: { created_at: 'desc' },
-      select: { created_at: true },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
     });
 
-    if (lastOtpByPhone && lastOtpByPhone.created_at > cooldownThreshold) {
+    if (lastOtpByPhone && lastOtpByPhone.createdAt > cooldownThreshold) {
       throw new RateLimitError(MSG_COOLDOWN);
     }
 
     const phoneRequestsLastHour = await prisma.userOtp.count({
-      where: { user: { phone }, created_at: { gte: oneHourAgo } },
+      where: { user: { phone }, createdAt: { gte: oneHourAgo } },
     });
 
     if (phoneRequestsLastHour >= OTP_MAX_PER_HOUR) {

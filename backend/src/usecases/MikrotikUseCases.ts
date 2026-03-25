@@ -3,40 +3,40 @@ import { prisma } from '../lib/db.js';
 
 interface MikrotikOutputDto {
   id: number;
-  nome: string;
+  name: string;
   ip: string;
-  usuario: string;
-  senha: string;
-  porta: number;
+  username: string;
+  password: string;
+  port: number;
   status: string;
-  usuarios_ativos: number;
-  criado_em: string;
-  end_hotspot: string | null;
+  activeUsers: number;
+  createdAt: string;
+  hotspotAddress: string | null;
 }
 
 function mapMikrotik(m: {
   id: number;
-  nome: string;
+  name: string;
   ip: string;
-  usuario: string;
-  senha: string;
-  porta: number;
+  username: string;
+  password: string;
+  port: number;
   status: string;
-  usuarios_ativos: number;
-  criado_em: Date;
-  end_hotspot: string | null;
+  activeUsers: number;
+  createdAt: Date;
+  hotspotAddress: string | null;
 }): MikrotikOutputDto {
   return {
     id: m.id,
-    nome: m.nome,
+    name: m.name,
     ip: m.ip,
-    usuario: m.usuario,
-    senha: m.senha,
-    porta: m.porta,
+    username: m.username,
+    password: m.password,
+    port: m.port,
     status: m.status,
-    usuarios_ativos: m.usuarios_ativos,
-    criado_em: m.criado_em.toISOString(),
-    end_hotspot: m.end_hotspot,
+    activeUsers: m.activeUsers,
+    createdAt: m.createdAt.toISOString(),
+    hotspotAddress: m.hotspotAddress,
   };
 }
 
@@ -54,7 +54,7 @@ export class GetMikrotiks {
 export class GetMikrotik {
   async execute(id: number): Promise<MikrotikOutputDto> {
     const mikrotik = await prisma.mikrotik.findUnique({ where: { id } });
-    if (!mikrotik) throw new NotFoundError('Mikrotik não encontrado');
+    if (!mikrotik) throw new NotFoundError('Mikrotik not found');
     return mapMikrotik(mikrotik);
   }
 }
@@ -62,24 +62,24 @@ export class GetMikrotik {
 // ── CreateMikrotik ───────────────────────────────────────────────────────────
 
 interface CreateMikrotikInputDto {
-  nome: string;
+  name: string;
   ip: string;
-  usuario: string;
-  senha: string;
-  porta?: number;
-  end_hotspot?: string | null;
+  username: string;
+  password: string;
+  port?: number;
+  hotspotAddress?: string | null;
 }
 
 export class CreateMikrotik {
   async execute(dto: CreateMikrotikInputDto): Promise<MikrotikOutputDto> {
     const mikrotik = await prisma.mikrotik.create({
       data: {
-        nome: dto.nome,
+        name: dto.name,
         ip: dto.ip,
-        usuario: dto.usuario,
-        senha: dto.senha,
-        porta: dto.porta ?? 8728,
-        end_hotspot: dto.end_hotspot ?? null,
+        username: dto.username,
+        password: dto.password,
+        port: dto.port ?? 8728,
+        hotspotAddress: dto.hotspotAddress ?? null,
       },
     });
     return mapMikrotik(mikrotik);
@@ -90,18 +90,18 @@ export class CreateMikrotik {
 
 interface UpdateMikrotikInputDto {
   id: number;
-  nome?: string;
+  name?: string;
   ip?: string;
-  usuario?: string;
-  senha?: string;
-  porta?: number;
-  end_hotspot?: string | null;
+  username?: string;
+  password?: string;
+  port?: number;
+  hotspotAddress?: string | null;
 }
 
 export class UpdateMikrotik {
   async execute({ id, ...data }: UpdateMikrotikInputDto): Promise<MikrotikOutputDto> {
     const exists = await prisma.mikrotik.findUnique({ where: { id } });
-    if (!exists) throw new NotFoundError('Mikrotik não encontrado');
+    if (!exists) throw new NotFoundError('Mikrotik not found');
 
     const mikrotik = await prisma.mikrotik.update({ where: { id }, data });
     return mapMikrotik(mikrotik);
@@ -113,7 +113,7 @@ export class UpdateMikrotik {
 export class DeleteMikrotik {
   async execute(id: number): Promise<void> {
     const exists = await prisma.mikrotik.findUnique({ where: { id } });
-    if (!exists) throw new NotFoundError('Mikrotik não encontrado');
+    if (!exists) throw new NotFoundError('Mikrotik not found');
     await prisma.mikrotik.delete({ where: { id } });
   }
 }

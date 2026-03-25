@@ -44,11 +44,11 @@ export const efiRoutes = async (app: FastifyInstance) => {
       try {
         const body = request.body;
         const result = await new SaveEfiConfig().execute({
-          client_id: body.client_id,
-          client_secret: body.client_secret,
-          chave_pix: body.chave_pix,
-          ambiente: body.ambiente,
-          ...(body.certificado_nome !== undefined ? { certificado_nome: body.certificado_nome } : {}),
+          clientId: body.clientId,
+          clientSecret: body.clientSecret,
+          pixKey: body.pixKey,
+          environment: body.environment,
+          ...(body.certificateName !== undefined ? { certificateName: body.certificateName } : {}),
         });
         return reply.status(200).send(result);
       } catch (error) {

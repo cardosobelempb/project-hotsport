@@ -44,11 +44,11 @@ export class VerifyOtp {
 
     const otpRecord = await prisma.userOtp.findFirst({
       where: {
-        user_id: user.id,
+        userId: user.id,
         used: false,
-        expires_at: { gt: dayjs().toDate() },
+        expiresAt: { gt: dayjs().toDate() },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!otpRecord) {
@@ -89,11 +89,11 @@ export class VerifyOtp {
   }
 
   private async hasActivePayment(cpf: string): Promise<boolean> {
-    const payment = await prisma.pagamento.findFirst({
+    const payment = await prisma.payment.findFirst({
       where: {
         cpf,
         status: 'approved',
-        expira_em: { gt: dayjs().toDate() },
+        expiresAt: { gt: dayjs().toDate() },
       },
     });
     return payment !== null;

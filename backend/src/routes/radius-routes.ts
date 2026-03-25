@@ -51,8 +51,8 @@ export const radiusRoutes = async (app: FastifyInstance) => {
         const result = await new CreateRadiusUser().execute({
           username: body.username,
           password: body.password,
-          plano_id: body.plano_id ?? null,
-          nas_id: body.nas_id ?? null,
+          planId: body.planId ?? null,
+          nasId: body.nasId ?? null,
         });
         return reply.status(201).send(result);
       } catch (error) {

@@ -4,24 +4,24 @@ import { prisma } from '../lib/db.js';
 interface RadiusUserOutputDto {
   id: number;
   username: string;
-  plano_id: number | null;
-  nas_id: number | null;
-  criado_em: string;
+  planId: number | null;
+  nasId: number | null;
+  createdAt: string;
 }
 
 function mapRadiusUser(u: {
   id: number;
   username: string;
-  plano_id: number | null;
-  nas_id: number | null;
-  criado_em: Date;
+  planId: number | null;
+  nasId: number | null;
+  createdAt: Date;
 }): RadiusUserOutputDto {
   return {
     id: u.id,
     username: u.username,
-    plano_id: u.plano_id,
-    nas_id: u.nas_id,
-    criado_em: u.criado_em.toISOString(),
+    planId: u.planId,
+    nasId: u.nasId,
+    createdAt: u.createdAt.toISOString(),
   };
 }
 
@@ -39,13 +39,12 @@ export class GetRadiusUsers {
 interface CreateRadiusUserInputDto {
   username: string;
   password: string;
-  plano_id?: number | null;
-  nas_id?: number | null;
+  planId?: number | null;
+  nasId?: number | null;
 }
 
 export class CreateRadiusUser {
   async execute(dto: CreateRadiusUserInputDto): Promise<RadiusUserOutputDto> {
-    // Insert into radcheck for RADIUS authentication
     await prisma.radcheck.create({
       data: {
         username: dto.username,
@@ -58,8 +57,8 @@ export class CreateRadiusUser {
     const user = await prisma.radiusUser.create({
       data: {
         username: dto.username,
-        plano_id: dto.plano_id ?? null,
-        nas_id: dto.nas_id ?? null,
+        planId: dto.planId ?? null,
+        nasId: dto.nasId ?? null,
       },
     });
 
@@ -76,9 +75,8 @@ interface DeleteRadiusUserInputDto {
 export class DeleteRadiusUser {
   async execute({ id }: DeleteRadiusUserInputDto): Promise<void> {
     const user = await prisma.radiusUser.findUnique({ where: { id } });
-    if (!user) throw new NotFoundError('Usuário RADIUS não encontrado');
+    if (!user) throw new NotFoundError('RADIUS user not found');
 
-    // Remove from radcheck too
     await prisma.radcheck.deleteMany({ where: { username: user.username } });
     await prisma.radreply.deleteMany({ where: { username: user.username } });
     await prisma.radiusUser.delete({ where: { id } });

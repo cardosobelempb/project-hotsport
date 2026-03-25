@@ -6,7 +6,7 @@ import { prisma } from '../lib/db.js';
 
 interface InputDto {
   email: string;
-  senha: string;
+  password: string;
 }
 
 interface OutputDto {
@@ -14,16 +14,16 @@ interface OutputDto {
 }
 
 export class LoginAdmin {
-  async execute({ email, senha }: InputDto): Promise<OutputDto> {
+  async execute({ email, password }: InputDto): Promise<OutputDto> {
     const admin = await prisma.admin.findUnique({ where: { email } });
 
     if (!admin) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    const isSenhaValida = await bcrypt.compare(senha, admin.password);
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
 
-    if (!isSenhaValida) {
+    if (!isPasswordValid) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 

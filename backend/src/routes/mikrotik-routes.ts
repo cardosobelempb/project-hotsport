@@ -110,12 +110,12 @@ export const mikrotikRoutes = async (app: FastifyInstance) => {
         const body = request.body;
         const result = await new UpdateMikrotik().execute({
           id,
-          ...(body.nome !== undefined ? { nome: body.nome } : {}),
+          ...(body.name !== undefined ? { name: body.name } : {}),
           ...(body.ip !== undefined ? { ip: body.ip } : {}),
-          ...(body.usuario !== undefined ? { usuario: body.usuario } : {}),
-          ...(body.senha !== undefined ? { senha: body.senha } : {}),
-          ...(body.porta !== undefined ? { porta: body.porta } : {}),
-          ...('end_hotspot' in body && body.end_hotspot !== undefined ? { end_hotspot: body.end_hotspot } : {}),
+          ...(body.username !== undefined ? { username: body.username } : {}),
+          ...(body.password !== undefined ? { password: body.password } : {}),
+          ...(body.port !== undefined ? { port: body.port } : {}),
+          ...('hotspotAddress' in body && body.hotspotAddress !== undefined ? { hotspotAddress: body.hotspotAddress } : {}),
         });
         return reply.status(200).send(result);
       } catch (error) {

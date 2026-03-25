@@ -5,7 +5,7 @@ import type { IAdminRepository } from '../../domain/repositories/admin.repositor
 
 export interface AdminLoginInputDto {
   email: string;
-  senha: string;
+  password: string;
 }
 
 export interface AdminLoginOutputDto {
@@ -16,16 +16,16 @@ export interface AdminLoginOutputDto {
 export class AdminLoginUseCase {
   constructor(private readonly adminRepository: IAdminRepository) {}
 
-  async execute({ email, senha }: AdminLoginInputDto): Promise<AdminLoginOutputDto> {
+  async execute({ email, password }: AdminLoginInputDto): Promise<AdminLoginOutputDto> {
     const admin = await this.adminRepository.findByEmail(email);
 
     if (!admin) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    const isSenhaValida = await bcrypt.compare(senha, admin.passwordHash);
+    const isPasswordValid = await bcrypt.compare(password, admin.passwordHash);
 
-    if (!isSenhaValida) {
+    if (!isPasswordValid) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 

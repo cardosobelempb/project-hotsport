@@ -33,13 +33,13 @@ export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
 
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'PUT',
-    url: '/senha',
+    url: '/password',
     schema: {
       tags: ['Admin'],
-      summary: 'Alterar senha do administrador',
+      summary: 'Change administrator password',
       body: z.object({
-        senha_atual: z.string().min(1),
-        nova_senha: z.string().min(6),
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6),
       }),
       response: {
         200: MessageSchema,
@@ -51,7 +51,7 @@ export const adminRoutes = async (app: FastifyInstance): Promise<void> => {
       try {
         const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
-        return reply.status(200).send({ message: 'Senha alterada com sucesso' });
+        return reply.status(200).send({ message: 'Password changed successfully' });
       } catch (error) {
         app.log.error(error);
         return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });

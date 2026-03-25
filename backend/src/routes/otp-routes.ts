@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { AppError, NotFoundError } from '../errors/index.js';
+import { AppError, NotFoundError, RateLimitError } from '../errors/index.js';
 import {
   ErrorSchema,
   MessageSchema,
@@ -42,17 +42,14 @@ export const otpRoutes = async (app: FastifyInstance) => {
       const ip = request.ip;
       const auditLog = new CreateOtpAuditLog();
 
-      await auditLog.execute({ event: 'otp_requested', cpf, telefone: phone, ip }).catch(err =>
+      await auditLog.execute({ event: 'otp_requested', cpf, phone, ip }).catch(err =>
         app.log.warn({ err }, 'OTP audit log write failed'),
       );
 
       try {
         const useCase = new RequestOtp();
-        const result = await useCase.execute(request.body);
-        // The OTP is logged at debug level so the WhatsApp gateway / background
-        // job can pick it up. It is NEVER returned in the HTTP response body.
-        app.log.debug({ userId: result.userId, expiresAt: result.expiresAt, otp: result.otp }, 'OTP generated');
-        await auditLog.execute({ event: 'otp_sent', cpf, telefone: phone, ip }).catch(err =>
+        await useCase.execute(request.body);
+        await auditLog.execute({ event: 'otp_sent', cpf, phone, ip }).catch(err =>
           app.log.warn({ err }, 'OTP audit log write failed'),
         );
         return reply.status(200).send({ message: 'Código enviado com sucesso' });
@@ -66,7 +63,7 @@ export const otpRoutes = async (app: FastifyInstance) => {
         }
         app.log.error(error);
         const detail = error instanceof Error ? error.message : null;
-        await auditLog.execute({ event: 'otp_request_error', cpf, telefone: phone, ip, ...(detail !== null && { detail }) }).catch(err =>
+        await auditLog.execute({ event: 'otp_request_error', cpf, phone, ip, ...(detail !== null && { detail }) }).catch(err =>
           app.log.warn({ err }, 'OTP audit log write failed'),
         );
         return reply

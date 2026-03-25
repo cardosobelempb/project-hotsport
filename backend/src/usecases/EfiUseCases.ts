@@ -2,28 +2,28 @@ import { prisma } from '../lib/db.js';
 
 interface EfiConfigOutputDto {
   id: number;
-  client_id: string;
-  client_secret: string;
-  chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
-  certificado_nome: string | null;
+  clientId: string;
+  clientSecret: string;
+  pixKey: string;
+  environment: 'SANDBOX' | 'PRODUCTION';
+  certificateName: string | null;
 }
 
 function mapEfiConfig(e: {
   id: number;
-  client_id: string;
-  client_secret: string;
-  chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
-  certificado_nome: string | null;
+  clientId: string;
+  clientSecret: string;
+  pixKey: string;
+  environment: 'SANDBOX' | 'PRODUCTION';
+  certificateName: string | null;
 }): EfiConfigOutputDto {
   return {
     id: e.id,
-    client_id: e.client_id,
-    client_secret: e.client_secret,
-    chave_pix: e.chave_pix,
-    ambiente: e.ambiente,
-    certificado_nome: e.certificado_nome,
+    clientId: e.clientId,
+    clientSecret: e.clientSecret,
+    pixKey: e.pixKey,
+    environment: e.environment,
+    certificateName: e.certificateName,
   };
 }
 
@@ -40,11 +40,11 @@ export class GetEfiConfig {
 // ── SaveEfiConfig ─────────────────────────────────────────────────────────────
 
 interface SaveEfiConfigInputDto {
-  client_id: string;
-  client_secret: string;
-  chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
-  certificado_nome?: string;
+  clientId: string;
+  clientSecret: string;
+  pixKey: string;
+  environment: 'SANDBOX' | 'PRODUCTION';
+  certificateName?: string;
 }
 
 export class SaveEfiConfig {
@@ -52,11 +52,11 @@ export class SaveEfiConfig {
     const existing = await prisma.efiConfig.findFirst();
 
     const data = {
-      client_id: dto.client_id,
-      client_secret: dto.client_secret,
-      chave_pix: dto.chave_pix,
-      ambiente: dto.ambiente,
-      certificado_nome: dto.certificado_nome ?? null,
+      clientId: dto.clientId,
+      clientSecret: dto.clientSecret,
+      pixKey: dto.pixKey,
+      environment: dto.environment,
+      certificateName: dto.certificateName ?? null,
     };
 
     const config = existing

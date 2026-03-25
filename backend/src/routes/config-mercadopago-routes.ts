@@ -26,11 +26,11 @@ export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<voi
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
         return reply.status(200).send({
           id: 1,
-          public_key: null,
-          access_token: null,
-          client_id: null,
-          client_secret: null,
-          webhook_secret: null,
+          publicKey: null,
+          accessToken: null,
+          clientId: null,
+          clientSecret: null,
+          webhookSecret: null,
         });
       } catch (error) {
         app.log.error(error);
@@ -46,11 +46,11 @@ export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<voi
       tags: ['Configurações'],
       summary: 'Atualizar configurações do Mercado Pago',
       body: z.object({
-        public_key: z.string().nullable().optional(),
-        access_token: z.string().nullable().optional(),
-        client_id: z.string().nullable().optional(),
-        client_secret: z.string().nullable().optional(),
-        webhook_secret: z.string().nullable().optional(),
+        publicKey: z.string().nullable().optional(),
+        accessToken: z.string().nullable().optional(),
+        clientId: z.string().nullable().optional(),
+        clientSecret: z.string().nullable().optional(),
+        webhookSecret: z.string().nullable().optional(),
       }),
       response: {
         200: ConfigMercadoPagoSchema,
@@ -64,11 +64,11 @@ export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<voi
         if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
         return reply.status(200).send({
           id: 1,
-          public_key: request.body.public_key ?? null,
-          access_token: request.body.access_token ?? null,
-          client_id: request.body.client_id ?? null,
-          client_secret: request.body.client_secret ?? null,
-          webhook_secret: request.body.webhook_secret ?? null,
+          publicKey: request.body.publicKey ?? null,
+          accessToken: request.body.accessToken ?? null,
+          clientId: request.body.clientId ?? null,
+          clientSecret: request.body.clientSecret ?? null,
+          webhookSecret: request.body.webhookSecret ?? null,
         });
       } catch (error) {
         app.log.error(error);

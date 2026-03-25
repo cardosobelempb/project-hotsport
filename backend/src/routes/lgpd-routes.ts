@@ -49,11 +49,11 @@ export const lgpdRoutes = async (app: FastifyInstance) => {
         const body = request.body;
         const result = await new RegisterLgpdConsent().execute({
           cpf: body.cpf,
-          aceite: body.aceite,
+          consent: body.consent,
           ...(body.mac !== undefined ? { mac: body.mac } : {}),
           ...(body.ip !== undefined ? { ip: body.ip } : {}),
-          ...(body.nome !== undefined ? { nome: body.nome } : {}),
-          ...(body.telefone !== undefined ? { telefone: body.telefone } : {}),
+          ...(body.name !== undefined ? { name: body.name } : {}),
+          ...(body.phone !== undefined ? { phone: body.phone } : {}),
         });
         return reply.status(201).send(result);
       } catch (error) {
