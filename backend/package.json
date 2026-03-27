@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx --watch src/server.ts",
+    "dev": "tsx --watch src/common/infrastructure/http/index.ts",
     "dev:legacy": "tsx --watch server.ts",
-    "build": "tsup src/server.ts --format esm --dts",
+    "build": "tsup src/common/infrastructure/http/index.ts --format esm --dts",
     "start": "node dist/server.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -24,7 +24,7 @@
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "@prisma/adapter-pg": "^7.4.0",
-    "@prisma/client": "^7.4.0",
+    "@prisma/client": "7.5.0",
     "@scalar/fastify-api-reference": "^1.44.20",
     "@wppconnect-team/wppconnect": "^1.37.3",
     "axios": "^1.10.0",
@@ -51,7 +51,7 @@
     "@eslint/js": "^10.0.1",
     "@types/bcrypt": "6.0.0",
     "@types/jsonwebtoken": "9.0.10",
-    "@types/node": "^24.0.0",
+    "@types/node": "24.12.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^10.0.2",
@@ -59,7 +59,7 @@
     "globals": "^17.3.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.8.1",
-    "prisma": "^7.4.0",
+    "prisma": "7.5.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

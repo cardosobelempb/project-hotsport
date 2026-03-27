@@ -1,1 +1,1 @@
-export * from './admin.router.js';
+export * from "./admin.router";

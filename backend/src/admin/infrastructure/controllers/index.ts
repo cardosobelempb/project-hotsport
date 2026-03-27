@@ -1,1 +1,1 @@
-export * from './admin-login.controller.js';
+export * from "./admin-login.controller";
