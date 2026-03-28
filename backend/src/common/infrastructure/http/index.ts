@@ -5,7 +5,7 @@
  */
 import "reflect-metadata";
 
-import { startServer } from "./server";
+import { startServer } from "./server.js";
 
 /**
  * Entry point da aplicação.
@@ -14,14 +14,11 @@ import { startServer } from "./server";
  */
 async function bootstrap(): Promise<void> {
   try {
-    console.log("Inicializando Data Source...");
-
     // Inicializa conexão com o banco
-
     console.log("Data Source inicializado com sucesso! 🚀");
 
     // Inicia servidor HTTP
-    startServer();
+    await startServer();
   } catch (error) {
     console.error("[Bootstrap] Erro ao inicializar a aplicação:", error);
 

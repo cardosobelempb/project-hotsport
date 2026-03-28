@@ -1,17 +1,19 @@
-import type { FastifyInstance } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { z } from 'zod';
+import type { FastifyInstance } from "fastify";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 
-import { EfiConfigSchema, ErrorSchema, SaveEfiConfigSchema } from '../schemas/index.js';
-import { GetEfiConfig, SaveEfiConfig } from '../usecases/EfiUseCases.js';
+import { EfiConfigSchema, SaveEfiConfigSchema } from "@/schemas/efi.js";
+import { ErrorSchema } from "@/schemas/error.js";
+
+import { GetEfiConfig, SaveEfiConfig } from "../usecases/EfiUseCases.js";
 
 export const efiRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'GET',
-    url: '/',
+    method: "GET",
+    url: "/",
     schema: {
-      tags: ['EFI'],
-      summary: 'Obter configuração EFI',
+      tags: ["EFI"],
+      summary: "Obter configuração EFI",
       response: {
         200: EfiConfigSchema.nullable(),
         500: ErrorSchema,
@@ -20,20 +22,32 @@ export const efiRoutes = async (app: FastifyInstance) => {
     handler: async (_request, reply) => {
       try {
         const result = await new GetEfiConfig().execute();
-        return reply.status(200).send(result);
+        if (!result) {
+          return reply.status(200).send(null);
+        }
+        return reply.status(200).send({
+          id: String(result.id),
+          clientId: result.clientId,
+          clientSecret: result.clientSecret,
+          pixKey: result.pixKey,
+          environment: result.environment,
+          certificateName: result.certificateName,
+        });
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/',
+    method: "POST",
+    url: "/",
     schema: {
-      tags: ['EFI'],
-      summary: 'Salvar configuração EFI',
+      tags: ["EFI"],
+      summary: "Salvar configuração EFI",
       body: SaveEfiConfigSchema,
       response: {
         200: EfiConfigSchema,
@@ -44,34 +58,45 @@ export const efiRoutes = async (app: FastifyInstance) => {
       try {
         const body = request.body;
         const result = await new SaveEfiConfig().execute({
-          client_id: body.client_id,
-          client_secret: body.client_secret,
-          chave_pix: body.chave_pix,
-          ambiente: body.ambiente,
-          ...(body.certificado_nome !== undefined ? { certificado_nome: body.certificado_nome } : {}),
+          client_id: body.clientId,
+          client_secret: body.clientSecret,
+          chave_pix: body.pixKey,
+          ambiente: body.environment,
+          ...(body.certificateName !== undefined
+            ? { certificado_nome: body.certificateName }
+            : {}),
         });
-        return reply.status(200).send(result);
+        return reply.status(200).send({
+          id: String(result.id),
+          clientId: result.clientId,
+          clientSecret: result.clientSecret,
+          pixKey: result.pixKey,
+          environment: result.environment,
+          certificateName: result.certificateName,
+        });
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   // Webhook PIX
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/webhook',
+    method: "POST",
+    url: "/webhook",
     schema: {
-      tags: ['EFI'],
-      summary: 'Webhook EFI PIX',
+      tags: ["EFI"],
+      summary: "Webhook EFI PIX",
       body: z.unknown(),
       response: {
         200: z.object({ received: z.boolean() }),
       },
     },
     handler: async (request, reply) => {
-      app.log.info({ webhook: request.body }, 'EFI webhook received');
+      app.log.info({ webhook: request.body }, "EFI webhook received");
       return reply.status(200).send({ received: true });
     },
   });

@@ -1,8 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { fastifyToFetch, fetchToFastifyReply } from "@/lib/fastifyFetch.js";
-import { ErrorSchema, LoginOutputSchema, LoginSchema } from "@/schemas";
+import { LoginOutputSchema, LoginSchema } from "@/schemas/auth";
+import { ErrorSchema } from "@/schemas/error";
+
+import { adminLoginController } from "../controllers";
 
 // export const adminRouter = async (app: FastifyInstance): Promise<void> => {
 //   app.withTypeProvider<ZodTypeProvider>().route({
@@ -36,18 +38,6 @@ export const adminRouter = async (app: FastifyInstance): Promise<void> => {
         500: ErrorSchema,
       },
     },
-    async handler(request, reply) {
-      try {
-        const fetchRequest = fastifyToFetch(request);
-        const response = await auth.handler(fetchRequest);
-        await fetchToFastifyReply(reply, response);
-      } catch (error) {
-        app.log.error({ error }, "Authentication error");
-        reply.status(500).send({
-          error: "Internal authentication error",
-          code: "AUTH_FAILURE",
-        });
-      }
-    },
+    handler: adminLoginController,
   });
 };

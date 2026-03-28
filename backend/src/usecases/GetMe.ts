@@ -1,4 +1,4 @@
-import type { JwtPayload } from '../auth/jwt.js';
+import type { JwtPayload } from "../modulos/auth/jwt.js";
 
 interface InputDto {
   payload: JwtPayload;

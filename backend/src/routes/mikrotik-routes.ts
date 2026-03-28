@@ -1,105 +1,163 @@
-import type { FastifyInstance } from 'fastify';
-import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { z } from 'zod';
+import type { FastifyInstance } from "fastify";
+import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 
-import { NotFoundError } from '../errors/index.js';
+import { ErrorSchema } from "@/schemas/error.js";
+import { ParamsIdStringSchema } from "@/schemas/generic.js";
 import {
-  CreateMikrotikSchema,
-  ErrorSchema,
-  MikrotikSchema,
-  UpdateMikrotikSchema,
-} from '../schemas/index.js';
+  CreateMikrotikRouterSchema,
+  MikrotikRouterSchema,
+  UpdateMikrotikRouterSchema,
+} from "@/schemas/mikrotik.js";
+
+import { NotFoundError } from "../errors/index.js";
 import {
   CreateMikrotik,
   DeleteMikrotik,
   GetMikrotik,
   GetMikrotiks,
   UpdateMikrotik,
-} from '../usecases/MikrotikUseCases.js';
+} from "../usecases/MikrotikUseCases.js";
 
 export const mikrotikRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'GET',
-    url: '/',
+    method: "GET",
+    url: "/",
     schema: {
-      tags: ['Mikrotiks'],
-      summary: 'Listar todos os mikrotiks',
+      tags: ["Mikrotiks"],
+      summary: "Listar todos os mikrotiks",
       response: {
-        200: z.array(MikrotikSchema),
+        200: z.array(MikrotikRouterSchema),
         500: ErrorSchema,
       },
     },
     handler: async (_request, reply) => {
       try {
         const result = await new GetMikrotiks().execute();
-        return reply.status(200).send(result);
+        const mapped = result.map((dto) => ({
+          id: String(dto.id),
+          name: dto.name,
+          ipAddress: dto.ip,
+          username: dto.username,
+          password: dto.password,
+          port: dto.port,
+          status: dto.status,
+          activeUsers: dto.activeUsers,
+          hotspotUrl: dto.hotspotUrl,
+          createdAt: dto.createdAt,
+          updatedAt: dto.updatedAt,
+        }));
+        return reply.status(200).send(mapped);
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'GET',
-    url: '/:id',
+    method: "GET",
+    url: "/:id",
     schema: {
-      tags: ['Mikrotiks'],
-      summary: 'Buscar mikrotik por ID',
-      params: z.object({ id: z.coerce.number().int() }),
+      tags: ["Mikrotiks"],
+      summary: "Buscar mikrotik por ID",
+      params: ParamsIdStringSchema,
       response: {
-        200: MikrotikSchema,
+        200: MikrotikRouterSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
       try {
-        const result = await new GetMikrotik().execute(request.params.id);
-        return reply.status(200).send(result);
+        const { id } = request.params;
+        const result = await new GetMikrotik().execute(id);
+        const mapped = {
+          id: result.id,
+          name: result.name,
+          ipAddress: result.ip,
+          username: result.username,
+          password: result.password,
+          port: result.port,
+          status: result.status,
+          activeUsers: result.activeUsers,
+          hotspotUrl: result.hotspotUrl,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+        };
+        return reply.status(200).send(mapped);
       } catch (error) {
         app.log.error(error);
         if (error instanceof NotFoundError) {
-          return reply.status(404).send({ error: error.message, code: error.code });
+          return reply
+            .status(404)
+            .send({ error: error.message, code: error.code });
         }
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/',
+    method: "POST",
+    url: "/",
     schema: {
-      tags: ['Mikrotiks'],
-      summary: 'Criar mikrotik',
-      body: CreateMikrotikSchema,
+      tags: ["Mikrotiks"],
+      summary: "Criar mikrotik",
+      body: CreateMikrotikRouterSchema,
       response: {
-        201: MikrotikSchema,
+        201: MikrotikRouterSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
       try {
-        const result = await new CreateMikrotik().execute(request.body);
-        return reply.status(201).send(result);
+        const body = request.body;
+        const result = await new CreateMikrotik().execute({
+          name: body.name,
+          ip: body.ipAddress,
+          username: body.username,
+          password: body.password,
+          port: body.port,
+          hotspotUrl: body.hotspotUrl,
+        });
+        const mapped = {
+          id: result.id,
+          name: result.name,
+          ipAddress: result.ip,
+          username: result.username,
+          password: result.password,
+          port: result.port,
+          status: result.status,
+          activeUsers: result.activeUsers,
+          hotspotUrl: result.hotspotUrl,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+        };
+        return reply.status(201).send(mapped);
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'PUT',
-    url: '/:id',
+    method: "PUT",
+    url: "/:id",
     schema: {
-      tags: ['Mikrotiks'],
-      summary: 'Atualizar mikrotik',
-      params: z.object({ id: z.coerce.number().int() }),
-      body: UpdateMikrotikSchema,
+      tags: ["Mikrotiks"],
+      summary: "Atualizar mikrotik",
+      params: ParamsIdStringSchema,
+      body: UpdateMikrotikRouterSchema,
       response: {
-        200: MikrotikSchema,
+        200: MikrotikRouterSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
@@ -110,31 +168,52 @@ export const mikrotikRoutes = async (app: FastifyInstance) => {
         const body = request.body;
         const result = await new UpdateMikrotik().execute({
           id,
-          ...(body.nome !== undefined ? { nome: body.nome } : {}),
-          ...(body.ip !== undefined ? { ip: body.ip } : {}),
-          ...(body.usuario !== undefined ? { usuario: body.usuario } : {}),
-          ...(body.senha !== undefined ? { senha: body.senha } : {}),
-          ...(body.porta !== undefined ? { porta: body.porta } : {}),
-          ...('end_hotspot' in body && body.end_hotspot !== undefined ? { end_hotspot: body.end_hotspot } : {}),
+          ...(body.name !== undefined ? { name: body.name } : {}),
+          ...(body.ipAddress !== undefined
+            ? { ipAddress: body.ipAddress }
+            : {}),
+          ...(body.username !== undefined ? { username: body.username } : {}),
+          ...(body.password !== undefined ? { password: body.password } : {}),
+          ...(body.port !== undefined ? { port: body.port } : {}),
+          ...(body.hotspotUrl !== undefined
+            ? { hotspotUrl: body.hotspotUrl }
+            : {}),
         });
-        return reply.status(200).send(result);
+        const mapped = {
+          id: result.id,
+          name: result.name,
+          ipAddress: result.ip,
+          username: result.username,
+          password: result.password,
+          port: result.port,
+          status: result.status,
+          activeUsers: result.activeUsers,
+          hotspotUrl: result.hotspotUrl,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+        };
+        return reply.status(200).send(mapped);
       } catch (error) {
         app.log.error(error);
         if (error instanceof NotFoundError) {
-          return reply.status(404).send({ error: error.message, code: error.code });
+          return reply
+            .status(404)
+            .send({ error: error.message, code: error.code });
         }
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'DELETE',
-    url: '/:id',
+    method: "DELETE",
+    url: "/:id",
     schema: {
-      tags: ['Mikrotiks'],
-      summary: 'Deletar mikrotik',
-      params: z.object({ id: z.coerce.number().int() }),
+      tags: ["Mikrotiks"],
+      summary: "Deletar mikrotik",
+      params: ParamsIdStringSchema,
       response: {
         204: z.null(),
         404: ErrorSchema,
@@ -143,14 +222,19 @@ export const mikrotikRoutes = async (app: FastifyInstance) => {
     },
     handler: async (request, reply) => {
       try {
-        await new DeleteMikrotik().execute(request.params.id);
+        const { id } = request.params;
+        await new DeleteMikrotik().execute(id);
         return reply.status(204).send(null);
       } catch (error) {
         app.log.error(error);
         if (error instanceof NotFoundError) {
-          return reply.status(404).send({ error: error.message, code: error.code });
+          return reply
+            .status(404)
+            .send({ error: error.message, code: error.code });
         }
-        return reply.status(500).send({ error: 'Erro interno', code: 'INTERNAL_SERVER_ERROR' });
+        return reply
+          .status(500)
+          .send({ error: "Erro interno", code: "INTERNAL_SERVER_ERROR" });
       }
     },
   });

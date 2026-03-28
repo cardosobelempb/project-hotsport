@@ -2,8 +2,8 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { type z } from "zod";
 
 import { AdminLoginUseCase } from "@/admin/application";
-import { signJwt } from "@/auth/jwt";
 import { AppError, UnauthorizedError } from "@/errors";
+import { signJwt } from "@/modulos/auth/jwt";
 import { LoginSchema } from "@/schemas";
 
 import { AdminPrismaRepository } from "../repositories";

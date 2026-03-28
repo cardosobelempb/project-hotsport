@@ -1,29 +1,31 @@
-import { prisma } from '../lib/db.js';
+import { Environment } from "@/generated/prisma/index.js";
+
+import { prisma } from "../lib/db.js";
 
 interface EfiConfigOutputDto {
   id: number;
-  client_id: string;
-  client_secret: string;
-  chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
-  certificado_nome: string | null;
+  clientId: string;
+  clientSecret: string;
+  pixKey: string;
+  environment: Environment;
+  certificateName: string | null;
 }
 
 function mapEfiConfig(e: {
   id: number;
-  client_id: string;
-  client_secret: string;
-  chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
-  certificado_nome: string | null;
+  clientId: string;
+  clientSecret: string;
+  pixKey: string;
+  environment: Environment;
+  certificateName: string | null;
 }): EfiConfigOutputDto {
   return {
     id: e.id,
-    client_id: e.client_id,
-    client_secret: e.client_secret,
-    chave_pix: e.chave_pix,
-    ambiente: e.ambiente,
-    certificado_nome: e.certificado_nome,
+    clientId: e.clientId,
+    clientSecret: e.clientSecret,
+    pixKey: e.pixKey,
+    environment: e.environment,
+    certificateName: e.certificateName,
   };
 }
 
@@ -43,7 +45,7 @@ interface SaveEfiConfigInputDto {
   client_id: string;
   client_secret: string;
   chave_pix: string;
-  ambiente: 'sandbox' | 'producao';
+  ambiente: Environment;
   certificado_nome?: string;
 }
 
@@ -52,11 +54,11 @@ export class SaveEfiConfig {
     const existing = await prisma.efiConfig.findFirst();
 
     const data = {
-      client_id: dto.client_id,
-      client_secret: dto.client_secret,
-      chave_pix: dto.chave_pix,
-      ambiente: dto.ambiente,
-      certificado_nome: dto.certificado_nome ?? null,
+      clientId: dto.client_id,
+      clientSecret: dto.client_secret,
+      pixKey: dto.chave_pix,
+      environment: dto.ambiente,
+      certificateName: dto.certificado_nome ?? null,
     };
 
     const config = existing

@@ -8,16 +8,19 @@ datasource db {
 }
 
 model Admin {
-  id        Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("admins")
+  // Added for auditing
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("admin")
 }
 
 model MercadoPagoConfig {
-  id            Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   publicKey     String?  @db.VarChar(255) @map("public_key")
   accessToken   String?  @db.Text @map("access_token")
   clientId      String?  @db.VarChar(255) @map("client_id")
@@ -29,13 +32,16 @@ model MercadoPagoConfig {
 }
 
 model EfiConfig {
-  id              Int         @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   clientId        String      @db.VarChar(255) @map("client_id")
   clientSecret    String      @db.VarChar(255) @map("client_secret")
-  pixKey          String      @db.VarChar(255) @map("chave_pix")
-  environment     Environment @default(SANDBOX) @map("ambiente")
-  certificateName String?     @db.VarChar(255) @map("certificado_nome")
-  createdAt       DateTime    @default(now()) @map("criado_em")
+  pixKey          String      @db.VarChar(255) @map("pix_key")
+  environment     Environment @default(SANDBOX) @map("environment")
+  certificateName String?     @db.VarChar(255) @map("certificate_name")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  // Added for auditing
+  updatedAt       DateTime    @default(now()) @updatedAt @map("updated_at")
 
   @@map("efi_config")
 }
@@ -44,90 +50,104 @@ enum Environment {
   SANDBOX
   PRODUCTION
 
-  @@map("Ambiente")
+  @@map("environment")
 }
 
 model LgpdLogin {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   cpf         String   @db.VarChar(14)
-  accepted    Boolean  @default(false) @map("aceite")
-  macAddress  String?  @db.VarChar(50) @map("mac")
-  ipAddress   String?  @db.VarChar(50) @map("ip")
-  createdAt   DateTime @default(now()) @map("criado_em")
+  accepted    Boolean  @default(false)
+  macAddress  String?  @db.VarChar(50) @map("mac_address")
+  ipAddress   String?  @db.VarChar(50) @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
   name        String?  @db.VarChar(100) @map("nome")
-  phoneNumber String?  @db.VarChar(20) @map("telefone")
+  phoneNumber String?  @db.VarChar(20) @map("phone_number")
 
-  @@map("lgpd_logins")
+  // Added for auditing
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("lgpd_login")
 }
 
 model MikrotikRouter {
-  id          Int     @id @default(autoincrement())
-  name        String  @db.VarChar(100) @map("nome")
-  ipAddress   String  @db.VarChar(45) @map("ip")
-  username    String  @db.VarChar(100) @map("usuario")
-  password    String  @db.VarChar(255) @map("senha")
-  port        Int     @default(8728) @map("porta")
-  status      String  @default("Offline") @db.VarChar(20)
-  activeUsers Int     @default(0) @map("usuarios_ativos")
-  createdAt   DateTime @default(now()) @map("criado_em")
-  hotspotUrl  String? @db.VarChar(255) @map("end_hotspot")
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  ipAddress   String   @db.VarChar(45) @map("ip_address")
+  username    String   @db.VarChar(100)
+  password    String   @db.VarChar(255)
+  port        Int      @default(8728)
+  status      String   @default("Offline") @db.VarChar(20)
+  activeUsers Int      @default(0) @map("active_users")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  hotspotUrl  String?  @db.VarChar(255) @map("hotspot_url")
 
   plans Plan[]
 
-  @@map("mikrotiks")
+  @@map("mikrotik_router") // or remove this too if you want the table name to be MikrotikRouter->mikrotikrouters (Prisma default)
 }
 
 model Payment {
-  id             Int      @id @default(autoincrement())
-  planId         Int      @map("plano_id")
-  email          String?  @db.VarChar(255)
-  planName       String?  @db.VarChar(255) @map("nome_plano")
-  amountCents    Int      @map("valor")
-  status         String?  @db.VarChar(50)
-  mercadoPagoId  BigInt?  @map("mp_pagamento_id")
-  createdAt      DateTime @default(now()) @map("criado_em")
-  expiresAt      DateTime? @map("expira_em")
-  updatedAt      DateTime @default(now()) @updatedAt @map("atualizado_em")
-  macAddress     String?  @db.VarChar(20) @map("mac")
-  cpf            String?  @db.VarChar(20)
-  ipAddress      String?  @db.VarChar(20) @map("IP")
+  id          String   @id @default(uuid()) @db.Uuid
+  planId        String   @db.Uuid @map("plan_id")
+  email         String?  @db.VarChar(255)
+  planName      String?  @db.VarChar(255) @map("plan_name")
+  amountCents    Int     @map("amount_cents")
+  status        String?  @db.VarChar(50)
+  mercadoPagoId String?  @map("mercado_pago_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  expiresAt     DateTime? @map("expires_at")
 
-  @@map("pagamentos")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  macAddress    String?  @db.VarChar(20) @map("mac_address")
+  cpf           String?  @db.VarChar(20)
+  ipAddress     String?  @db.VarChar(45) @map("ip_address") // I suggest 45 to support IPv6
+
+  plans Plan[]
+
+  @@map("payment")
 }
 
 model Plan {
-  id            Int      @id @default(autoincrement())
-  name          String   @db.VarChar(100) @map("nome")
-  description   String?  @db.Text @map("descricao")
-  price         Decimal  @db.Decimal(10, 2) @map("valor")
-  durationMins  Int      @map("duracao_minutos")
-  downloadSpeed String   @db.VarChar(20) @map("velocidade_down")
-  uploadSpeed   String   @db.VarChar(20) @map("velocidade_up")
-  mikrotikId    Int      @map("mikrotik_id")
-  isActive      Boolean  @default(true) @map("ativo")
+  id          String   @id @default(uuid()) @db.Uuid
+  name          String   @db.VarChar(100)
+  description   String?  @db.Text
+  price         Decimal  @db.Decimal(10, 2)
+  durationMins   Int      @map("duration_mins")
+  downloadSpeed String   @db.VarChar(20) @map("download_speed")
+  uploadSpeed   String   @db.VarChar(20) @map("upload_speed")
+
+  mikrotikId    String      @map("mikrotik_id") @db.Uuid
+  isActive      Boolean  @default(true) @map("is_active")
   addressPool   String   @default("default-dhcp") @db.VarChar(50) @map("address_pool")
   sharedUsers   Int      @default(10) @map("shared_users")
 
-  mikrotik MikrotikRouter @relation(fields: [mikrotikId], references: [id], onDelete: Cascade)
+  mikrotik      MikrotikRouter @relation(fields: [mikrotikId], references: [id], onDelete: Cascade)
 
-  @@map("planos")
+  payments      Payment[] // <-- add this relation
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("plan") // or remove @@map and let Prisma pick the default table name
 }
 
 // ── User (OTP auth via WhatsApp) ─────────────────────────────────────────────
 
 model User {
-  id          String    @id @default(uuid()) @db.Uuid
-  cpf         String    @unique @db.VarChar(14)
-  name        String?   @db.VarChar(100)
-  phoneNumber String?   @db.VarChar(20) @map("phone")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  cpf         String   @unique @db.VarChar(14)
+  name        String?  @db.VarChar(100)
+  phoneNumber String?  @db.VarChar(20) @map("phone_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   otps UserOtp[]
 
   @@index([cpf])
   @@index([phoneNumber])
-  @@map("users")
+  @@map("user")
 }
 
 model UserOtp {
@@ -139,26 +159,32 @@ model UserOtp {
   isUsed    Boolean  @default(false) @map("used")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // Added for auditing (e.g. mark used/attempts)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
   @@index([userId, createdAt])
-  @@map("user_otps")
+  @@map("user_otp")
 }
 
 model RadiusUser {
-  id        Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   username  String   @db.VarChar(255)
   planId    Int?     @map("plano_id")
   nasId     Int?     @map("nas_id")
-  createdAt DateTime @default(now()) @map("criado_em")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Added for auditing
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("radius_users")
 }
 
 model Radcheck {
-  id        Int    @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   username  String @db.VarChar(64)
   attribute String @default("Cleartext-Password") @db.VarChar(64)
   op        String @default(":=") @db.Char(2)
@@ -168,7 +194,7 @@ model Radcheck {
 }
 
 model Radreply {
-  id        Int    @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   username  String @db.VarChar(64)
   attribute String @db.VarChar(64)
   op        String @default(":=") @db.Char(2)
@@ -187,27 +213,30 @@ model Radusergroup {
 }
 
 model OtpRequest {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   cpf         String   @db.VarChar(14)
-  phoneNumber String   @db.VarChar(20) @map("telefone")
+  phoneNumber String   @db.VarChar(20) @map("phone_number")
   otpHash     String   @db.VarChar(255) @map("otp_hash")
   expiresAt   DateTime @map("expires_at")
   attempts    Int      @default(0)
   maxAttempts Int      @default(5) @map("max_attempts")
   isUsed      Boolean  @default(false) @map("used")
-  createdAt   DateTime @default(now()) @map("criado_em")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("otp_requests")
+  // Added for auditing
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("otp_request")
 }
 
 model OtpAuditLog {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid()) @db.Uuid
   event       String   @db.VarChar(50)
   cpf         String   @db.VarChar(14)
-  phoneNumber String?  @db.VarChar(20) @map("telefone")
-  ipAddress   String?  @db.VarChar(45) @map("ip")
+  phoneNumber String?  @db.VarChar(20) @map("phone_number")
+  ipAddress   String?  @db.VarChar(45) @map("ip_address")
   detail      String?  @db.VarChar(500)
-  createdAt   DateTime @default(now()) @map("criado_em")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@index([cpf])
   @@index([event])

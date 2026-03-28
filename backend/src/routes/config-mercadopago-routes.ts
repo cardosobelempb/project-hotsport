@@ -1,20 +1,23 @@
-import { fromNodeHeaders } from 'better-auth/node';
-import { type FastifyInstance } from 'fastify';
-import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { z } from 'zod';
+import { fromNodeHeaders } from "better-auth/node";
+import { type FastifyInstance } from "fastify";
+import { type ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 
-import { auth } from '../lib/auth.js';
-import { ConfigMercadoPagoSchema,ErrorSchema } from '../schemas/index.js';
+import { auth } from "../lib/auth.js";
+import { ErrorSchema } from "../schemas/error.js";
+import { MercadoPagoConfigSchema } from "../schemas/mercadopago.js";
 
-export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<void> => {
+export const configMercadoPagoRoutes = async (
+  app: FastifyInstance,
+): Promise<void> => {
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'GET',
-    url: '/',
+    method: "GET",
+    url: "/",
     schema: {
-      tags: ['Configurações'],
-      summary: 'Obter configurações do Mercado Pago',
+      tags: ["Configurações"],
+      summary: "Obter configurações do Mercado Pago",
       response: {
-        200: ConfigMercadoPagoSchema,
+        200: MercadoPagoConfigSchema,
         401: ErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
@@ -22,29 +25,37 @@ export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<voi
     },
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
-        if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
+        const session = await auth.api.getSession({
+          headers: fromNodeHeaders(request.headers),
+        });
+        if (!session)
+          return reply
+            .status(401)
+            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
         return reply.status(200).send({
-          id: 1,
-          public_key: null,
-          access_token: null,
-          client_id: null,
-          client_secret: null,
-          webhook_secret: null,
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          publicKey: null,
+          accessToken: null,
+          clientId: null,
+          clientSecret: null,
+          webhookSecret: null,
         });
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
+        return reply.status(500).send({
+          error: "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
     },
   });
 
   app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'PUT',
-    url: '/',
+    method: "PUT",
+    url: "/",
     schema: {
-      tags: ['Configurações'],
-      summary: 'Atualizar configurações do Mercado Pago',
+      tags: ["Configurações"],
+      summary: "Atualizar configurações do Mercado Pago",
       body: z.object({
         public_key: z.string().nullable().optional(),
         access_token: z.string().nullable().optional(),
@@ -53,26 +64,34 @@ export const configMercadoPagoRoutes = async (app: FastifyInstance): Promise<voi
         webhook_secret: z.string().nullable().optional(),
       }),
       response: {
-        200: ConfigMercadoPagoSchema,
+        200: MercadoPagoConfigSchema,
         401: ErrorSchema,
         500: ErrorSchema,
       },
     },
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
-        if (!session) return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
+        const session = await auth.api.getSession({
+          headers: fromNodeHeaders(request.headers),
+        });
+        if (!session)
+          return reply
+            .status(401)
+            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
         return reply.status(200).send({
-          id: 1,
-          public_key: request.body.public_key ?? null,
-          access_token: request.body.access_token ?? null,
-          client_id: request.body.client_id ?? null,
-          client_secret: request.body.client_secret ?? null,
-          webhook_secret: request.body.webhook_secret ?? null,
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          publicKey: request.body.public_key ?? null,
+          accessToken: request.body.access_token ?? null,
+          clientId: request.body.client_id ?? null,
+          clientSecret: request.body.client_secret ?? null,
+          webhookSecret: request.body.webhook_secret ?? null,
         });
       } catch (error) {
         app.log.error(error);
-        return reply.status(500).send({ error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' });
+        return reply.status(500).send({
+          error: "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
     },
   });

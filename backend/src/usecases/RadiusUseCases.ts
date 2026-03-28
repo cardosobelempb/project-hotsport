@@ -1,27 +1,27 @@
-import { NotFoundError } from '../errors/index.js';
-import { prisma } from '../lib/db.js';
+import { NotFoundError } from "../errors/index.js";
+import { prisma } from "../lib/db.js";
 
 interface RadiusUserOutputDto {
   id: number;
   username: string;
-  plano_id: number | null;
-  nas_id: number | null;
-  criado_em: string;
+  planId: number | null;
+  nasId: number | null;
+  createdAt: string;
 }
 
 function mapRadiusUser(u: {
   id: number;
   username: string;
-  plano_id: number | null;
-  nas_id: number | null;
-  criado_em: Date;
+  planId: number | null;
+  nasId: number | null;
+  createdAt: Date;
 }): RadiusUserOutputDto {
   return {
     id: u.id,
     username: u.username,
-    plano_id: u.plano_id,
-    nas_id: u.nas_id,
-    criado_em: u.criado_em.toISOString(),
+    planId: u.planId,
+    nasId: u.nasId,
+    createdAt: u.createdAt.toISOString(),
   };
 }
 
@@ -29,7 +29,7 @@ function mapRadiusUser(u: {
 
 export class GetRadiusUsers {
   async execute(): Promise<RadiusUserOutputDto[]> {
-    const users = await prisma.radiusUser.findMany({ orderBy: { id: 'desc' } });
+    const users = await prisma.radiusUser.findMany({ orderBy: { id: "desc" } });
     return users.map(mapRadiusUser);
   }
 }
@@ -49,8 +49,8 @@ export class CreateRadiusUser {
     await prisma.radcheck.create({
       data: {
         username: dto.username,
-        attribute: 'Cleartext-Password',
-        op: ':=',
+        attribute: "Cleartext-Password",
+        op: ":=",
         value: dto.password,
       },
     });
@@ -58,8 +58,8 @@ export class CreateRadiusUser {
     const user = await prisma.radiusUser.create({
       data: {
         username: dto.username,
-        plano_id: dto.plano_id ?? null,
-        nas_id: dto.nas_id ?? null,
+        planId: dto.plano_id ?? null,
+        nasId: dto.nas_id ?? null,
       },
     });
 
@@ -76,7 +76,7 @@ interface DeleteRadiusUserInputDto {
 export class DeleteRadiusUser {
   async execute({ id }: DeleteRadiusUserInputDto): Promise<void> {
     const user = await prisma.radiusUser.findUnique({ where: { id } });
-    if (!user) throw new NotFoundError('Usuário RADIUS não encontrado');
+    if (!user) throw new NotFoundError("Usuário RADIUS não encontrado");
 
     // Remove from radcheck too
     await prisma.radcheck.deleteMany({ where: { username: user.username } });

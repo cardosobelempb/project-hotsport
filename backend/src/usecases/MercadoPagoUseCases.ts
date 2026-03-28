@@ -1,29 +1,29 @@
-import { prisma } from '../lib/db.js';
+import { prisma } from "../lib/db.js";
 
 interface MercadoPagoConfigOutputDto {
   id: number;
-  public_key: string | null;
-  access_token: string | null;
-  client_id: string | null;
-  client_secret: string | null;
-  webhook_secret: string | null;
+  publicKey: string | null;
+  accessToken: string | null;
+  clientId: string | null;
+  clientSecret: string | null;
+  webhookSecret: string | null;
 }
 
 function mapConfig(c: {
   id: number;
-  public_key: string | null;
-  access_token: string | null;
-  client_id: string | null;
-  client_secret: string | null;
-  webhook_secret: string | null;
+  publicKey: string | null;
+  accessToken: string | null;
+  clientId: string | null;
+  clientSecret: string | null;
+  webhookSecret: string | null;
 }): MercadoPagoConfigOutputDto {
   return {
     id: c.id,
-    public_key: c.public_key,
-    access_token: c.access_token,
-    client_id: c.client_id,
-    client_secret: c.client_secret,
-    webhook_secret: c.webhook_secret,
+    publicKey: c.publicKey,
+    accessToken: c.accessToken,
+    clientId: c.clientId,
+    clientSecret: c.clientSecret,
+    webhookSecret: c.webhookSecret,
   };
 }
 
@@ -31,7 +31,7 @@ function mapConfig(c: {
 
 export class GetMercadoPagoConfig {
   async execute(): Promise<MercadoPagoConfigOutputDto | null> {
-    const config = await prisma.configMercadoPago.findFirst();
+    const config = await prisma.mercadoPagoConfig.findFirst();
     if (!config) return null;
     return mapConfig(config);
   }
@@ -48,12 +48,17 @@ interface SaveMercadoPagoConfigInputDto {
 }
 
 export class SaveMercadoPagoConfig {
-  async execute(dto: SaveMercadoPagoConfigInputDto): Promise<MercadoPagoConfigOutputDto> {
-    const existing = await prisma.configMercadoPago.findFirst();
+  async execute(
+    dto: SaveMercadoPagoConfigInputDto,
+  ): Promise<MercadoPagoConfigOutputDto> {
+    const existing = await prisma.mercadoPagoConfig.findFirst();
 
     const config = existing
-      ? await prisma.configMercadoPago.update({ where: { id: existing.id }, data: dto })
-      : await prisma.configMercadoPago.create({ data: dto });
+      ? await prisma.mercadoPagoConfig.update({
+          where: { id: existing.id },
+          data: dto,
+        })
+      : await prisma.mercadoPagoConfig.create({ data: dto });
 
     return mapConfig(config);
   }

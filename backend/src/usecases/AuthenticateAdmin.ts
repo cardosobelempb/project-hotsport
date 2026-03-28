@@ -1,8 +1,9 @@
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
-import { signJwt } from '../auth/jwt.js';
-import { UnauthorizedError } from '../errors/index.js';
-import { prisma } from '../lib/db.js';
+import { prisma } from "@/lib/db.js";
+import { signJwt } from "@/modulos/auth/jwt.js";
+
+import { UnauthorizedError } from "../errors/index.js";
 
 interface InputDto {
   email: string;
@@ -18,16 +19,16 @@ export class AuthenticateAdmin {
     const admin = await prisma.admin.findUnique({ where: { email } });
 
     if (!admin) {
-      throw new UnauthorizedError('Credenciais inválidas');
+      throw new UnauthorizedError("Credenciais inválidas");
     }
 
     const isSenhaValida = await bcrypt.compare(senha, admin.password);
 
     if (!isSenhaValida) {
-      throw new UnauthorizedError('Credenciais inválidas');
+      throw new UnauthorizedError("Credenciais inválidas");
     }
 
-    const token = signJwt({ sub: String(admin.id), role: 'admin' });
+    const token = signJwt({ sub: String(admin.id), role: "admin" });
 
     return { token };
   }

@@ -8,7 +8,7 @@ import {
   validatorCompiler,
 } from "fastify-type-provider-zod";
 
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes.js";
 
 export type BuildAppOptions = {
   logger?: boolean;
@@ -26,7 +26,28 @@ export type BuildAppOptions = {
 export async function buildApp(
   options: BuildAppOptions = {},
 ): Promise<FastifyInstance> {
-  const app = Fastify({ logger: options.logger ?? true });
+  const isProd = process.env.NODE_ENV === "production";
+
+  const app = Fastify({
+    disableRequestLogging: true,
+    logger:
+      options.logger === false
+        ? false
+        : isProd
+          ? { level: process.env.LOG_LEVEL ?? "info" }
+          : {
+              level: process.env.LOG_LEVEL ?? "debug",
+              transport: {
+                target: "pino-pretty",
+                options: {
+                  colorize: true,
+                  translateTime: "SYS:standard",
+                  ignore: "pid,hostname",
+                  singleLine: false,
+                },
+              },
+            },
+  });
 
   // Zod compilers
   app.setValidatorCompiler(validatorCompiler);

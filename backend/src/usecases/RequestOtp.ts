@@ -1,25 +1,30 @@
-import axios from 'axios';
-import bcrypt from 'bcryptjs';
-import { randomInt } from 'crypto';
-import dayjs from 'dayjs';
+import axios from "axios";
+import bcrypt from "bcryptjs";
+import { randomInt } from "crypto";
+import dayjs from "dayjs";
 
-import { RateLimitError } from '../errors/index.js';
-import { prisma } from '../lib/db.js';
+import { ConflictError, CpfVO, PhoneVO } from "@/common/index.js";
+import { WhatsappError } from "@/modulos/whatsapp/domain/errors/WhatsappError.js";
+
+import { RateLimitError } from "../errors/index.js";
+import { prisma } from "../lib/db.js";
 
 // ── CPF validation ────────────────────────────────────────────────────────────
 
 const OTP_MIN_INTERVAL_SECONDS = 60;
 const OTP_MAX_PER_HOUR = 5;
-const MSG_COOLDOWN = 'Aguarde 60 segundos antes de solicitar um novo código.';
-const MSG_HOURLY_LIMIT = 'Limite de solicitações atingido. Tente novamente em uma hora.';
+const MSG_COOLDOWN = "Aguarde 60 segundos antes de solicitar um novo código.";
+const MSG_HOURLY_LIMIT =
+  "Limite de solicitações atingido. Tente novamente em uma hora.";
 
 interface RequestOtpInputDto {
-  cpf: string;
-  telefone: string;
+  name?: string;
+  cpf: CpfVO;
+  phoneNumber: PhoneVO;
 }
 
-interface OutputDto {
-  status: 'enviado' | 'erro';
+interface RequestOtpOutputDto {
+  status: "enviado" | "erro";
   detail?: string;
 }
 
@@ -37,62 +42,72 @@ interface OutputDto {
 export class RequestOtp {
   async execute(dto: RequestOtpInputDto): Promise<RequestOtpOutputDto> {
     const now = dayjs();
-    const oneHourAgo = now.subtract(1, 'hour').toDate();
-    const cooldownThreshold = now.subtract(OTP_MIN_INTERVAL_SECONDS, 'second').toDate();
+    const oneHourAgo = now.subtract(1, "hour").toDate();
+    const cooldownThreshold = now
+      .subtract(OTP_MIN_INTERVAL_SECONDS, "second")
+      .toDate();
 
-    await this.checkRateLimitByCpf(dto.cpf, oneHourAgo, cooldownThreshold);
-    await this.checkRateLimitByPhone(dto.phone, oneHourAgo, cooldownThreshold);
+    await this.checkRateLimitByCpf(
+      dto.cpf.getValue(),
+      oneHourAgo,
+      cooldownThreshold,
+    );
+    await this.checkRateLimitByPhone(
+      dto.phoneNumber.getValue(),
+      oneHourAgo,
+      cooldownThreshold,
+    );
 
-    const user = await prisma.user.upsert({
-      where: { cpf: dto.cpf },
+    const recentOtp = await prisma.user.upsert({
+      where: { cpf: dto.cpf.getValue() },
       update: {
-        phone: dto.phone,
+        phoneNumber: dto.phoneNumber.getValue(),
         ...(dto.name !== undefined ? { name: dto.name } : {}),
       },
       create: {
-        cpf: dto.cpf,
-        phone: dto.phone,
+        cpf: dto.cpf.getValue(),
+        phoneNumber: dto.phoneNumber.getValue(),
         name: dto.name ?? null,
       },
     });
     if (recentOtp) {
-      throw new ConflictError('Aguarde antes de solicitar um novo código OTP');
+      throw new ConflictError("Aguarde antes de solicitar um novo código OTP");
     }
 
     const otp = String(randomInt(100_000, 1_000_000));
     const otpHash = await bcrypt.hash(otp, 10);
-    const expiresAt = dayjs().add(5, 'minute').toDate();
+    const expiresAt = dayjs().add(5, "minute").toDate();
 
     const whatsappUrl =
-      process.env['WHATSAPP_SERVER_URL'] ?? 'http://127.0.0.1:3030';
-    const whatsappToken = process.env['WHATSAPP_SERVER_TOKEN'] ?? '';
+      process.env["WHATSAPP_SERVER_URL"] ?? "http://127.0.0.1:3030";
+    const whatsappToken = process.env["WHATSAPP_SERVER_TOKEN"] ?? "";
 
     const mensagem = `Seu código de acesso é: *${otp}*\nEle expira em 5 minutos. Não compartilhe com ninguém.`;
 
     await axios
       .post(
         `${whatsappUrl}/send`,
-        { telefone: telefoneNormalizado, mensagem },
+        { telefone: dto.phoneNumber.getValue(), mensagem },
         {
-          headers: { 'x-whatsapp-token': whatsappToken },
+          headers: { "x-whatsapp-token": whatsappToken },
           timeout: 10_000,
         },
       )
       .catch(() => {
-        throw new WhatsappError();
+        throw new WhatsappError("Falha ao enviar OTP via WhatsApp");
       });
 
     await prisma.otpRequest.create({
       data: {
-        cpf: cpfNormalizado,
-        telefone: telefoneNormalizado,
-        otp_hash: otpHash,
-        expires_at: expiresAt,
-        max_attempts: 5,
+        cpf: dto.cpf.getValue(),
+        phoneNumber: dto.phoneNumber.getValue(),
+        otpHash: otpHash,
+        expiresAt: expiresAt,
+        maxAttempts: 5,
       },
     });
 
-    return { status: 'enviado' };
+    return { status: "enviado" };
   }
 
   /**
@@ -112,17 +127,17 @@ export class RequestOtp {
     if (!user) return;
 
     const lastOtp = await prisma.userOtp.findFirst({
-      where: { user_id: user.id },
-      orderBy: { created_at: 'desc' },
-      select: { created_at: true },
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
     });
 
-    if (lastOtp && lastOtp.created_at > cooldownThreshold) {
+    if (lastOtp && lastOtp.createdAt > cooldownThreshold) {
       throw new RateLimitError(MSG_COOLDOWN);
     }
 
     const cpfRequestsLastHour = await prisma.userOtp.count({
-      where: { user_id: user.id, created_at: { gte: oneHourAgo } },
+      where: { userId: user.id, createdAt: { gte: oneHourAgo } },
     });
 
     if (cpfRequestsLastHour >= OTP_MAX_PER_HOUR) {
@@ -140,17 +155,17 @@ export class RequestOtp {
     cooldownThreshold: Date,
   ): Promise<void> {
     const lastOtpByPhone = await prisma.userOtp.findFirst({
-      where: { user: { phone } },
-      orderBy: { created_at: 'desc' },
-      select: { created_at: true },
+      where: { user: { phoneNumber: phone } },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
     });
 
-    if (lastOtpByPhone && lastOtpByPhone.created_at > cooldownThreshold) {
+    if (lastOtpByPhone && lastOtpByPhone.createdAt > cooldownThreshold) {
       throw new RateLimitError(MSG_COOLDOWN);
     }
 
     const phoneRequestsLastHour = await prisma.userOtp.count({
-      where: { user: { phone }, created_at: { gte: oneHourAgo } },
+      where: { user: { phoneNumber: phone }, createdAt: { gte: oneHourAgo } },
     });
 
     if (phoneRequestsLastHour >= OTP_MAX_PER_HOUR) {

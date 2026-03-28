@@ -1,35 +1,35 @@
-import { prisma } from '../lib/db.js';
+import { prisma } from "../lib/db.js";
 
 interface LgpdOutputDto {
-  id: number;
+  id: string;
   cpf: string;
-  aceite: boolean;
-  mac: string | null;
-  ip: string | null;
-  criado_em: string;
-  nome: string | null;
-  telefone: string | null;
+  accepted: boolean;
+  macAddress: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  name: string | null;
+  phoneNumber: string | null;
 }
 
 function mapLgpd(l: {
-  id: number;
+  id: string;
   cpf: string;
-  aceite: boolean;
-  mac: string | null;
-  ip: string | null;
-  criado_em: Date;
-  nome: string | null;
-  telefone: string | null;
+  accepted: boolean;
+  macAddress: string | null;
+  ipAddress: string | null;
+  createdAt: Date;
+  name: string | null;
+  phoneNumber: string | null;
 }): LgpdOutputDto {
   return {
     id: l.id,
     cpf: l.cpf,
-    aceite: l.aceite,
-    mac: l.mac,
-    ip: l.ip,
-    criado_em: l.criado_em.toISOString(),
-    nome: l.nome,
-    telefone: l.telefone,
+    accepted: l.accepted,
+    macAddress: l.macAddress,
+    ipAddress: l.ipAddress,
+    createdAt: l.createdAt.toISOString(),
+    name: l.name,
+    phoneNumber: l.phoneNumber,
   };
 }
 
@@ -37,11 +37,11 @@ function mapLgpd(l: {
 
 interface RegisterLgpdConsentInputDto {
   cpf: string;
-  aceite: boolean;
-  mac?: string;
-  ip?: string;
-  nome?: string;
-  telefone?: string;
+  accepted: boolean;
+  macAddress?: string;
+  ipAddress?: string;
+  name?: string;
+  phoneNumber?: string;
 }
 
 export class RegisterLgpdConsent {
@@ -49,11 +49,11 @@ export class RegisterLgpdConsent {
     const record = await prisma.lgpdLogin.create({
       data: {
         cpf: dto.cpf,
-        aceite: dto.aceite,
-        mac: dto.mac ?? null,
-        ip: dto.ip ?? null,
-        nome: dto.nome ?? null,
-        telefone: dto.telefone ?? null,
+        accepted: dto.accepted,
+        macAddress: dto.macAddress ?? null,
+        ipAddress: dto.ipAddress ?? null,
+        name: dto.name ?? null,
+        phoneNumber: dto.phoneNumber ?? null,
       },
     });
     return mapLgpd(record);
@@ -64,7 +64,9 @@ export class RegisterLgpdConsent {
 
 export class GetLgpdData {
   async execute(): Promise<LgpdOutputDto[]> {
-    const records = await prisma.lgpdLogin.findMany({ orderBy: { id: 'desc' } });
+    const records = await prisma.lgpdLogin.findMany({
+      orderBy: { id: "desc" },
+    });
     return records.map(mapLgpd);
   }
 }
