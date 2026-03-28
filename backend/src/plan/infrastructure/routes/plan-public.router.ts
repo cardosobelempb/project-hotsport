@@ -1,12 +1,12 @@
-import { type FastifyInstance } from 'fastify';
-import { type ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
-import { ErrorSchema, PlanoSchema } from '../schemas/index.js';
-import { getPlanController } from '../plan/infrastructure/controllers/get-plan.controller.js';
-import { getPlansController } from '../plan/infrastructure/controllers/get-plans.controller.js';
+import { ErrorSchema, PlanoSchema } from '../../../schemas/index.js';
+import { getPlanController } from '../controllers/get-plan.controller.js';
+import { getPlansController } from '../controllers/get-plans.controller.js';
 
-export const planosPublicosRoutes = async (app: FastifyInstance): Promise<void> => {
+export const planPublicRouter = async (app: FastifyInstance): Promise<void> => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
     url: '/',

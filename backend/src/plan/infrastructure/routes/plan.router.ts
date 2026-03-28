@@ -1,22 +1,31 @@
+import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
+import { auth } from '../../../lib/auth.js';
 import {
   CreatePlanoSchema,
   ErrorSchema,
   PlanoSchema,
   UpdatePlanoSchema,
-} from '../schemas/index.js';
+} from '../../../schemas/index.js';
 import {
   createPlanController,
   deletePlanController,
   getPlanController,
   getPlansController,
   updatePlanController,
-} from '../plan/infrastructure/controllers/index.js';
+} from '../controllers/index.js';
 
-export const planRoutes = async (app: FastifyInstance) => {
+export const planRouter = async (app: FastifyInstance): Promise<void> => {
+  app.addHook('preHandler', async (request, reply) => {
+    const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
+    if (!session) {
+      return reply.status(401).send({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
+    }
+  });
+
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'GET',
     url: '/',
@@ -25,6 +34,7 @@ export const planRoutes = async (app: FastifyInstance) => {
       summary: 'List all plans',
       response: {
         200: z.array(PlanoSchema),
+        401: ErrorSchema,
         500: ErrorSchema,
       },
     },
@@ -40,6 +50,7 @@ export const planRoutes = async (app: FastifyInstance) => {
       params: z.object({ id: z.coerce.number().int() }),
       response: {
         200: PlanoSchema,
+        401: ErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
@@ -52,10 +63,11 @@ export const planRoutes = async (app: FastifyInstance) => {
     url: '/',
     schema: {
       tags: ['Plans'],
-      summary: 'Create a plan',
+      summary: 'Create a new plan',
       body: CreatePlanoSchema,
       response: {
         201: PlanoSchema,
+        401: ErrorSchema,
         500: ErrorSchema,
       },
     },
@@ -72,6 +84,7 @@ export const planRoutes = async (app: FastifyInstance) => {
       body: UpdatePlanoSchema,
       response: {
         200: PlanoSchema,
+        401: ErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },
@@ -88,6 +101,7 @@ export const planRoutes = async (app: FastifyInstance) => {
       params: z.object({ id: z.coerce.number().int() }),
       response: {
         204: z.null(),
+        401: ErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
       },

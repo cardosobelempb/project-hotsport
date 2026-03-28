@@ -6,14 +6,16 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 
-import { authRoutes } from './routes/auth-routes.js';
 import { adminRouter } from './admin/infrastructure/routes/admin.router.js';
+import { planRouter, planPublicRouter } from './plan/index.js';
+import { authRoutes } from './routes/auth-routes.js';
+import { efiRoutes } from './routes/efi-routes.js';
+import { lgpdRoutes } from './routes/lgpd-routes.js';
 import { meRoutes } from './routes/me-routes.js';
 import { mercadoPagoRoutes } from './routes/mercadopago-routes.js';
 import { mikrotikRoutes } from './routes/mikrotik-routes.js';
 import { otpRoutes } from './routes/otp-routes.js';
 import { pagamentoRoutes } from './routes/pagamento-routes.js';
-import { planRoutes } from './routes/plan-routes.js';
 import { radiusRoutes } from './routes/radius-routes.js';
 
 const app = Fastify({ logger: true });
@@ -41,12 +43,12 @@ async function start() {
   await app.register(authRoutes, { prefix: '/api/auth' });
   await app.register(adminRouter, { prefix: '/api/admin' });
   await app.register(meRoutes, { prefix: '/api' });
-  await app.register(planRoutes, { prefix: '/api/planos' });
+  await app.register(planRouter, { prefix: '/api/plans' });
+  await app.register(planPublicRouter, { prefix: '/api/plans/public' });
   await app.register(mikrotikRoutes, { prefix: '/api/mikrotiks' });
   await app.register(pagamentoRoutes, { prefix: '/api/pagamentos' });
   await app.register(radiusRoutes, { prefix: '/api/radius' });
   await app.register(otpRoutes, { prefix: '/auth/otp' });
-  await app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   await app.register(lgpdRoutes, { prefix: '/api/lgpd' });
   await app.register(efiRoutes, { prefix: '/api/efi' });
   await app.register(mercadoPagoRoutes, { prefix: '/api/config-mercadopago' });
