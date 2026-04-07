@@ -13,16 +13,16 @@ model Admin {
   password  String   @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("admins")
+  @@map("admin")
 }
 
 model ConfigMercadoPago {
   id            Int      @id @default(autoincrement())
-  publicKey     String?  @db.VarChar(255) @map("public_key")
-  accessToken   String?  @db.Text @map("access_token")
-  clientId      String?  @db.VarChar(255) @map("client_id")
-  clientSecret  String?  @db.Text @map("client_secret")
-  webhookSecret String?  @db.VarChar(255) @map("webhook_secret")
+  publicKey     String?  @map("public_key") @db.VarChar(255)
+  accessToken   String?  @map("access_token") @db.Text
+  clientId      String?  @map("client_id") @db.VarChar(255)
+  clientSecret  String?  @map("client_secret") @db.Text
+  webhookSecret String?  @map("webhook_secret") @db.VarChar(255)
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("config_mercadopago")
@@ -30,11 +30,11 @@ model ConfigMercadoPago {
 
 model EfiConfig {
   id              Int         @id @default(autoincrement())
-  clientId        String      @db.VarChar(255) @map("client_id")
-  clientSecret    String      @db.VarChar(255) @map("client_secret")
-  pixKey          String      @db.VarChar(255) @map("pix_key")
+  clientId        String      @map("client_id") @db.VarChar(255)
+  clientSecret    String      @map("client_secret") @db.VarChar(255)
+  pixKey          String      @map("pix_key") @db.VarChar(255)
   environment     Environment @default(SANDBOX)
-  certificateName String?     @db.VarChar(255) @map("certificate_name")
+  certificateName String?     @map("certificate_name") @db.VarChar(255)
   createdAt       DateTime    @default(now()) @map("created_at")
 
   @@map("efi_config")
@@ -47,7 +47,7 @@ enum Environment {
 
 model LgpdLogin {
   id        Int      @id @default(autoincrement())
-  cpf       String   @db.VarChar(14)
+  cpf       String   @unique @db.VarChar(14)
   consent   Boolean  @default(false)
   mac       String?  @db.VarChar(50)
   ip        String?  @db.VarChar(50)
@@ -55,7 +55,7 @@ model LgpdLogin {
   name      String?  @db.VarChar(100)
   phone     String?  @db.VarChar(20)
 
-  @@map("lgpd_logins")
+  @@map("lgpd_login")
 }
 
 model Mikrotik {
@@ -68,17 +68,17 @@ model Mikrotik {
   status         String   @default("Offline") @db.VarChar(20)
   activeUsers    Int      @default(0) @map("active_users")
   createdAt      DateTime @default(now()) @map("created_at")
-  hotspotAddress String?  @db.VarChar(255) @map("hotspot_address")
+  hotspotAddress String?  @map("hotspot_address") @db.VarChar(255)
   plans          Plan[]
 
-  @@map("mikrotiks")
+  @@map("mikrotik")
 }
 
 model Payment {
   id          Int       @id @default(autoincrement())
   planId      Int       @map("plan_id")
   email       String?   @db.VarChar(255)
-  planName    String?   @db.VarChar(255) @map("plan_name")
+  planName    String?   @map("plan_name") @db.VarChar(255)
   amount      Int
   status      String?   @db.VarChar(50)
   mpPaymentId BigInt?   @map("mp_payment_id")
@@ -89,7 +89,7 @@ model Payment {
   cpf         String?   @db.VarChar(20)
   ip          String?   @db.VarChar(20)
 
-  @@map("payments")
+  @@map("payment")
 }
 
 model Plan {
@@ -98,36 +98,78 @@ model Plan {
   description     String?  @db.Text
   amount          Decimal  @db.Decimal(10, 2)
   durationMinutes Int      @map("duration_minutes")
-  downloadSpeed   String   @db.VarChar(20) @map("download_speed")
-  uploadSpeed     String   @db.VarChar(20) @map("upload_speed")
+  downloadSpeed   String   @map("download_speed") @db.VarChar(20)
+  uploadSpeed     String   @map("upload_speed") @db.VarChar(20)
   mikrotikId      Int      @map("mikrotik_id")
   active          Boolean  @default(true)
-  addressPool     String   @default("default-dhcp") @db.VarChar(50) @map("address_pool")
+  addressPool     String   @default("default-dhcp") @map("address_pool") @db.VarChar(50)
   sharedUsers     Int      @default(10) @map("shared_users")
   mikrotik        Mikrotik @relation(fields: [mikrotikId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("plans")
+  @@map("plan")
 }
 
 // ── User (OTP authentication via WhatsApp) ───────────────────────────────────
 
+enum UserStatus {
+  active
+  inactive
+  blocked
+}
+
 model User {
-  id        String    @id @default(uuid()) @db.Uuid
-  cpf       String    @unique @db.VarChar(14)
-  name      String?   @db.VarChar(100)
-  phone     String?   @db.VarChar(20)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  otps      UserOtp[]
+  id          String     @id @default(uuid()) @db.Uuid
+  firstName   String?    @map("first_name") @db.VarChar(100)
+  lastName    String?    @map("last_name") @db.VarChar(100)
+  cpf         String     @unique @db.VarChar(14)
+  phoneNumber String?    @map("phone_number") @db.VarChar(20)
+  status      UserStatus @default(active)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+
+  auths  Auth[]
+  tokens Token[]
+  otps   UserOtp[]
 
   @@index([cpf])
-  @@index([phone])
-  @@map("users")
+  @@index([phoneNumber])
+  @@map("user")
+}
+
+model Auth {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth")
+}
+
+model Token {
+  id           String @id @default(uuid()) @db.Uuid
+  userId       String @map("user_id") @db.Uuid
+  refreshToken String @map("refresh_token") @db.VarChar(255)
+  accessToken  String @map("access_token") @db.VarChar(255)
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("token")
 }
 
 model UserOtp {
   id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid @map("user_id")
+  userId    String   @map("user_id") @db.Uuid
   hash      String   @db.VarChar(255)
   expiresAt DateTime @map("expires_at")
   attempts  Int      @default(0)
@@ -148,7 +190,7 @@ model RadiusUser {
   nasId     Int?     @map("nas_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("radius_users")
+  @@map("radius_user")
 }
 
 model Radcheck {
@@ -184,14 +226,14 @@ model OtpRequest {
   id          Int      @id @default(autoincrement())
   cpf         String   @db.VarChar(14)
   phone       String   @db.VarChar(20)
-  otpHash     String   @db.VarChar(255) @map("otp_hash")
+  otpHash     String   @map("otp_hash") @db.VarChar(255)
   expiresAt   DateTime @map("expires_at")
   attempts    Int      @default(0)
   maxAttempts Int      @default(5) @map("max_attempts")
   used        Boolean  @default(false)
   createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("otp_requests")
+  @@map("otp_request")
 }
 
 // ── OTP Audit Log (compliance / LGPD) ────────────────────────────────────────
@@ -238,5 +280,5 @@ model OtpAuditLog {
   @@index([cpf])
   @@index([event])
   @@index([createdAt])
-  @@map("otp_audit_logs")
+  @@map("otp_audit_log")
 }

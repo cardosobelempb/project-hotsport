@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "name": {
+      "empty": "O nome não pode estar vazio.",
+      "tooShort": "O nome deve ter pelo menos {{min}} caracteres.",
+      "tooLong": "O nome deve ter no máximo {{max}} caracteres.",
+      "surnameMissing": "Sobrenome é obrigatório.",
+      "invalidChars": "Apenas letras, espaços, apóstrofos e hífens são permitidos."
+    }
+  }
+}

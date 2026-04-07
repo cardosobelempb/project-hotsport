@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "name": {
+      "empty": "Name cannot be empty.",
+      "tooShort": "Name must be at least {{min}} characters.",
+      "tooLong": "Name must be at most {{max}} characters.",
+      "surnameMissing": "Surname is required.",
+      "invalidChars": "Only letters, spaces, apostrophes, and hyphens are allowed."
+    }
+  }
+}

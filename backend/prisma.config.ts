@@ -1,14 +1,13 @@
-import path from 'node:path';
+// prisma.config.ts
+import { config } from "dotenv";
+import { defineConfig } from "prisma/config";
 
-import { PrismaPg } from '@prisma/adapter-pg';
-import type { PrismaConfig } from 'prisma';
+// Load .env before defining the config
+config();
 
-export default {
-  earlyAccess: true,
-  schema: path.join('prisma', 'schema.prisma'),
-  migrate: {
-    async adapter(env: Record<string, string | undefined>) {
-      return new PrismaPg({ connectionString: env['DATABASE_URL'] ?? '' });
-    },
+export default defineConfig({
+  // ... your other configurations
+  datasource: {
+    url: process.env.DATABASE_URL || "", // Use process.env
   },
-} satisfies PrismaConfig;
+});

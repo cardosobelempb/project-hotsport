@@ -1,0 +1,10 @@
+export * from './AbstractFileVO'
+export * from './DocxVO'
+export * from './FileFactory'
+export * from './FileVo'
+export * from './ImageVO'
+export * from './PDFVO'
+export * from './VideoVO'
+export * from './XlsxVO'
+export * from './ZipVO'
+
