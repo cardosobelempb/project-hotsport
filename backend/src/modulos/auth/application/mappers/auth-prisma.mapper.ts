@@ -1,10 +1,11 @@
 import { EmailVO, UUIDVO } from "@/core";
 import { Prisma, type Auth } from "@/generated/prisma";
 
+import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
 import { AuthEntity } from "../../domain/entities/auth.entity";
-import { AuthLoginResponseSchemaType } from "../../infrastructure/schemas/auth.login.schema";
+import { AuthResponseType } from "../../infrastructure/schemas/auth.schema";
 
-export class AuthLoginPrismaMapper {
+export class AuthPrismaMapper {
   static toDomain(raw: Auth): AuthEntity {
     return AuthEntity.create({
       id: UUIDVO.create(raw.id),
@@ -33,14 +34,17 @@ export class AuthLoginPrismaMapper {
   }
 
   // Domain entities → resposta HTTP
-  static toHttp(tokens: {
-    accessToken: string;
-    refreshToken?: string;
-  }): AuthLoginResponseSchemaType {
+  static toHttp(auth: UserEntity): AuthResponseType {
     return {
-      message: "Authentication successful",
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken || "",
+      user: {
+        id: auth.id.toString(),
+        firstName: auth.firstName,
+        lastName: auth.lastName,
+        cpf: auth.cpf,
+        phoneNumber: auth.phoneNumber,
+        status: auth.status,
+        createdAt: auth.createdAt.toISOString(),
+      },
     };
   }
 }

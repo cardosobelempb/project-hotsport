@@ -3,8 +3,9 @@ import { Prisma, type Auth } from "@/generated/prisma";
 
 import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
 import { AuthEntity } from "../../domain/entities/auth.entity";
+import { AuthRegisterResponseType } from "../../infrastructure/schemas/auth-register.schema";
 
-export class AuthPrismaMapper {
+export class AuthRegisterPrismaMapper {
   static toDomain(raw: Auth): AuthEntity {
     return AuthEntity.create({
       id: UUIDVO.create(raw.id),
@@ -33,31 +34,16 @@ export class AuthPrismaMapper {
   }
 
   // ✅ Converte entidade → objeto de resposta HTTP (bate com UserPresentSchema)
-  static toHttp(entity: AuthEntity) {
+  // Domain entities → resposta HTTP
+  static toHttp(user: UserEntity): AuthRegisterResponseType {
     return {
-      id: entity.id.toString(),
-      userId: entity.userId.toString(),
-      email: entity.email.toString(),
-      passwordHash: entity.passwordHash?.toString() ?? "",
-      createdAt: entity.createdAt.toISOString(),
-    };
-  }
-
-  static toAuthAndUserHttp(auth: AuthEntity, user: UserEntity) {
-    return {
-      user: {
-        id: auth.userId.toString(),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        cpf: user.cpf,
-        phoneNumber: user.phoneNumber,
-        status: user.status,
-        createdAt: user.createdAt.toISOString(),
-      },
-      id: auth.id.toString(),
-      email: auth.email.toString(),
-      passwordHash: auth.passwordHash?.toString() ?? "",
-      createdAt: auth.createdAt.toISOString(),
+      id: user.id.toString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      cpf: user.cpf,
+      phoneNumber: user.phoneNumber,
+      status: user.status,
+      createdAt: user.createdAt.toISOString(),
     };
   }
 }

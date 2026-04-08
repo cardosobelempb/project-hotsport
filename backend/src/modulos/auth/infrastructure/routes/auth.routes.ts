@@ -2,13 +2,13 @@ import { UserPrismaRepository } from "@/modulos/user/infrastructure/repositories
 
 import { env } from "@/core/infrastructure/env";
 import { FastifyInstance } from "fastify";
-import { AuthLoginUseCase } from "../../application/usecases/AuthLoginUseCase";
-import { AuthRegisterUseCase } from "../../application/usecases/AuthRegisterUseCase";
-import { AuthUserUseCase } from "../../application/usecases/AuthUserUseCase";
+import { AuthLoginUseCase } from "../../application/usecases/auth-login.use-case";
+import { AuthRegisterUseCase } from "../../application/usecases/auth-register.use-case";
+import { AuthSessionUseCase } from "../../application/usecases/auth-session.use-case";
 import { JwtTokenUseCase } from "../../application/usecases/JwtTokenUseCase";
 import { authLoginController } from "../controllers/auth-login.controller";
 import { authRegisterController } from "../controllers/auth-register.controller";
-import { authUserController } from "../controllers/auth-user.controller";
+import { authSessionController } from "../controllers/auth-session.controller";
 import { BcryptHasher } from "../cryptography/bcrypt-hasher";
 import { AuthPrismaRepository } from "../repositories/auth-prisma.repository";
 
@@ -29,12 +29,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     jwtTokenUseCase,
   );
 
-  const authUserUseCase = new AuthUserUseCase(
-    userRepository,
-    authRepository,
-    bcryptHasher,
-    jwtTokenUseCase,
-  );
+  const authSessionUseCase = new AuthSessionUseCase(userRepository);
 
   await app.register(authRegisterController(authRegisterUseCase), {
     prefix: "/register",
@@ -42,7 +37,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   await app.register(authLoginController(authLoginUseCase), {
     prefix: "/login",
   });
-  await app.register(authUserController(authUserUseCase), {
+  await app.register(authSessionController(authSessionUseCase), {
     prefix: "/session",
   });
   // await app.register(updatePaymentStatusController(userRegisterUseCase), {

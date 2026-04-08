@@ -1,8 +1,7 @@
 import z from "zod";
 
-import { UserPresentSchema } from "@/modulos/user/infrastructure/schemas/user-register.schema";
+import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
 import { EmailString } from "@/shared/schemas/helpers";
-import { AuthPresentSchema } from "./auth.schema";
 
 const AuthLoginBaseSchema = z.object({
   email: EmailString,
@@ -11,18 +10,22 @@ const AuthLoginBaseSchema = z.object({
 
 export const AuthLoginBodySchema = AuthLoginBaseSchema.extend({});
 
-export const AuthLoginPresentSchema = AuthPresentSchema.extend({
-  user: UserPresentSchema,
-  accessToken: z.string(),
-  refreshToken: z.string().optional(),
-});
+export type AuthLoginResponseSchemaType = z.infer<
+  typeof AuthLoginResponseSchema
+>;
+export type AuthLoginBodySchemaType = z.infer<typeof AuthLoginBodySchema>;
 
-// export const AuthLoginPresentSchema = z.object({
-//   user: UserPresentSchema,
-//   auth: AuthPresentSchema,
-//   accessToken: z.string(),
-//   refreshToken: z.string().optional(),
-// });
+export const AuthLoginResponseSchema = {
+  200: z.object({
+    message: z.string(),
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  }),
+  401: ErrorSchema,
+  422: ValidationErrorSchema,
+  500: ErrorSchema,
+};
 
-export type AuthLoginBodyType = z.infer<typeof AuthLoginBodySchema>;
-export type AuthLoginPresentType = z.infer<typeof AuthLoginPresentSchema>;
+export type AuthLoginResponseType = z.infer<
+  (typeof AuthLoginResponseSchema)[200]
+>;

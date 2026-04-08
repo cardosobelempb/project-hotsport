@@ -40,10 +40,20 @@ Leia integralmente. Estas instruções têm prioridade sobre qualquer padrão ge
 ## Arquitetura de Camadas
 
 ```
-routes/      → validação Zod + autenticação better-auth + chamar use case + tratar erros
-usecases/    → toda lógica de negócio + Prisma direto + mapear OutputDto (sem try/catch)
-schemas/     → schemas Zod centralizados em src/schemas/index.ts
-errors/      → erros customizados em src/errors/index.ts
+modules/             → módulos de funcionalidades (ex: workouts/)
+  aplication/        → lógica de aplicação (mappers + use cases)
+    {modulename}/application/mappers/  → mapear OutputDto → model Prisma
+    {modulename}/aplication/usecases/    → toda lógica de negócio + Prisma direto + mapear OutputDto (sem try/catch)
+  domain/           → regras de negócio puras (sem dependências externas)
+    {modulename}/domain/entities/
+    {modulename}/domain/errors/      → erros customizados em src/errors/index.ts
+    {modulename}/domain/repositories/ → interfaces de repositórios (ex: UserRepository)
+  infrastructure/   → implementação concreta de rotas, repositórios, controllers e schemas
+    {modulename}/infrastructure/repository/      → implementação concreta dos repositórios usando Prisma
+    {modulename}/infrastructure/routes/      → rotas Fastify em src/routes/*-routes.ts
+    {modulename}/imfrastructure/controllers/   → controllers opcionais para lógica de roteamento complexa
+    {modulename}/infrastructure/schemas/     → schemas Zod centralizados em src/schemas/index.ts
+  providers/        → provedores de serviços externos (ex: email, cache, etc)
 generated/   → NUNCA editar — auto-gerado pelo Prisma
 ```
 

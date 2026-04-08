@@ -2,11 +2,10 @@ import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { ConflictError } from "@/core";
-import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
-import { AuthRegisterUseCase } from "../../application/usecases/AuthRegisterUseCase";
+import { AuthRegisterUseCase } from "../../application/usecases/auth-register.use-case";
 import {
   AuthRegisterBodySchema,
-  AuthRegisterPresentSchema,
+  AuthRegisterResponseSchema,
 } from "../schemas/auth-register.schema";
 
 export const authRegisterController = (
@@ -20,12 +19,7 @@ export const authRegisterController = (
         tags: ["Auth"],
         summary: "Registrar um novo usuário",
         body: AuthRegisterBodySchema,
-        response: {
-          201: AuthRegisterPresentSchema,
-          409: ErrorSchema,
-          422: ValidationErrorSchema,
-          500: ErrorSchema,
-        },
+        response: AuthRegisterResponseSchema,
       },
       handler: async (request, reply) => {
         const result = await authRegisterUseCase.execute(request.body);
@@ -56,9 +50,7 @@ export const authRegisterController = (
         }
 
         // ✅ Envia { user: {...}, accessToken: "..." }
-        return reply.status(201).send({
-          user: result.value.user.toJSON(),
-        });
+        return reply.status(201).send({ user: result.value.user });
       },
     });
   };

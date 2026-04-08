@@ -2,7 +2,7 @@ import { ErrorCode, left, right, UnauthorizedError } from "@/core";
 import { HashComparer } from "@/core/core/common";
 import { UserRepository } from "@/modulos/user/domain/repositories/UserRepository";
 import { AuthRepository } from "../../domain/repositories/AuthRepository";
-import { AuthLoginBodyType } from "../../infrastructure/schemas/auth.login.schema";
+import { AuthLoginBodySchemaType } from "../../infrastructure/schemas/auth.login.schema";
 import { AuthLoginPresenter } from "../../presentation/auth-login.present";
 import { JwtTokenUseCase } from "./JwtTokenUseCase";
 
@@ -17,7 +17,7 @@ export class AuthUserUseCase {
   async execute({
     email,
     password, // ✅ senha plain text, hash feito aqui
-  }: AuthLoginBodyType): Promise<AuthLoginPresenter> {
+  }: AuthLoginBodySchemaType): Promise<AuthLoginPresenter> {
     // 🔍 Busca usuário com auth
     const auth = await this.authRepository.findByEmail(email);
     if (!auth) return left(new UnauthorizedError(ErrorCode.UNAUTHORIZED));

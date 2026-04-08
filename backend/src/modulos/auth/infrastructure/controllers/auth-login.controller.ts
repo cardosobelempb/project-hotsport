@@ -1,13 +1,12 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { ConflictError, right } from "@/core";
+import { UnauthorizedError } from "@/core";
 import { env } from "@/core/infrastructure/env";
-import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
-import { AuthLoginUseCase } from "../../application/usecases/AuthLoginUseCase";
+import { AuthLoginUseCase } from "../../application/usecases/auth-login.use-case";
 import {
   AuthLoginBodySchema,
-  AuthLoginPresentSchema,
+  AuthLoginResponseSchema,
 } from "../schemas/auth.login.schema";
 
 export const authLoginController = (authLoginUseCase: AuthLoginUseCase) => {
@@ -19,12 +18,7 @@ export const authLoginController = (authLoginUseCase: AuthLoginUseCase) => {
         tags: ["Auth"],
         summary: "Login a user",
         body: AuthLoginBodySchema,
-        response: {
-          201: AuthLoginPresentSchema,
-          409: ErrorSchema,
-          422: ValidationErrorSchema,
-          500: ErrorSchema,
-        },
+        response: AuthLoginResponseSchema,
       },
       handler: async (request, reply) => {
         const result = await authLoginUseCase.execute(request.body);
@@ -33,20 +27,19 @@ export const authLoginController = (authLoginUseCase: AuthLoginUseCase) => {
           const error = result.value;
 
           switch (error.constructor) {
-            case ConflictError:
-              return reply.status(409).send({
+            case UnauthorizedError:
+              return reply.status(401).send({
                 message: error.message,
-                statusCode: 409,
+                statusCode: 401,
                 timestamp: new Date().toISOString(),
                 path: request.url,
-                fieldName: error.path?.includes("email") ? "email" : "cpf",
                 error: error.error,
               });
 
             default:
-              return reply.status(422).send({
+              return reply.status(500).send({
                 message: error.message,
-                statusCode: 422,
+                statusCode: 500,
                 timestamp: new Date().toISOString(),
                 path: request.url,
                 error: error.error,
@@ -54,14 +47,13 @@ export const authLoginController = (authLoginUseCase: AuthLoginUseCase) => {
           }
         }
 
-        // ✅ Envia { user: {...}, accessToken: "..." }
-        const { auth, user, accessToken, refreshToken } = result.value;
+        const { message, accessToken, refreshToken } = result.value;
 
         reply.cookie("access_token", accessToken, {
           httpOnly: true,
           secure: env.NODE_ENV === "production",
           sameSite: "strict",
-          maxAge: 24 * 60 * 60 * 1000, // 1 dias
+          maxAge: 24 * 60 * 60 * 1000, // 1 dia
         });
 
         reply.cookie("refresh_token", refreshToken, {
@@ -71,7 +63,7 @@ export const authLoginController = (authLoginUseCase: AuthLoginUseCase) => {
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
         });
 
-        return right({ message: "Login successful" });
+        return reply.status(200).send({ message, accessToken, refreshToken });
       },
     });
   };

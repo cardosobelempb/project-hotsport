@@ -1,9 +1,9 @@
 import z from "zod";
 
-import {
-  UserPresentSchema,
-  UserRegisterBodySchema,
-} from "@/modulos/user/infrastructure/schemas/user-register.schema";
+import { ConflictError } from "@/core";
+import { UserRegisterBodySchema } from "@/modulos/user/infrastructure/schemas/user-register.schema";
+import { UserResponseSchema } from "@/modulos/user/infrastructure/schemas/user.schema";
+import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
 import { EmailString } from "@/shared/schemas/helpers";
 
 const AuthRegisterBaseSchema = z.object({
@@ -22,11 +22,15 @@ export const AuthRegisterBodySchema = AuthRegisterBaseSchema.refine(
     path: ["passwordConfirmation"],
   },
 );
-
-export const AuthRegisterPresentSchema = z.object({
-  user: UserPresentSchema,
-  // accessToken: z.string(),
-});
-
 export type AuthRegisterBodyType = z.infer<typeof AuthRegisterBodySchema>;
-export type AuthRegisterPresentType = z.infer<typeof AuthRegisterPresentSchema>;
+
+export const AuthRegisterResponseSchema = {
+  201: { user: UserResponseSchema },
+  409: ConflictError,
+  422: ValidationErrorSchema,
+  500: ErrorSchema,
+};
+
+export type AuthRegisterResponseType = z.infer<
+  (typeof AuthRegisterResponseSchema)[201]
+>;

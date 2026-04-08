@@ -1,12 +1,27 @@
-import { ConflictError, EmailVO, left, right, UUIDVO } from "@/core";
+import { ConflictError, Either, EmailVO, left, right, UUIDVO } from "@/core";
 import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
 import { UserRepository } from "@/modulos/user/domain/repositories/UserRepository";
 import { AuthEntity } from "../../domain/entities/auth.entity";
 import { AuthRepository } from "../../domain/repositories/AuthRepository";
 
 import { BcryptHasher } from "../../infrastructure/cryptography/bcrypt-hasher";
-import { AuthRegisterBodyType } from "../../infrastructure/schemas/auth-register.schema";
-import { AuthRegisterPresenter } from "../../presentation/auth-register.present";
+import {
+  AuthRegisterBodyType,
+  AuthRegisterResponseType,
+} from "../../infrastructure/schemas/auth-register.schema";
+import { AuthRegisterPrismaMapper } from "../mappers/auth-register-prisma.mapper";
+
+export interface AuthRegisterUseCaseInput {
+  email: string;
+  password: string;
+}
+
+type AuthRegisterUseCaseOutput = AuthRegisterResponseType;
+
+export type AuthRegisterUseCaseResult = Either<
+  ConflictError,
+  { user: AuthRegisterUseCaseOutput }
+>;
 
 export class AuthRegisterUseCase {
   constructor(
@@ -19,7 +34,7 @@ export class AuthRegisterUseCase {
     user,
     email,
     password, // ✅ senha plain text, hash feito aqui
-  }: AuthRegisterBodyType): Promise<AuthRegisterPresenter> {
+  }: AuthRegisterBodyType): Promise<AuthRegisterUseCaseResult> {
     const [authWithSameEmail, userWithSameCpf] = await Promise.all([
       this.authRepository.findByEmail(email),
       this.userRepository.findByCpf(user.cpf),
@@ -56,6 +71,6 @@ export class AuthRegisterUseCase {
 
     await this.authRepository.save(auth);
 
-    return right({ user: savedUser, accessToken: "" });
+    return right({ user: AuthRegisterPrismaMapper.toHttp(savedUser) });
   }
 }

@@ -3,7 +3,7 @@ import { Prisma } from "@/generated/prisma";
 import { AuthEntity } from "@/modulos/auth/domain/entities/auth.entity";
 import { prisma } from "@/shared/lib/db";
 
-import { AuthPrismaMapper } from "../../application/mappers/auth-register-prisma.mapper";
+import { AuthPrismaMapper } from "../../application/mappers/auth-prisma.mapper";
 import { AuthRepository } from "../../domain/repositories/AuthRepository";
 
 export class AuthPrismaRepository implements AuthRepository {
