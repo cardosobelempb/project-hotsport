@@ -1,7 +1,6 @@
+import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
-
-import { UnauthorizedError } from "../../errors/index.js";
 
 export interface JwtPayload {
   sub: string;
