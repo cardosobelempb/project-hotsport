@@ -126,6 +126,7 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   slug: 'slug',
   logoUrl: 'logoUrl',
   isActive: 'isActive',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -135,6 +136,7 @@ exports.Prisma.MemberScalarFieldEnum = {
   organizationId: 'organizationId',
   userId: 'userId',
   role: 'role',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -147,6 +149,7 @@ exports.Prisma.UserScalarFieldEnum = {
   cpf: 'cpf',
   phoneNumber: 'phoneNumber',
   status: 'status',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -202,6 +205,7 @@ exports.Prisma.OtpScalarFieldEnum = {
 
 exports.Prisma.MercadoPagoConfigScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
   publicKey: 'publicKey',
   accessTokenEncrypted: 'accessTokenEncrypted',
   clientId: 'clientId',
@@ -213,6 +217,7 @@ exports.Prisma.MercadoPagoConfigScalarFieldEnum = {
 
 exports.Prisma.EfiConfigScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
   clientId: 'clientId',
   clientSecret: 'clientSecret',
   pixKey: 'pixKey',
@@ -232,6 +237,7 @@ exports.Prisma.MikrotikScalarFieldEnum = {
   username: 'username',
   passwordHash: 'passwordHash',
   status: 'status',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -256,6 +262,7 @@ exports.Prisma.HotspotUserScalarFieldEnum = {
   ipAddress: 'ipAddress',
   passwordHash: 'passwordHash',
   status: 'status',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -269,6 +276,7 @@ exports.Prisma.VoucherScalarFieldEnum = {
   status: 'status',
   usedAt: 'usedAt',
   expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -308,7 +316,8 @@ exports.Prisma.NullsOrder = {
 exports.MemberRole = exports.$Enums.MemberRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
-  OPERATOR: 'OPERATOR'
+  OPERATOR: 'OPERATOR',
+  HOTSPOT_USER: 'HOTSPOT_USER'
 };
 
 exports.UserStatus = exports.$Enums.UserStatus = {
