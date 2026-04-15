@@ -7,236 +7,385 @@ datasource db {
   provider = "postgresql"
 }
 
-model Admin {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique @db.VarChar(255)
-  password   String   @db.VarChar(255)
-  created_at DateTime @default(now())
+// ─────────────────────────────────────────────────────────────────────────────
+// ORGANIZAÇÃO (tenant)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @@map("admins")
+model Organization {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @db.VarChar(100)
+  slug      String    @unique @db.VarChar(100)
+  logoUrl   String?   @map("logo_url") @db.VarChar(500)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  members      Member[]
+  mikrotiks    Mikrotik[]
+  plans        HotspotPlan[]
+  vouchers     Voucher[]
+  hotspotUsers HotspotUser[]
+  lgpdConsents LgpdConsent[]
+
+  @@index([slug])
+  @@map("organization")
 }
 
-model ConfigMercadoPago {
-  id             Int      @id @default(autoincrement())
-  public_key     String?  @db.VarChar(255)
-  access_token   String?  @db.Text
-  client_id      String?  @db.VarChar(255)
-  client_secret  String?  @db.Text
-  webhook_secret String?  @db.VarChar(255)
-  updated_at     DateTime @default(now()) @updatedAt
+// ─────────────────────────────────────────────────────────────────────────────
+// MEMBRO (usuário dentro de uma organização com papel)
+// ─────────────────────────────────────────────────────────────────────────────
+enum MemberRole {
+  OWNER
+  ADMIN
+  OPERATOR
+}
+
+model Member {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @map("organization_id") @db.Uuid
+  userId         String     @map("user_id") @db.Uuid
+  role           MemberRole @default(OPERATOR)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User (cliente final, pode ter vários endereços, ser membro de várias organizações)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+model User {
+  id          String     @id @default(uuid()) @db.Uuid
+  firstName   String     @map("first_name") @db.VarChar(100)
+  lastName    String     @map("last_name") @db.VarChar(100)
+  email       String     @unique @db.VarChar(255)
+  cpf         String     @unique @db.VarChar(14)
+  phoneNumber String?    @map("phone_number") @db.VarChar(20)
+  status      UserStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  accounts     Account[]
+  tokens       Token[]
+  members      Member[]
+  addresses    Address[]
+  otps         Otp[]
+  lgpdConsents LgpdConsent[]
+
+  @@index([email])
+  @@index([cpf])
+  @@index([phoneNumber])
+  @@map("user")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Endereço do usuário (pode ter vários, um primário)
+// ─────────────────────────────────────────────────────────────────────────────
+enum AddressType {
+  HOME
+  WORK
+  BILLING
+  OTHER
+}
+
+model Address {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  type      AddressType @default(HOME)
+  isPrimary Boolean     @default(false) @map("is_primary")
+
+  street       String  @db.VarChar(255)
+  number       String  @db.VarChar(20)
+  complement   String? @db.VarChar(100)
+  neighborhood String  @db.VarChar(100)
+  city         String  @db.VarChar(100)
+  state        String  @db.Char(2)
+  country      String  @default("BR") @db.Char(2)
+  zipCode      String  @map("zip_code") @db.VarChar(10)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("address")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH (usuário, conta de login, tokens de sessão, OTP para login por SMS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  provider          String  @db.VarChar(50)
+  providerAccountId String  @map("provider_account_id")
+  passwordHash      String? @map("password_hash")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Token {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  refreshToken String    @map("refresh_token")
+  accessToken  String    @map("access_token")
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("token")
+}
+
+model Otp {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String?   @db.Uuid
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int       @default(0)
+  usedAt    DateTime?
+  users     User[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@map("otp")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// mercado pago e efi config
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Environment {
+  SANDBOX
+  PRODUCTION
+}
+
+model MercadoPagoConfig {
+  id                   Int     @id @default(autoincrement())
+  publicKey            String? @map("public_key")
+  accessTokenEncrypted String? @map("access_token")
+  clientId             String? @map("client_id")
+  clientSecret         String? @map("client_secret")
+  webhookSecret        String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   @@map("config_mercadopago")
 }
 
 model EfiConfig {
-  id                Int      @id @default(autoincrement())
-  client_id         String   @db.VarChar(255)
-  client_secret     String   @db.VarChar(255)
-  chave_pix         String   @db.VarChar(255)
-  ambiente          Ambiente @default(sandbox)
-  certificado_nome  String?  @db.VarChar(255)
-  criado_em         DateTime @default(now())
+  id           Int         @id @default(autoincrement())
+  clientId     String
+  clientSecret String
+  pixKey       String
+  environment  Environment @default(SANDBOX)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   @@map("efi_config")
 }
 
-enum Ambiente {
-  sandbox
-  producao
-}
-
-model LgpdLogin {
-  id        Int      @id @default(autoincrement())
-  cpf       String   @db.VarChar(14)
-  aceite    Boolean  @default(false)
-  mac       String?  @db.VarChar(50)
-  ip        String?  @db.VarChar(50)
-  criado_em DateTime @default(now())
-  nome      String?  @db.VarChar(100)
-  telefone  String?  @db.VarChar(20)
-
-  @@map("lgpd_logins")
+// ─────────────────────────────────────────────────────────────────────────────
+// MIKROTIK — ROTEADOR
+// ─────────────────────────────────────────────────────────────────────────────
+enum MikrotikStatus {
+  ONLINE
+  OFFLINE
+  ERROR
 }
 
 model Mikrotik {
-  id              Int       @id @default(autoincrement())
-  nome            String    @db.VarChar(100)
-  ip              String    @db.VarChar(45)
-  usuario         String    @db.VarChar(100)
-  senha           String    @db.VarChar(255)
-  porta           Int       @default(8728)
-  status          String    @default("Offline") @db.VarChar(20)
-  usuarios_ativos Int       @default(0)
-  criado_em       DateTime  @default(now())
-  end_hotspot     String?   @db.VarChar(255)
-  planos          Plano[]
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  name           String
+  host           String
+  port           Int            @default(8728)
+  macAddress     String         @map("mac_address") @db.VarChar(20)
+  ipAddress      String         @map("ip_address") @db.VarChar(15)
+  username       String
+  passwordHash   String
+  status         MikrotikStatus @default(OFFLINE)
 
-  @@map("mikrotiks")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  vouchers     Voucher[]
+  hotspotUsers HotspotUser[]
+
+  @@index([organizationId])
+  @@index([host])
+  @@map("mikrotik")
 }
 
-model Pagamento {
-  id             Int       @id @default(autoincrement())
-  plano_id       Int
-  email          String?   @db.VarChar(255)
-  nome_plano     String?   @db.VarChar(255)
-  valor          Int
-  status         String?   @db.VarChar(50)
-  mp_pagamento_id BigInt?
-  criado_em      DateTime  @default(now())
-  expira_em      DateTime?
-  atualizado_em  DateTime  @default(now()) @updatedAt
-  mac            String?   @db.VarChar(20)
-  cpf            String?   @db.VarChar(20)
-  IP             String?   @db.VarChar(20)
-
-  @@map("pagamentos")
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANO DE HOTSPOT
+// ─────────────────────────────────────────────────────────────────────────────
+enum HotspotPlanType {
+  TIME
+  DATA
+  UNLIMITED
 }
 
-model Plano {
-  id               Int      @id @default(autoincrement())
-  nome             String   @db.VarChar(100)
-  descricao        String?  @db.Text
-  valor            Decimal  @db.Decimal(10, 2)
-  duracao_minutos  Int
-  velocidade_down  String   @db.VarChar(20)
-  velocidade_up    String   @db.VarChar(20)
-  mikrotik_id      Int
-  ativo            Boolean  @default(true)
-  address_pool     String   @default("default-dhcp") @db.VarChar(50)
-  shared_users     Int      @default(10)
-  mikrotik         Mikrotik @relation(fields: [mikrotik_id], references: [id], onDelete: Cascade)
+model HotspotPlan {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  name           String
+  type           HotspotPlanType @default(TIME)
 
-  @@map("planos")
+  durationSecs Int?
+  dataLimitMb  Int?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  vouchers     Voucher[]
+
+  @@index([organizationId])
+  @@map("hotspot_plan")
 }
 
-// ── User (autenticação OTP via WhatsApp) ─────────────────────────────────────
-
-model User {
-  id         String    @id @default(uuid()) @db.Uuid
-  cpf        String    @unique @db.VarChar(14)
-  name       String?   @db.VarChar(100)
-  phone      String?   @db.VarChar(20)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  otps       UserOtp[]
-
-  @@index([cpf])
-  @@index([phone])
-  @@map("users")
+// ─────────────────────────────────────────────────────────────────────────────
+// USUÁRIO DE HOTSPOT (cliente final da academia/local)
+// ─────────────────────────────────────────────────────────────────────────────
+enum HotspotUserStatus {
+  ACTIVE
+  EXPIRED
+  BLOCKED
+  PENDING
 }
 
-model UserOtp {
-  id         String   @id @default(uuid()) @db.Uuid
-  user_id    String   @db.Uuid
-  hash       String   @db.VarChar(255)
-  expires_at DateTime
-  attempts   Int      @default(0)
-  used       Boolean  @default(false)
-  created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model HotspotUser {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  mikrotikId     String            @db.Uuid
+  username       String
+  macAddress     String            @map("mac_address") @db.VarChar(20)
+  ipAddress      String            @map("ip_address") @db.VarChar(15)
+  passwordHash   String
+  status         HotspotUserStatus @default(PENDING)
 
-  @@index([user_id])
-  @@index([expires_at])
-  @@index([user_id, created_at])
-  @@map("user_otps")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  mikrotik      Mikrotik       @relation(fields: [mikrotikId], references: [id])
+  organizations Organization[]
+
+  @@unique([organizationId, username])
+  @@index([organizationId, status])
+  @@map("hotspot_user")
 }
 
-model RadiusUser {
-  id         Int      @id @default(autoincrement())
-  username   String   @db.VarChar(255)
-  plano_id   Int?
-  nas_id     Int?
-  criado_em  DateTime @default(now())
+// ─────────────────────────────────────────────────────────────────────────────
+// VOUCHER
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @@map("radius_users")
+enum VoucherStatus {
+  UNUSED
+  ACTIVE
+  EXPIRED
+  REVOKED
 }
 
-model Radcheck {
-  id        Int    @id @default(autoincrement())
-  username  String @db.VarChar(64)
-  attribute String @default("Cleartext-Password") @db.VarChar(64)
-  op        String @default(":=") @db.Char(2)
-  value     String @db.VarChar(253)
+model Voucher {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @map("organization_id") @db.Uuid
+  mikrotikId     String        @map("mikrotik_id") @db.Uuid
+  planId         String        @map("plan_id") @db.Uuid
+  code           String        @unique @db.VarChar(20) // ex: "XKQP-8821"
+  status         VoucherStatus @default(UNUSED)
+  usedAt         DateTime?     @map("used_at")
+  expiresAt      DateTime?     @map("expires_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime?     @updatedAt @map("updated_at")
 
-  @@map("radcheck")
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  mikrotik     Mikrotik     @relation(fields: [mikrotikId], references: [id], onDelete: Cascade)
+  plan         HotspotPlan  @relation(fields: [planId], references: [id])
+
+  @@index([organizationId])
+  @@index([code])
+  @@index([status])
+  @@map("voucher")
 }
 
-model Radreply {
-  id        Int    @id @default(autoincrement())
-  username  String @db.VarChar(64)
-  attribute String @db.VarChar(64)
-  op        String @default(":=") @db.Char(2)
-  value     String @db.VarChar(253)
+// ─────────────────────────────────────────────────────────────────────────────
+// LGPD Consent (registro de consentimento do cliente para marketing, compartilhamento de dados e analytics, necessário para emissão de voucher)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @@map("radreply")
+// ─────────────────────────────────────────────────────────────────────────────
+// LGPD — Consentimento do usuário por organização (SaaS multi-tenant)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ConsentStatus {
+  ACTIVE // consentimento vigente
+  REVOKED // usuário revogou
+  WITHDRAWN // consentimento expirou ou foi retirado por inatividade
 }
 
-model Radusergroup {
-  username  String @db.VarChar(64)
-  groupname String @db.VarChar(64)
-  priority  Int    @default(1)
+model LgpdConsent {
+  id             String @id @default(uuid()) @db.Uuid
+  userId         String @map("user_id") @db.Uuid
+  organizationId String @map("organization_id") @db.Uuid // ← SaaS: por tenant
 
-  @@id([username, groupname])
-  @@map("radusergroup")
-}
+  // O que o usuário aceitou
+  consentTerms       Boolean @map("consent_terms") // termos de uso (obrigatório)
+  consentMarketing   Boolean @map("consent_marketing") // e-mail/SMS marketing
+  consentDataSharing Boolean @map("consent_data_sharing") // compartilhar com parceiros
+  consentAnalytics   Boolean @map("consent_analytics") // análise de comportamento
 
-model OtpRequest {
-  id           Int      @id @default(autoincrement())
-  cpf          String   @db.VarChar(14)
-  telefone     String   @db.VarChar(20)
-  otp_hash     String   @db.VarChar(255)
-  expires_at   DateTime
-  attempts     Int      @default(0)
-  max_attempts Int      @default(5)
-  used         Boolean  @default(false)
-  criado_em    DateTime @default(now())
+  // Rastreabilidade (obrigatório pela LGPD)
+  ipAddress      String @map("ip_address") @db.VarChar(45) // suporta IPv6
+  macAddress     String @map("mac_address") @db.VarChar(20) // opcional
+  userAgent      String @map("user_agent") @db.VarChar(500)
+  consentVersion String @map("consent_version") @db.VarChar(10) // ex: "v1.2"
 
-  @@map("otp_requests")
-}
+  // Ciclo de vida
+  status      ConsentStatus @default(ACTIVE)
+  withdrawnAt DateTime?     @map("withdrawn_at") // quando revogou
 
-// ── OTP Audit Log (compliance / LGPD) ────────────────────────────────────────
-//
-// Registra todos os eventos relevantes do fluxo OTP para auditoria e LGPD.
-//
-// Eventos registrados:
-//   otp_requested        – solicitação recebida (início do fluxo)
-//   otp_sent             – mensagem WhatsApp enviada com sucesso
-//   otp_whatsapp_error   – falha no envio via WhatsApp
-//   otp_throttled        – bloqueio por solicitação recente (rate-limit)
-//   otp_validation_error – CPF ou telefone inválido
-//   otp_request_error    – erro genérico na solicitação
-//   otp_verify_attempt   – tentativa de verificação recebida
-//   otp_verified         – OTP verificado com sucesso
-//   otp_invalid          – código OTP incorreto
-//   otp_max_attempts     – número máximo de tentativas atingido (bloqueio)
-//   otp_not_found        – nenhum OTP válido encontrado para o usuário
-//   otp_user_not_found   – CPF não encontrado na base de usuários
-//
-// Query mínima para auditoria:
-//   -- Todos os eventos de um CPF:
-//   SELECT * FROM otp_audit_logs WHERE cpf = '<cpf>' ORDER BY criado_em DESC;
-//
-//   -- Eventos em intervalo de datas:
-//   SELECT event, COUNT(*) FROM otp_audit_logs
-//     WHERE criado_em BETWEEN '<inicio>' AND '<fim>' GROUP BY event;
-//
-//   -- Detecção de bloqueios nas últimas 24h:
-//   SELECT cpf, ip, criado_em FROM otp_audit_logs
-//     WHERE event = 'otp_max_attempts'
-//       AND criado_em > NOW() - INTERVAL '24 hours'
-//     ORDER BY criado_em DESC;
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
-model OtpAuditLog {
-  id        Int      @id @default(autoincrement())
-  event     String   @db.VarChar(50)
-  cpf       String   @db.VarChar(14)
-  telefone  String?  @db.VarChar(20)
-  ip        String?  @db.VarChar(45)
-  detail    String?  @db.VarChar(500)
-  criado_em DateTime @default(now())
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([cpf])
-  @@index([event])
-  @@index([criado_em])
-  @@map("otp_audit_logs")
+  @@unique([userId, organizationId, consentVersion]) // evita duplicata por versão
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@map("lgpd_consent")
 }
