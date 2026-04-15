@@ -1,8 +1,5 @@
-import { prisma } from '../../../lib/db.js';
-import type {
-  AdminDomainEntity,
-  IAdminRepository,
-} from '../../domain/repositories/admin.repository.js';
+import { AdminDomainEntity, IAdminRepository } from "@/admin/domain";
+import { prisma } from "@/lib/db";
 
 export class AdminPrismaRepository implements IAdminRepository {
   async findByEmail(email: string): Promise<AdminDomainEntity | null> {

@@ -1,4 +1,8 @@
+<<<<<<< HEAD:backend/src/modulos/me/application/usecases/GetMe.md
 import type { JwtPayload } from "../../auth/jwt.js";
+=======
+import type { JwtPayload } from "../modulos/auth/jwt.js";
+>>>>>>> main:backend/src/usecases/GetMe.ts
 
 interface InputDto {
   payload: JwtPayload;
