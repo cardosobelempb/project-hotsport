@@ -1,0 +1,62 @@
+
+import z from "zod";
+
+
+// ── Base ──────────────────────────────────────────────────────────────────────
+
+const CreateMikrotikBase = z.object({
+  name: z.string().min(1, "Name is required"),
+  username: z.string().min(1, "Username is required"),
+  host: z.string().min(1, "Host is required"),
+  port: z.number().int().positive("Port must be a positive integer"),
+  ipAddress: z.string().min(1, "IP Address is required"),
+  macAddress: z.string().min(1, "MAC Address is required"),
+  passwordHash: PasswordString,
+  organizationId: UUIDString,
+});
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+export const CreateMikrotikBodySchema =
+  withPasswordConfirmation(CreateMikrotikBase);
+
+export type CreateMikrotikBodyType = z.infer<typeof CreateMikrotikBodySchema>;
+
+// ── Response ──────────────────────────────────────────────────────────────────
+
+export const CreateMikrotikMikrotikSchema = z.object({
+  id: UUIDString,
+  name: z.string(),
+  host: z.string(),
+  port: z.number().int(),
+  ipAddress: z.string(),
+  macAddress: z.string(),
+  username: z.string(),
+  status: MikrotikStatus,
+  createdAt: IsoDateTimeOutput,
+  organizationId: UUIDString,
+});
+
+export const MikrotikSchema = z.object({
+  id: UUIDString,
+  name: z.string(),
+  host: z.string(),
+  port: z.number().int(),
+  ipAddress: z.string(),
+  macAddress: z.string(),
+  username: z.string(),
+  status: MikrotikStatus,
+  createdAt: IsoDateTimeOutput,
+  organizationId: UUIDString,
+});
+
+export const MikrotikResponseSchema = {
+  201: MikrotikSchema,
+  409: ErrorSchema,
+  422: ValidationErrorSchema,
+  500: ErrorSchema,
+};
+
+export type MikrotikResponseSchemaType = z.infer<
+  (typeof MikrotikResponseSchema)[201]
+>;

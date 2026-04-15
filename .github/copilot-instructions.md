@@ -7,14 +7,13 @@ Leia integralmente. Estas instruções têm prioridade sobre qualquer padrão ge
 ## Stack
 
 | Camada          | Tecnologia                                       |
-| --------------- | ------------------------------------------------ |
+| --------------- | ------------------------------------------------ | --- |
 | Runtime         | Node.js (ES Modules)                             |
 | Package manager | `npm`                                            |
 | Linguagem       | TypeScript — target `ES2024`, `strict: true`     |
 | Framework HTTP  | Fastify 5 + `fastify-type-provider-zod`          |
 | ORM             | Prisma 7 (output em `src/generated/prisma/`)     |
-| Banco           | PostgreSQL via `@prisma/adapter-pg` + `pg`       |
-| Autenticação    | `better-auth`                                    |
+| Banco           | PostgreSQL via `@prisma/adapter-pg` + `pg`       |     |
 | Validação       | Zod **v4** — nunca use v3                        |
 | Datas           | `dayjs` — nunca use `new Date()` para formatação |
 | Build           | `tsup`                                           |
@@ -37,34 +36,133 @@ Leia integralmente. Estas instruções têm prioridade sobre qualquer padrão ge
 
 ---
 
-## Arquitetura de Camadas
+# Estrutura do projeto
 
 ```
-routes/      → validação Zod + autenticação better-auth + chamar use case + tratar erros
-usecases/    → toda lógica de negócio + Prisma direto + mapear OutputDto (sem try/catch)
-schemas/     → schemas Zod centralizados em src/schemas/index.ts
-errors/      → erros customizados em src/errors/index.ts
-generated/   → NUNCA editar — auto-gerado pelo Prisma
-```
+src/
+├── modules/
+│   └── auth/
+│       ├── application/
+│       │   ├── mappers/
+│       │   │   └── user.mapper.ts              → UserEntity → UserDTOType
+│       │   └── use-cases/
+│       │       ├── auth-login.use-case.ts
+│       │       ├── auth-session.use-case.ts
+│       │       ├── auth-refresh.use-case.ts
+│       │       └── auth-logout.use-case.ts
+│       ├── domain/
+│       │   ├── entities/
+│       │   │   └── user.entity.ts
+│       │   ├── errors/
+│       │   │   └── auth.errors.ts
+│       │   └── repositories/
+│       │       ├── user.repository.ts          → interface UserRepository
+│       │       └── auth.repository.ts          → interface AuthRepository
+│       └── infrastructure/
+│           ├── controllers/
+│           │   └── auth.controller.ts
+│           ├── repository/
+│           │   ├── user.repo.ts                → implements UserRepository (Prisma)
+│           │   └── auth.repo.ts                → implements AuthRepository (Prisma)
+│           ├── routes/
+│           │   └── auth.routes.ts
+│           └── schemas/
+│               └── auth.schema.ts
+│
+├── providers/
+│   ├── cryptography/
+│   │   ├── hash-comparer.contract.ts           → abstract class HashComparer
+│   │   ├── hash-generator.contract.ts          → abstract class HashGenerator
+│   │   └── bcryptjs.provider.ts                → implements HashComparer + HashGenerator
+│   └── token/
+│       ├── token-generator.contract.ts         → abstract class TokenGenerator
+│       ├── token-verifier.contract.ts          → abstract class TokenVerifier
+│       └── jwt.provider.ts                     → implements TokenGenerator + TokenVerifier
+│
+├── shared/
+│   ├── schemas/
+│   │   ├── error-response.schema.ts            → ErrorResponseSchema (reutilizável)
+│   │   └── user-dto.schema.ts                  → UserDTOSchema (reutilizável)
+│   ├── errors/
+│   │   └── error-codes.ts                      → enum ErrorCode
+│   └── either.ts                               → Either<L, R>
+│
+├── app.ts                                      → registra plugins e rotas
+├── container.ts                                → injeção de dependência manual
+└── server.ts                                   → bootstrap da aplicação
 
-Fluxo obrigatório:
-
-```
-Route → UseCase → Prisma → OutputDto → Route → JSON Response
+generated/
+└── prisma/                                     → NUNCA editar — auto-gerado pelo Prisma
 ```
 
 ---
 
-## Organização de Arquivos
+## Organização de arquivos
 
-| O quê       | Onde                                        |
-| ----------- | ------------------------------------------- |
-| Rotas       | `src/routes/*-routes.ts` (kebab-case)       |
-| Use Cases   | `src/usecases/VerbEntidade.ts` (PascalCase) |
-| Schemas Zod | `src/schemas/index.ts`                      |
-| Erros       | `src/errors/index.ts`                       |
+| O quê                    | Onde                                                         | Exemplo                     |
+| ------------------------ | ------------------------------------------------------------ | --------------------------- |
+| Use cases                | `{modulo}/application/use-cases/{modulo}-{acao}.use-case.ts` | `auth-login.use-case.ts`    |
+| Mappers                  | `{modulo}/application/mappers/{entidade}.mapper.ts`          | `user.mapper.ts`            |
+| Entidades                | `{modulo}/domain/entities/{entidade}.entity.ts`              | `user.entity.ts`            |
+| Repositórios (interface) | `{modulo}/domain/repositories/{entidade}.repository.ts`      | `user.repository.ts`        |
+| Erros                    | `{modulo}/domain/errors/{modulo}.errors.ts`                  | `auth.errors.ts`            |
+| Repositórios (impl)      | `{modulo}/infrastructure/repository/{entidade}.repo.ts`      | `user.repo.ts`              |
+| Schemas Zod              | `{modulo}/infrastructure/schemas/{modulo}.schema.ts`         | `auth.schema.ts`            |
+| Controllers              | `{modulo}/infrastructure/controllers/{modulo}.controller.ts` | `auth.controller.ts`        |
+| Rotas                    | `{modulo}/infrastructure/routes/{modulo}.routes.ts`          | `auth.routes.ts`            |
+| Provider (contrato)      | `providers/{categoria}/{servico}.contract.ts`                | `hash-comparer.contract.ts` |
+| Provider (impl)          | `providers/{categoria}/{lib}.provider.ts`                    | `bcryptjs.provider.ts`      |
+| Schemas compartilhados   | `shared/schemas/{nome}.schema.ts`                            | `error-response.schema.ts`  |
+| Erros compartilhados     | `shared/errors/error-codes.ts`                               | `ErrorCode`                 |
 
 ---
+
+## Responsabilidade por camada
+
+| Camada                       | Responsabilidade                                       |
+| ---------------------------- | ------------------------------------------------------ |
+| `application/use-cases`      | regra de negócio, orquestra repositórios e providers   |
+| `application/mappers`        | converte `Entity` → `DTO` (value objects → primitivos) |
+| `domain/entities`            | modelo de domínio com value objects                    |
+| `domain/repositories`        | contratos (interfaces) dos repositórios                |
+| `domain/errors`              | erros customizados do módulo                           |
+| `infrastructure/repository`  | implementação concreta com Prisma                      |
+| `infrastructure/schemas`     | schemas Zod para validação HTTP                        |
+| `infrastructure/controllers` | entrada HTTP, extrai cookies/params, chama use case    |
+| `infrastructure/routes`      | registra rotas no Fastify                              |
+| `providers/cryptography`     | contrato + implementação bcryptjs                      |
+| `providers/token`            | contrato + implementação JWT                           |
+| `shared/schemas`             | schemas Zod reutilizáveis entre módulos                |
+| `container.ts`               | instancia e injeta todas as dependências               |
+
+---
+
+## Replicando para um novo módulo
+
+```
+src/modules/{modulo}/
+├── application/
+│   ├── mappers/
+│   │   └── {entidade}.mapper.ts
+│   └── use-cases/
+│       └── {modulo}-{acao}.use-case.ts
+├── domain/
+│   ├── entities/
+│   │   └── {entidade}.entity.ts
+│   ├── errors/
+│   │   └── {modulo}.errors.ts
+│   └── repositories/
+│       └── {entidade}.repository.ts
+└── infrastructure/
+    ├── controllers/
+    │   └── {modulo}.controller.ts
+    ├── repository/
+    │   └── {entidade}.repo.ts
+    ├── routes/
+    │   └── {modulo}.routes.ts
+    └── schemas/
+        └── {modulo}.schema.ts
+```
 
 ## Comandos
 

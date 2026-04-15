@@ -1,53 +1,26 @@
-import js from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import globals from 'globals';
+import js from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+import { defineConfig } from "eslint/config";
+export default defineConfig([
   {
-    ignores: [
-      'node_modules/',
-      'dist/',
-      'src/generated/',
-      'db.js',
-      'server.js',
-      'whatsappServer.js',
-      'user.js',
-      'jobs/**',
-      'middleware/**',
-      'mikrotik/**',
-      'routes/**',
-      'eslint.config.cjs',
-      'src/config/**',
-      'src/controllers/**',
-    ],
+    files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: { globals: globals.node },
   },
-  js.configs.recommended,
+  tseslint.configs.recommended,
+  eslintConfigPrettier,
   {
-    files: ['src/**/*.ts'],
-    languageOptions: {
-      parser: tsparser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-      globals: {
-        ...globals.node,
-      },
-    },
     plugins: {
-      '@typescript-eslint': tseslint,
-      'simple-import-sort': simpleImportSort,
+      "simple-import-sort": simpleImportSort,
     },
     rules: {
-      ...tseslint.configs['recommended'].rules,
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
-      'no-console': 'off',
+      "simple-import-sort/imports": "error",
+      "simple-import-sort/exports": "error",
     },
   },
-];
+]);
