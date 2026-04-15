@@ -19,5 +19,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always",
     "source.organizeImports": "always"
-  }
+  },
+  "chatgpt.openOnStartup": true
 }
