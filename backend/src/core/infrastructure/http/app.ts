@@ -11,6 +11,9 @@ import {
 import fastifyCookie from "@fastify/cookie";
 
 import { env } from "../env/index.js";
+import { fromFastifyLogger } from "../observability/logger.js";
+
+import { getPrismaClient } from "../db/prisma.client.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { registerRoutes } from "./routes.js";
 
@@ -53,6 +56,12 @@ export async function buildApp(
             },
   });
 
+  // Logger da aplicação usando o Fastify como base
+  const logger = fromFastifyLogger(app.log);
+
+  // Prisma com logger integrado
+  const prisma = getPrismaClient({ logger });
+
   // Zod compilers
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -66,11 +75,12 @@ export async function buildApp(
   const cookieSecret = env.COOKIE_SECRET;
 
   if (!cookieSecret) {
+    logger.error({}, "Missing required environment variable: COOKIE_SECRET");
     throw new Error("Missing required environment variable: COOKIE_SECRET");
   }
 
   await app.register(fastifyCookie, {
-    secret: cookieSecret, // para cookies assinados
+    secret: cookieSecret,
   });
 
   // Swagger / OpenAPI
@@ -87,6 +97,20 @@ export async function buildApp(
 
   // Swagger UI
   await app.register(fastifySwaggerUi, { routePrefix: "/docs" });
+
+  // Disponibiliza logger e prisma via decorator para toda a aplicação
+  app.decorate("logger", logger);
+  app.decorate("prisma", prisma);
+
+  // Loga inicialização dos plugins
+  app.addHook("onReady", async () => {
+    logger.info({}, "Aplicação pronta");
+  });
+
+  app.addHook("onClose", async () => {
+    logger.info({}, "Aplicação encerrando...");
+    await prisma.$disconnect();
+  });
 
   // Routes (tudo aqui)
   await registerRoutes(app);

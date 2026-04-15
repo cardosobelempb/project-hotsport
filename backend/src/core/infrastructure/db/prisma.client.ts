@@ -1,5 +1,5 @@
-import { PrismaClient } from "@/generated/prisma/index.js";
-
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../../../../generated/prisma";
 import { Logger } from "../observability/logger";
 
 declare global {
@@ -11,11 +11,15 @@ type PrismaFactoryOptions = {
 };
 
 function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
+  const adapter = new PrismaPg({
+    connectionString: process.env["DATABASE_URL"] ?? "",
+  });
+
   const prisma = new PrismaClient({
+    adapter,
     log: [
       { level: "warn", emit: "event" },
       { level: "error", emit: "event" },
-      // Em produção você pode remover query/info para não vazar dados
       { level: "info", emit: "event" },
     ],
   });
@@ -29,9 +33,6 @@ function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
   return prisma;
 }
 
-/**
- * Singleton: reutiliza no dev para evitar "too many connections"
- */
 export function getPrismaClient(
   options: PrismaFactoryOptions = {},
 ): PrismaClient {

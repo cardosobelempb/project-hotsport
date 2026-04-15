@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { env } from "../env/index.js";
+import { buildLogger } from "../observability/logger.js";
 import { buildApp } from "./app.js";
 
 const PORT = env.PORT;
@@ -19,13 +20,14 @@ function printStartupBanner({
   publicHost: string;
   port: number;
 }) {
+  const logger = buildLogger();
   const baseUrl = `http://${publicHost}:${port}`;
-  console.log("");
-  console.log("Hotspot API");
-  console.log(`- API:  ${baseUrl}`);
-  console.log(`- Docs: ${baseUrl}/docs`);
+  logger.info({}, "");
+  logger.info({}, "Hotspot API");
+  logger.info({}, `- API:  ${baseUrl}`);
+  logger.info({}, `- Docs: ${baseUrl}/docs`);
   // console.log(`- JSON: ${baseUrl}/swagger.json`);
-  console.log("");
+  logger.info({}, "");
   // URLs “puras” tendem a ser clicáveis em mais terminais
   // console.log(`${baseUrl}/docs`);
   // console.log(`${baseUrl}/swagger.json`);

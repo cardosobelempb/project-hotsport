@@ -1,4 +1,4 @@
-export interface Pagination {
+export interface BasePagination {
   size?: number;
   page: number;
   sort?: [];

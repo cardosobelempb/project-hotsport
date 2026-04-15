@@ -1,0 +1,168 @@
+
+<style>
+#cd svg { width: 100%; height: auto; }
+#cd svg .node rect, #cd svg .node polygon { rx: 8; }
+</style>
+<h2 class="sr-only">Diagrama de classes do schema Prisma — modelos e relacionamentos</h2>
+<div id="cd" style="padding: 1rem 0"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+    primaryColor: dark ? '#3C3489' : '#EEEDFE',
+    primaryTextColor: dark ? '#CECBF6' : '#3C3489',
+    primaryBorderColor: dark ? '#7F77DD' : '#AFA9EC',
+    secondaryColor: dark ? '#085041' : '#E1F5EE',
+    secondaryTextColor: dark ? '#9FE1CB' : '#0F6E56',
+    secondaryBorderColor: dark ? '#1D9E75' : '#5DCAA5',
+    tertiaryColor: dark ? '#3C3489' : '#FAEEDA',
+    tertiaryTextColor: dark ? '#FAC775' : '#854F0B',
+    tertiaryBorderColor: dark ? '#EF9F27' : '#BA7517',
+    noteBkgColor: dark ? '#444441' : '#F1EFE8',
+    noteTextColor: dark ? '#D3D1C7' : '#2C2C2A',
+  }
+});
+
+const diagram = `classDiagram
+  direction TB
+
+  class Organization {
+    +UUID id
+    +String name
+    +String slug
+    +Boolean isActive
+  }
+
+  class Member {
+    +UUID id
+    +MemberRole role
+    OWNER | ADMIN | OPERATOR
+  }
+
+  class User {
+    +UUID id
+    +String email
+    +String cpf
+    +String phoneNumber
+    +UserStatus status
+  }
+
+  class Account {
+    +UUID id
+    +String provider
+    +String providerAccountId
+    +String passwordHash
+  }
+
+  class Token {
+    +UUID id
+    +String accessToken
+    +String refreshToken
+    +DateTime expiresAt
+  }
+
+  class Otp {
+    +UUID id
+    +String phone
+    +String codeHash
+    +DateTime expiresAt
+    +Int attempts
+  }
+
+  class Address {
+    +UUID id
+    +AddressType type
+    +Boolean isPrimary
+    +String city
+    +String state
+    +String zipCode
+  }
+
+  class LgpdConsent {
+    +UUID id
+    +Boolean consentTerms
+    +Boolean consentMarketing
+    +Boolean consentDataSharing
+    +Boolean consentAnalytics
+    +String consentVersion
+    +ConsentStatus status
+    +DateTime withdrawnAt
+  }
+
+  class Mikrotik {
+    +UUID id
+    +String host
+    +Int port
+    +String macAddress
+    +MikrotikStatus status
+  }
+
+  class HotspotPlan {
+    +UUID id
+    +String name
+    +PlanType type
+    +Int durationSecs
+    +Int dataLimitMb
+  }
+
+  class HotspotUser {
+    +UUID id
+    +String username
+    +String macAddress
+    +HotspotUserStatus status
+  }
+
+  class Voucher {
+    +UUID id
+    +String code
+    +VoucherStatus status
+    +DateTime expiresAt
+    +DateTime usedAt
+  }
+
+  class MercadoPagoConfig {
+    +Int id
+    +String publicKey
+    +String clientId
+    +String webhookSecret
+  }
+
+  class EfiConfig {
+    +Int id
+    +String pixKey
+    +String clientId
+    +Environment environment
+  }
+
+  Organization "1" --> "*" Member        : has members
+  Organization "1" --> "*" Mikrotik      : owns
+  Organization "1" --> "*" HotspotPlan   : defines plans
+  Organization "1" --> "*" HotspotUser   : manages users
+  Organization "1" --> "*" Voucher       : issues
+  Organization "1" --> "*" LgpdConsent   : collects consent
+
+  User "1" --> "*" Member        : participates
+  User "1" --> "*" Account       : authenticates via
+  User "1" --> "*" Token         : has sessions
+  User "1" --> "*" Address       : has addresses
+  User "1" --> "*" Otp           : verifies via
+  User "1" --> "*" LgpdConsent   : gives consent
+
+  Mikrotik "1"    --> "*" Voucher      : validates
+  Mikrotik "1"    --> "*" HotspotUser  : manages
+  HotspotPlan "1" --> "*" Voucher      : applied to
+`;
+
+const { svg } = await mermaid.render('cd-svg', diagram);
+document.getElementById('cd').innerHTML = svg;
+</script>

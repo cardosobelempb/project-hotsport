@@ -5,8 +5,8 @@ import {
   isResponseSerializationError,
 } from "fastify-type-provider-zod";
 
-import { ValidationError } from "@/core/core";
-import { Prisma } from "@/generated/prisma";
+import { ValidationError } from "@/core/domain/errors/validation.error";
+import { Prisma } from "../../../../../generated/prisma";
 
 interface ErrorResponse {
   statusCode: number;

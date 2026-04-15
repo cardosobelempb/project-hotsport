@@ -1,13 +1,12 @@
+import { IsoDateTimeInput, UUIDString } from "@/shared/schemas/helpers";
 import { z } from "zod";
-
-import { IsoDateTimeString, UUIDString } from "@/shared/schemas";
 
 export const RadiusUserSchema = z.object({
   id: UUIDString,
   username: z.string(),
   planId: z.number().int().nullable(),
   nasId: z.number().int().nullable(),
-  createdAt: IsoDateTimeString,
+  createdAt: IsoDateTimeInput,
 });
 
 export const CreateRadiusUserSchema = z.object({

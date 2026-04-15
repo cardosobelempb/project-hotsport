@@ -1,22 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES2024",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "node16",
+    "moduleResolution": "node16",
     "outDir": "./dist",
     "rootDir": "./src",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ] // só isso já basta
+    },
     "strict": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
-    "exactOptionalPropertyTypes": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
+    "exactOptionalPropertyTypes": true
   },
   "include": [
     "src/**/*"

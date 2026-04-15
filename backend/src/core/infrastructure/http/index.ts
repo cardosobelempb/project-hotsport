@@ -6,6 +6,7 @@
 import "reflect-metadata";
 import "../env/index.js";
 
+import { buildLogger } from "../observability/logger.js";
 import { startServer } from "./server.js";
 
 /**
@@ -14,14 +15,15 @@ import { startServer } from "./server.js";
  * e iniciar o servidor apenas quando tudo estiver pronto.
  */
 async function bootstrap(): Promise<void> {
+  const logger = buildLogger();
   try {
     // Inicializa conexão com o banco
-    console.log("Data Source inicializado com sucesso! 🚀");
+    logger.info({}, "Data Source inicializado com sucesso! 🚀");
 
     // Inicia servidor HTTP
     await startServer();
   } catch (error) {
-    console.error("[Bootstrap] Erro ao inicializar a aplicação:", error);
+    logger.error({ error }, "[Bootstrap] Erro ao inicializar a aplicação:");
 
     // Fail fast: encerra o processo com erro
     process.exit(1);

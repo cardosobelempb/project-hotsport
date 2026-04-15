@@ -1,9 +1,11 @@
-import { Either, left, right, UnauthorizedError } from "@/core";
 import { env } from "@/core/infrastructure/env";
+
+import { Either, left, right } from "@/core/domain/errors/handle-errors";
+import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
+import { UserMapper } from "@/modulos/user/infrastructure/mappers/user.mapper";
 import { UserPrismaRepository } from "@/modulos/user/infrastructure/repositories/user-prisma.repository";
-import { UserMapper } from "@/modulos/user/infrastructure/schemas/user.schema";
-import { verify } from "jsonwebtoken";
-import { AuthSessionResponseType } from "../../infrastructure/schemas/auth.session.schema";
+import { JwtPayload, verify } from "jsonwebtoken";
+import { AuthSessionResponseType } from "../../infrastructure/http/schemas/session-auth.schema";
 
 export interface AuthSessionUseCaseInput {
   accessToken: string;
@@ -16,6 +18,17 @@ export type AuthSessionUseCaseResult = Either<
   AuthSessionUseCaseOutput
 >;
 
+const verifyToken = (
+  token: string,
+  secret: string,
+): JwtPayload | string | null => {
+  try {
+    return verify(token, secret);
+  } catch {
+    return null;
+  }
+};
+
 export class AuthSessionUseCase {
   constructor(private readonly userPrismaRepository: UserPrismaRepository) {}
   async execute({
@@ -25,24 +38,24 @@ export class AuthSessionUseCase {
       return left(new UnauthorizedError("Unauthorized"));
     }
 
-    let payload: any;
-    try {
-      payload = verify(accessToken, env.ACCESS_TOKEN_SECRET_KEY || "");
-    } catch (err) {
-      return left(new UnauthorizedError("Unauthorized"));
-    }
+    const decoded = verifyToken(accessToken, env.ACCESS_TOKEN_SECRET_KEY || "");
 
-    if (!payload || typeof payload !== "object" || !payload.sub) {
+    if (
+      !decoded ||
+      typeof decoded !== "object" ||
+      !("sub" in decoded) ||
+      !decoded.sub
+    ) {
       return left(new UnauthorizedError("Unauthorized"));
     }
 
     const user = await this.userPrismaRepository.findById(
-      payload.sub.toString(),
+      decoded.sub.toString(),
     );
     if (!user) {
       return left(new UnauthorizedError("Unauthorized"));
     }
 
-    return right({ user: UserMapper.toHttp(user) });
+    return right({ user: UserMapper.toOutput(user) });
   }
 }

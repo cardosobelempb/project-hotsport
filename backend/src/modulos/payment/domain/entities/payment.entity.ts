@@ -1,10 +1,24 @@
-// domain/entities/payment.entity.ts
-import { EntityDomain, UUIDVO } from "@/core";
-import { Optional } from "@/core/core/common";
+import { Optional } from "@/core/domain/common/types";
+import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
+import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 
-import { PaymentProps } from "./payment.props";
+export interface PaymentProps {
+  id: UUIDVO;
+  planId: string;
+  email: string | null;
+  planName: string | null;
+  amountCents: number;
+  status: string | null;
+  mercadoPagoId: string | null;
+  macAddress: string | null;
+  cpf: string | null;
+  ipAddress: string | null;
+  createdAt: Date;
+  expiresAt: Date | null;
+  updatedAt: Date;
+}
 
-export class PaymentEntity extends EntityDomain<PaymentProps> {
+export class PaymentEntity extends BaseEntity<PaymentProps> {
   /* =======================
    * Getters
    * ======================= */

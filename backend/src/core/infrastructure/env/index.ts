@@ -1,4 +1,3 @@
-// src/shared/config/env.ts
 import { parseEnvArray } from "@/shared/schemas/helpers";
 import "dotenv/config";
 import { z } from "zod";
@@ -21,6 +20,18 @@ export const envSchema = z.object({
 
   // Database
   DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
+  // POSTGRES_USER: z
+  //   .string()
+  //   .min(1, "POSTGRES_USER é obrigatório")
+  //   .default("postgres"),
+  // POSTGRES_PASSWORD: z
+  //   .string()
+  //   .min(1, "POSTGRES_PASSWORD é obrigatório")
+  //   .default("docker"),
+  // POSTGRES_DB: z
+  //   .string()
+  //   .min(1, "POSTGRES_DB é obrigatório")
+  //   .default("hotspot"),
 
   // JWT
   JWT_SECRET_KEY: z.string().min(1, "JWT_SECRET_KEY é obrigatória"),

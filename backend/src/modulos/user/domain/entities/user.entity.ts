@@ -1,80 +1,119 @@
-// domain/entities/user.entity.ts
-import { EntityDomain, UUIDVO } from "@/core";
-import { Optional } from "@/core/core/common";
+import { Optional } from "@/core/domain/common/types";
+import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
+import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
+import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
+import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
+import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { UserStatus } from "../enums/user-status.enum";
 
-import { UserProps } from "./user.props";
+export interface UserProps {
+  firstName: string;
+  lastName: string;
+  email: EmailVO;
+  cpf: CpfVO;
+  phoneNumber: PhoneVO | null;
+  status: UserStatus;
+  createdAt: Date;
+  updatedAt: Date | null;
+}
 
-export class UserEntity extends EntityDomain<UserProps> {
-  /* =======================
-   * Getters
-   * ======================= */
+export class UserEntity extends BaseAggregate<UserProps> {
+  // GETTERS
 
-  get firstName(): string {
+  get firstName() {
     return this.props.firstName;
   }
-
-  get lastName(): string {
+  get lastName() {
     return this.props.lastName;
   }
-
-  get status(): string {
-    return this.props.status;
+  get email(): EmailVO {
+    return this.props.email;
   }
-
-  get cpf(): string {
+  get cpf(): CpfVO {
     return this.props.cpf;
   }
-
-  get phoneNumber(): string {
+  get phoneNumber(): PhoneVO | null {
     return this.props.phoneNumber;
   }
-
-  get createdAt(): Date {
+  get status() {
+    return this.props.status;
+  }
+  get createdAt() {
     return this.props.createdAt;
   }
-
-  get updatedAt(): Date | null {
+  get updatedAt() {
     return this.props.updatedAt;
   }
 
-  /* ======================
-   * Métodos internos
-   * ======================= */
+  // PRIVATE
 
   private touch(): void {
     this.props.updatedAt = new Date();
   }
 
-  /* =======================
-   * Fábricas
-   * ======================= */
+  // DOMAIN RULES
+
+  activate(): void {
+    if (this.isActive) return;
+
+    this.props.status = UserStatus.ACTIVE;
+    this.touch();
+  }
+
+  deactivate(): void {
+    if (this.props.status === UserStatus.INACTIVE) return;
+
+    this.props.status = UserStatus.INACTIVE;
+    this.touch();
+  }
+
+  block(): void {
+    if (this.props.status === UserStatus.BLOCKED) return;
+
+    this.props.status = UserStatus.BLOCKED;
+    this.touch();
+  }
+
+  // DERIVED STATE
+
+  get isActive(): boolean {
+    return this.props.status === UserStatus.ACTIVE;
+  }
+
+  // FACTORY
 
   static create(
-    props: Optional<UserProps, "createdAt" | "updatedAt" | "status">,
+    props: Optional<
+      UserProps,
+      "phoneNumber" | "createdAt" | "updatedAt" | "status"
+    >,
     id?: UUIDVO,
-  ) {
-    const user = new UserEntity(
+  ): UserEntity {
+    return new UserEntity(
       {
         ...props,
-        status: props.status ?? "active",
+        phoneNumber: props.phoneNumber ?? null,
+        status: props.status ?? UserStatus.ACTIVE,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: props.updatedAt ?? new Date(),
+        updatedAt: null, // ✅ CORREÇÃO
       },
       id,
     );
-
-    return user;
   }
+
+  // SERIALIZAÇÃO SEGURA
 
   toJSON() {
     return {
       id: this.id.toString(),
       firstName: this.firstName,
       lastName: this.lastName,
-      phoneNumber: this.phoneNumber,
-      cpf: this.cpf,
+      email: this.email.getValue(),
+      cpf: this.cpf.getValue(),
+      phoneNumber: this.phoneNumber?.getValue() ?? null,
       status: this.status,
       createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt?.toISOString() ?? null,
     };
   }
 }

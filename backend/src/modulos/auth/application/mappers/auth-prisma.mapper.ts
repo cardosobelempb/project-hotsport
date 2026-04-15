@@ -1,50 +1,43 @@
-import { EmailVO, UUIDVO } from "@/core";
-import { Prisma, type Auth } from "@/generated/prisma";
+import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { Prisma, type Account } from "../../../../../generated/prisma";
 
-import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
-import { AuthEntity } from "../../domain/entities/auth.entity";
-import { AuthResponseType } from "../../infrastructure/schemas/auth.schema";
+import { AccountEntity } from "@/modulos/account/domain/entities/account.entity";
 
-export class AuthPrismaMapper {
-  static toDomain(raw: Auth): AuthEntity {
-    return AuthEntity.create({
-      id: UUIDVO.create(raw.id),
+export class AccountPrismaMapper {
+  static toDomain(raw: Account): AccountEntity {
+    return AccountEntity.create({
       userId: UUIDVO.create(raw.userId),
-      email: EmailVO.create(raw.email),
-      passwordHash: raw.passwordHash,
-      createdAt: raw.createdAt,
+      provider: raw.provider,
+      providerAccountId: UUIDVO.create(raw.providerAccountId),
+      passwordHash: raw.passwordHash ?? "",
     });
   }
 
-  static toPrisma(entity: AuthEntity): Prisma.AuthUncheckedCreateInput {
+  static toPersist(entity: AccountEntity): Prisma.AccountUncheckedCreateInput {
     return {
-      id: entity.id.toString(),
       userId: entity.userId.toString(),
-      email: entity.email.toString(),
-      passwordHash: entity.passwordHash?.toString() ?? "",
-      createdAt: entity.createdAt,
+      provider: "credentials",
+      providerAccountId: entity.provider.toString(),
+      passwordHash: entity.passwordHash?.toString(),
     };
   }
 
-  static toUpdatePrisma(entity: AuthEntity): Prisma.AuthUncheckedUpdateInput {
+  static toUpdatePrisma(
+    entity: AccountEntity,
+  ): Prisma.AccountUncheckedUpdateInput {
     return {
-      email: entity.email.toString(),
-      passwordHash: entity.passwordHash?.toString() ?? "",
+      passwordHash: entity.passwordHash?.toString(),
     };
   }
 
   // Domain entities → resposta HTTP
-  static toHttp(auth: UserEntity): AuthResponseType {
+  static toHttp(
+    account: AccountEntity,
+  ): Omit<Prisma.AccountUncheckedCreateInput, "passwordHash"> {
     return {
-      user: {
-        id: auth.id.toString(),
-        firstName: auth.firstName,
-        lastName: auth.lastName,
-        cpf: auth.cpf,
-        phoneNumber: auth.phoneNumber,
-        status: auth.status,
-        createdAt: auth.createdAt.toISOString(),
-      },
+      userId: account.userId.toString(),
+      provider: account.provider,
+      providerAccountId: account.providerAccountId.toString(),
     };
   }
 }

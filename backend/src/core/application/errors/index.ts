@@ -1,3 +1,3 @@
-import { UseCaseError } from "./usecase-error";
+import { BaseUseCaseError } from "./base-usecase.error";
 
-export type { UseCaseError };
+export type { BaseUseCaseError };

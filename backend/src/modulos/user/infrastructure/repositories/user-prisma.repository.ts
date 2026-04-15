@@ -1,10 +1,13 @@
-import { SearchInput, SearchOutput } from "@/core";
-import { Prisma } from "@/generated/prisma";
 import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
 import { prisma } from "@/shared/lib/db";
 
-import { UserPrismaMapper } from "../../application/mappers/user-prisma.mapper";
-import { UserRepository } from "../../domain/repositories/UserRepository";
+import {
+  SearchInput,
+  SearchOutput,
+} from "@/core/domain/repositories/search.repository";
+import { Prisma } from "../../../../../generated/prisma";
+import { UserRepository } from "../../domain/repositories/user.repository";
+import { UserMapper } from "../mappers/user.mapper";
 
 export class UserPrismaRepository implements UserRepository {
   async search(params: SearchInput): Promise<SearchOutput<UserEntity>> {
@@ -51,7 +54,7 @@ export class UserPrismaRepository implements UserRepository {
     ]);
 
     return {
-      items: users.map(UserPrismaMapper.toDomain),
+      items: users.map(UserMapper.toDomain),
       total,
       totalPages: Math.ceil(total / perPage),
       currentPage: page,
@@ -65,7 +68,7 @@ export class UserPrismaRepository implements UserRepository {
   async findById(id: string): Promise<UserEntity | null> {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return null;
-    return UserPrismaMapper.toDomain(user);
+    return UserMapper.toDomain(user);
   }
 
   // async findByEmail(email: string): Promise<boolean | null> {
@@ -80,24 +83,40 @@ export class UserPrismaRepository implements UserRepository {
     return true;
   }
 
-  async save(entity: UserEntity): Promise<UserEntity> {
-    const data = UserPrismaMapper.toPrisma(entity);
-    const updateData: Prisma.UserUncheckedUpdateInput = {
-      firstName: data.firstName ?? "",
-      lastName: data.lastName ?? "",
-      phoneNumber: data.phoneNumber ?? "",
-      cpf: data.cpf ?? "",
-      createdAt: data.createdAt ?? new Date(),
-      updatedAt: new Date(),
-    };
+  async findByEmail(email: string): Promise<boolean | null> {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return null;
+    return true;
+  }
 
-    const user = await prisma.user.upsert({
+  async create(entity: UserEntity): Promise<UserEntity> {
+    const data = UserMapper.toPersistence(entity);
+
+    const user = await prisma.user.create({ data });
+
+    return UserMapper.toDomain(user);
+  }
+
+  async createWithTx(
+    entity: UserEntity,
+    tx: Prisma.TransactionClient,
+  ): Promise<UserEntity> {
+    const data = UserMapper.toPersistence(entity);
+    const user = await tx.user.create({ data });
+    return UserMapper.toDomain(user);
+  }
+
+  async save(entity: UserEntity): Promise<UserEntity> {
+    const user = await prisma.user.update({
       where: { id: entity.id.toString() },
-      create: data,
-      update: updateData,
+      data: {
+        firstName: entity.firstName,
+        lastName: entity.lastName,
+        cpf: entity.cpf.getValue(),
+      },
     });
 
-    return UserPrismaMapper.toDomain(user);
+    return UserMapper.toDomain(user);
   }
 
   async delete(entity: UserEntity): Promise<void> {
