@@ -2,14 +2,17 @@ import { Optional } from "@/core/domain/common/types";
 import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
 import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
 import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { OrganizationStatus } from "../enums/organization.enum";
 
 export interface OrganizationProps {
   name: string;
   slug: SlugVO;
-  logoUrl?: string | null;
+  logoUrl: string | null;
+  status: OrganizationStatus;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
 export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
@@ -24,6 +27,22 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
   }
   get isActive() {
     return this.props.isActive;
+  }
+
+  get status() {
+    return this.props.status;
+  }
+
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
+  get updatedAt() {
+    return this.props.updatedAt;
+  }
+
+  get deletedAt() {
+    return this.props.deletedAt;
   }
 
   private touch() {
@@ -45,7 +64,12 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
   static create(
     props: Optional<
       OrganizationProps,
-      "logoUrl" | "createdAt" | "updatedAt" | "isActive"
+      | "logoUrl"
+      | "createdAt"
+      | "updatedAt"
+      | "isActive"
+      | "status"
+      | "deletedAt"
     >,
     id?: UUIDVO,
   ) {
@@ -53,9 +77,11 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
       {
         ...props,
         logoUrl: props.logoUrl ?? null,
+        status: props.status ?? OrganizationStatus.ACTIVE,
         isActive: props.isActive ?? true,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: null,
+        deletedAt: null,
       },
       id,
     );

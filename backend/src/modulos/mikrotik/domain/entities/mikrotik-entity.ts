@@ -8,28 +8,38 @@ export interface MikrotikProps {
   name: string;
   host: string;
   port: number;
+  macAddress: string;
+  ipAddress: string;
   username: string;
   passwordHash: string;
-  ipAddress: string;
-  macAddress: string;
   status: MikrotikStatus;
   createdAt: Date;
   updatedAt: Date | null;
 }
 
 export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
+  get organizationId() {
+    return this.props.organizationId;
+  }
+
   get name() {
     return this.props.name;
   }
+
   get host() {
     return this.props.host;
-  }
-  get status() {
-    return this.props.status;
   }
 
   get port() {
     return this.props.port;
+  }
+
+  get macAddress() {
+    return this.props.macAddress;
+  }
+
+  get ipAddress() {
+    return this.props.ipAddress;
   }
 
   get username() {
@@ -40,12 +50,8 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
     return this.props.passwordHash;
   }
 
-  get ipAddress() {
-    return this.props.ipAddress;
-  }
-
-  get macAddress() {
-    return this.props.macAddress;
+  get status() {
+    return this.props.status;
   }
 
   get createdAt() {
@@ -56,26 +62,54 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
     return this.props.updatedAt;
   }
 
-  get organizationId() {
-    return this.props.organizationId;
+  markOnline() {
+    if (this.props.status === MikrotikStatus.ONLINE) return;
+    this.props.status = MikrotikStatus.ONLINE;
+    this.touch();
+  }
+
+  markOffline() {
+    if (this.props.status === MikrotikStatus.OFFLINE) return;
+    this.props.status = MikrotikStatus.OFFLINE;
+    this.touch();
+  }
+
+  markError() {
+    if (this.props.status === MikrotikStatus.ERROR) return;
+    this.props.status = MikrotikStatus.ERROR;
+    this.touch();
+  }
+
+  updateConnection(params: {
+    name?: string;
+    host?: string;
+    port?: number;
+    macAddress?: string;
+    ipAddress?: string;
+    username?: string;
+    passwordHash?: string;
+  }) {
+    if (params.name !== undefined) this.props.name = params.name;
+    if (params.host !== undefined) this.props.host = params.host;
+    if (params.port !== undefined) this.props.port = params.port;
+    if (params.macAddress !== undefined)
+      this.props.macAddress = params.macAddress;
+    if (params.ipAddress !== undefined) this.props.ipAddress = params.ipAddress;
+    if (params.username !== undefined) this.props.username = params.username;
+    if (params.passwordHash !== undefined)
+      this.props.passwordHash = params.passwordHash;
+    this.touch();
   }
 
   private touch() {
     this.props.updatedAt = new Date();
   }
 
-  markOnline() {
-    this.props.status = MikrotikStatus.ONLINE;
-    this.touch();
-  }
-
-  markOffline() {
-    this.props.status = MikrotikStatus.OFFLINE;
-    this.touch();
-  }
-
   static create(
-    props: Optional<MikrotikProps, "status" | "createdAt" | "updatedAt">,
+    props: Optional<
+      MikrotikProps,
+      "port" | "status" | "createdAt" | "updatedAt"
+    >,
     id?: UUIDVO,
   ) {
     return new MikrotikEntity(
@@ -84,7 +118,7 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
         port: props.port ?? 8728,
         status: props.status ?? MikrotikStatus.OFFLINE,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: null,
+        updatedAt: props.updatedAt ?? null,
       },
       id,
     );

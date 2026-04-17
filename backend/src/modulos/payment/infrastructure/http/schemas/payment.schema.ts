@@ -1,23 +1,31 @@
-import { EmailString, UUIDString } from "@/shared/schemas/helpers";
-import z from "zod";
+import { z } from "zod";
 
-// Payment
+import { EmailString, IsoDateTimeString } from "@/schemas/helpers";
+
 export const PaymentSchema = z.object({
-  id: UUIDString,
-  planId: UUIDString,
+  id: z.string().uuid(),
+  planId: z.string().uuid(),
   email: EmailString.nullable(),
   planName: z.string().nullable(),
-  amount: z.number().int(),
+  amountCents: z.number().int(),
   status: z.string().nullable(),
-  mpPaymentId: UUIDString,
-  createdAt: z.string(),
-  expiresAt: z.string().nullable(),
-  mac: z.string().nullable(),
+
+  // Melhor: padronizar como string no response (BigInt -> string)
+  mercadoPagoId: z.string().uuid().nullable(),
+
+  macAddress: z.string().nullable(),
   cpf: z.string().nullable(),
-  ip: z.string().nullable(),
+  ipAddress: z.string().nullable(),
+
+  createdAt: IsoDateTimeString,
+  expiresAt: IsoDateTimeString.nullable(),
+  updatedAt: IsoDateTimeString,
 });
 
 export const CreatePaymentSchema = PaymentSchema.omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
+
+export const PaymentListSchema = z.array(PaymentSchema);

@@ -1,14 +1,25 @@
 import { HotspotPlanType } from "../../domain/enums/hotsport-plan.enuns";
 
-export interface HotsportPlanDto {
+interface HotsportPlanDto {
   id: string;
   organizationId: string;
   name: string;
   duratioSec: number;
   dataLimitMb: number;
   type: HotspotPlanType;
-  createAt: string;
+  createdAt: string;
   updatedAt: string | null;
+}
+
+export interface HotsportPlanRawDto extends Omit<
+  HotsportPlanDto,
+  "createdAt" | "updatedAt" | "type"
+> {
+  id: string;
+  organizationId: string;
+  name: string;
+  duratioSec: number;
+  dataLimitMb: number;
 }
 
 export interface HotsportPlanInputDto extends Omit<
@@ -31,7 +42,7 @@ export interface HotsportPlanOutputDto extends Omit<
   duratioSec: number;
   dataLimitMb: number;
   type: HotspotPlanType;
-  createAt: string;
+  createdAt: string;
 }
 
 export interface HotsportPlanOptionalDto extends Partial<HotsportPlanDto> {}

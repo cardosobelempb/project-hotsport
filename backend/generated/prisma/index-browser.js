@@ -125,6 +125,7 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   logoUrl: 'logoUrl',
+  status: 'status',
   isActive: 'isActive',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
@@ -299,6 +300,64 @@ exports.Prisma.LgpdConsentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SubscriptionPlanScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  status: 'status',
+  billingCycle: 'billingCycle',
+  amount: 'amount',
+  currency: 'currency',
+  trialDays: 'trialDays',
+  sortOrder: 'sortOrder',
+  isPublic: 'isPublic',
+  isDefault: 'isDefault',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  subscriptionPlanId: 'subscriptionPlanId',
+  status: 'status',
+  billingCycle: 'billingCycle',
+  amount: 'amount',
+  currency: 'currency',
+  trialStartsAt: 'trialStartsAt',
+  trialEndsAt: 'trialEndsAt',
+  startsAt: 'startsAt',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  canceledAt: 'canceledAt',
+  expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  subscriptionId: 'subscriptionId',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  description: 'description',
+  dueAt: 'dueAt',
+  paidAt: 'paidAt',
+  failedAt: 'failedAt',
+  refundedAt: 'refundedAt',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -313,6 +372,12 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  SUSPENDED: 'SUSPENDED'
+};
+
 exports.MemberRole = exports.$Enums.MemberRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
@@ -370,6 +435,36 @@ exports.ConsentStatus = exports.$Enums.ConsentStatus = {
   WITHDRAWN: 'WITHDRAWN'
 };
 
+exports.PlanStatus = exports.$Enums.PlanStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  ARCHIVED: 'ARCHIVED'
+};
+
+exports.BillingCycle = exports.$Enums.BillingCycle = {
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  SEMIANNUAL: 'SEMIANNUAL',
+  YEARLY: 'YEARLY'
+};
+
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  SUSPENDED: 'SUSPENDED',
+  CANCELED: 'CANCELED',
+  EXPIRED: 'EXPIRED'
+};
+
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  CANCELED: 'CANCELED',
+  REFUNDED: 'REFUNDED'
+};
+
 exports.Prisma.ModelName = {
   Organization: 'Organization',
   Member: 'Member',
@@ -384,7 +479,10 @@ exports.Prisma.ModelName = {
   HotspotPlan: 'HotspotPlan',
   HotspotUser: 'HotspotUser',
   Voucher: 'Voucher',
-  LgpdConsent: 'LgpdConsent'
+  LgpdConsent: 'LgpdConsent',
+  SubscriptionPlan: 'SubscriptionPlan',
+  Subscription: 'Subscription',
+  Payment: 'Payment'
 };
 
 /**

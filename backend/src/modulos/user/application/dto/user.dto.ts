@@ -1,6 +1,6 @@
 import { UserStatus } from "../../domain/enums/user-status.enum";
 
-export interface UserDto {
+interface UserDto {
   id: string;
   firstName: string;
   lastName: string;
@@ -10,6 +10,18 @@ export interface UserDto {
   status: UserStatus;
   createdAt: string;
   updatedAt: string | null;
+}
+
+export interface UserRawDto extends Omit<
+  UserDto,
+  "createdAt" | "updatedAt" | "status"
+> {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  cpf: string;
+  email: string;
 }
 
 export interface UserInputDto extends Omit<

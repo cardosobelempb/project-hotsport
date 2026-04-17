@@ -1,7 +1,8 @@
 import { Optional } from "@/core/domain/common/types";
-import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
+import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
 import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 import { MemberRole } from "../emuns/member-roles.enum";
+import { CannotDemoteOwnerError } from "../erros/cannot-demote-owner.error";
 
 export interface MemberProps {
   organizationId: UUIDVO;
@@ -11,40 +12,45 @@ export interface MemberProps {
   updatedAt: Date | null;
 }
 
-export class MemberEntity extends BaseEntity<MemberProps> {
+export class MemberEntity extends BaseAggregate<MemberProps> {
   get organizationId() {
     return this.props.organizationId;
   }
+
   get userId() {
     return this.props.userId;
   }
+
   get role() {
     return this.props.role;
   }
 
-  get createdAt() {
-    return this.props.createdAt;
+  promoteToAdmin() {
+    if (this.props.role === MemberRole.OWNER) return;
+    this.props.role = MemberRole.ADMIN;
+    this.touch();
   }
-  get updatedAt() {
-    return this.props.updatedAt;
+
+  transferOwnership() {
+    this.props.role = MemberRole.OWNER;
+    this.touch();
+  }
+
+  setOperator() {
+    if (this.props.role === MemberRole.OWNER) {
+      throw new CannotDemoteOwnerError("Cannot demote an owner to operator");
+    }
+
+    this.props.role = MemberRole.OPERATOR;
+    this.touch();
   }
 
   private touch() {
     this.props.updatedAt = new Date();
   }
 
-  promoteToOwner() {
-    this.props.role = MemberRole.OWNER;
-    this.touch();
-  }
-
-  promoteToAdmin() {
-    this.props.role = MemberRole.ADMIN;
-    this.touch();
-  }
-
   static create(
-    props: Optional<MemberProps, "createdAt" | "updatedAt" | "role">,
+    props: Optional<MemberProps, "role" | "createdAt" | "updatedAt">,
     id?: UUIDVO,
   ) {
     return new MemberEntity(
@@ -52,7 +58,7 @@ export class MemberEntity extends BaseEntity<MemberProps> {
         ...props,
         role: props.role ?? MemberRole.OPERATOR,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: null,
+        updatedAt: props.updatedAt ?? null,
       },
       id,
     );

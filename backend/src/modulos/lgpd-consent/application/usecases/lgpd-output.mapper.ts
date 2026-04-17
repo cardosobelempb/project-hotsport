@@ -1,8 +1,4 @@
-export enum ConsentStatus {
-  ACTIVE = "ACTIVE", // usuário aceitou
-  WITHDRAWN = "WITHDRAWN", // usuário retirou o consentimento
-  REVOKED = "REVOKED", // usuário revogou
-}
+import { LgpdConsentStatus } from "../../domain/enums/lgpd-consent-status.enum";
 
 export interface LgpdOutputDto {
   id: string;
@@ -19,7 +15,7 @@ export interface LgpdOutputDto {
   userAgent: string;
   consentVersion: string;
   // Ciclo de vida
-  status: ConsentStatus;
+  status: LgpdConsentStatus;
   withdrawnAt: Date | null;
   createdAt: Date;
   updatedAt: Date | null;
@@ -52,7 +48,7 @@ export const mapLgpd = (record: LgpdMapperInput): LgpdOutputDto => ({
   macAddress: record.macAddress,
   userAgent: record.userAgent,
   consentVersion: record.consentVersion,
-  status: ConsentStatus.ACTIVE, // Definindo como ACTIVE por padrão, ajuste conforme necessário
+  status: LgpdConsentStatus.ACTIVE, // Definindo como ACTIVE por padrão, ajuste conforme necessário
   withdrawnAt: null, // Definindo como null por padrão, ajuste conforme necessário
   createdAt: new Date(), // Definindo a data atual, ajuste conforme necessário
   updatedAt: null, // Definindo como null por padrão, ajuste conforme necessário

@@ -11,7 +11,7 @@ import { ConflictError } from "@/core/domain/errors/usecases/conflict.error";
 import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
 import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
 import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
-import { UserMapper } from "@/modulos/user/infrastructure/mappers/user.mapper";
+import { UserMapper } from "@/modulos/user/infrastructure/mappers/prisma/user-prisma.mapper";
 
 import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
 import { CreateAccountInputDto } from "../dto/create-account.input.ts";

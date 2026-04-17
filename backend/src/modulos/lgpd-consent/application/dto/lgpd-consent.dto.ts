@@ -1,8 +1,73 @@
+// import { LgpdConsentStatus } from "../../domain/enums/lgpd-consent-status.enum";
+
 import { LgpdConsentStatus } from "../../domain/enums/lgpd-consent-status.enum";
 
-export interface LgpdConsentDto {
+// export interface LgpdConsentDto {
+//   id: string;
+//   lgpdconsentId: string;
+//   organizationId: string;
+//   // O que o usuário aceitou
+//   consentTerms: boolean;
+//   consentMarketing: boolean;
+//   consentDataSharing: boolean;
+//   consentAnalytics: boolean;
+//   // Rastreabilidade (obrigatório pela LGPD)
+//   ipAddress: string;
+//   macAddress: string;
+//   lgpdconsentAgent: string;
+//   consentVersion: string;
+//   // Ciclo de vida
+//   status: LgpdConsentStatus;
+//   withdrawnAt: Date | null;
+//   updatedAt: string | null;
+// }
+
+// export interface OrganizationInputDto extends Omit<
+//   LgpdConsentDto,
+//   "id" | "createdAt" | "updatedAt" | "status" | "withdrawnAt"
+// > {
+//   lgpdconsentId: string;
+//   organizationId: string;
+//   // O que o usuário aceitou
+//   consentTerms: boolean;
+//   consentMarketing: boolean;
+//   consentDataSharing: boolean;
+//   consentAnalytics: boolean;
+//   // Rastreabilidade (obrigatório pela LGPD)
+//   ipAddress: string;
+//   macAddress: string;
+//   lgpdconsentAgent: string;
+//   consentVersion: string;
+// }
+
+// export interface OrganizationOutputDto extends Omit<
+//   LgpdConsentDto,
+//   "updatedAt" | "withdrawnAt"
+// > {
+//   id: string;
+//   lgpdconsentId: string;
+//   organizationId: string;
+//   // O que o usuário aceitou
+//   consentTerms: boolean;
+//   consentMarketing: boolean;
+//   consentDataSharing: boolean;
+//   consentAnalytics: boolean;
+//   // Rastreabilidade (obrigatório pela LGPD)
+//   ipAddress: string;
+//   macAddress: string;
+//   lgpdconsentAgent: string;
+//   consentVersion: string;
+//   // Ciclo de vida
+//   status: LgpdConsentStatus;
+//   withdrawnAt: Date | null;
+//   updatedAt: string | null;
+// }
+
+// export interface OrganizationOptionalDto extends Partial<LgpdConsentDto> {}
+
+interface LgpdConsentDto {
   id: string;
-  userId: string;
+  lgpdconsentId: string;
   organizationId: string;
   // O que o usuário aceitou
   consentTerms: boolean;
@@ -12,7 +77,7 @@ export interface LgpdConsentDto {
   // Rastreabilidade (obrigatório pela LGPD)
   ipAddress: string;
   macAddress: string;
-  userAgent: string;
+  lgpdconsentAgent: string;
   consentVersion: string;
   // Ciclo de vida
   status: LgpdConsentStatus;
@@ -20,11 +85,12 @@ export interface LgpdConsentDto {
   updatedAt: string | null;
 }
 
-export interface OrganizationInputDto extends Omit<
+export interface LgpdConsentRawDto extends Omit<
   LgpdConsentDto,
-  "id" | "createdAt" | "updatedAt" | "status" | "withdrawnAt"
+  "createdAt" | "updatedAt" | "status" | "withdrawnAt"
 > {
-  userId: string;
+  id: string;
+  lgpdconsentId: string;
   organizationId: string;
   // O que o usuário aceitou
   consentTerms: boolean;
@@ -34,16 +100,34 @@ export interface OrganizationInputDto extends Omit<
   // Rastreabilidade (obrigatório pela LGPD)
   ipAddress: string;
   macAddress: string;
-  userAgent: string;
+  lgpdconsentAgent: string;
   consentVersion: string;
 }
 
-export interface OrganizationOutputDto extends Omit<
+export interface LgpdConsentInputDto extends Omit<
+  LgpdConsentDto,
+  "id" | "createdAt" | "updatedAt" | "status" | "withdrawnAt"
+> {
+  lgpdconsentId: string;
+  organizationId: string;
+  // O que o usuário aceitou
+  consentTerms: boolean;
+  consentMarketing: boolean;
+  consentDataSharing: boolean;
+  consentAnalytics: boolean;
+  // Rastreabilidade (obrigatório pela LGPD)
+  ipAddress: string;
+  macAddress: string;
+  lgpdconsentAgent: string;
+  consentVersion: string;
+}
+
+export interface LgpdConsentOutputDto extends Omit<
   LgpdConsentDto,
   "updatedAt" | "withdrawnAt"
 > {
   id: string;
-  userId: string;
+  lgpdconsentId: string;
   organizationId: string;
   // O que o usuário aceitou
   consentTerms: boolean;
@@ -53,12 +137,11 @@ export interface OrganizationOutputDto extends Omit<
   // Rastreabilidade (obrigatório pela LGPD)
   ipAddress: string;
   macAddress: string;
-  userAgent: string;
+  lgpdconsentAgent: string;
   consentVersion: string;
   // Ciclo de vida
   status: LgpdConsentStatus;
   withdrawnAt: Date | null;
-  updatedAt: string | null;
 }
 
-export interface OrganizationOptionalDto extends Partial<LgpdConsentDto> {}
+export interface LgpdConsentOptionalDto extends Partial<LgpdConsentDto> {}

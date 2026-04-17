@@ -1,7 +1,7 @@
 import { NotFoundError } from "@/errors";
 
 import { PaymentEntity } from "../../domain/entities/payment.entity";
-import { PaymentRepository } from "../../domain/repositories/PaymentRepository";
+import { PaymentRepository } from "../../domain/repositories/payment-repository";
 import { PaymentPrismaRepository } from "../../infrastructure/repositories/prisma/payment-prisma.repository";
 import { PaymentOutputDto } from "../dto/payment-output.dto";
 import { UpdatePaymentStatusInputDto } from "../dto/update-payment-status-input.dto";

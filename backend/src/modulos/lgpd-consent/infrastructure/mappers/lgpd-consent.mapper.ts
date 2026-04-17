@@ -53,8 +53,6 @@ export class LgpdConsentMapper {
       consentVersion: entity.consentVersion,
       status: entity.status,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      withdrawnAt: entity.withdrawnAt,
     };
   }
 }

@@ -3,14 +3,14 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
 
-import { UserRegisterUseCase } from "@/modulos/user/application/usecases/user-register.usecase";
-
 import { AlreadyExistsError } from "@/core/domain/errors/usecases/already-exists.error";
+
+import { CreateUserUseCase } from "@/modulos/user/application/usecases/create-user.usecase";
 import { UserCreateBodySchema } from "../schemas/user-create.schema";
 import { UserPresentSchema } from "../schemas/user-register.schema";
 
 export const userRegisterController = (
-  userRegisterUseCase: UserRegisterUseCase,
+  createUserUseCase: CreateUserUseCase,
 ) => {
   return async (app: FastifyInstance): Promise<void> => {
     app.withTypeProvider<ZodTypeProvider>().route({
@@ -28,7 +28,7 @@ export const userRegisterController = (
         },
       },
       handler: async (request, reply) => {
-        const result = await userRegisterUseCase.execute(request.body);
+        const result = await createUserUseCase.execute(request.body);
 
         if (result.isLeft()) {
           const error = result.value;

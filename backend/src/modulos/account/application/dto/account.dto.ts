@@ -1,6 +1,6 @@
-export interface AccountDto {
+interface AccountDto {
   id: string;
-  userId: string;
+  accountId: string;
   provider: string;
   providerAccountId: string;
   passwordHash: string;
@@ -8,11 +8,22 @@ export interface AccountDto {
   updatedAt: string | null;
 }
 
+export interface AccountRawDto extends Omit<
+  AccountDto,
+  "createdAt" | "updatedAt"
+> {
+  id: string;
+  accountId: string;
+  provider: string;
+  providerAccountId: string;
+  passwordHash: string;
+}
+
 export interface AccountInputDto extends Omit<
   AccountDto,
   "id" | "createdAt" | "updatedAt"
 > {
-  userId: string;
+  accountId: string;
   provider: string;
   providerAccountId: string;
   passwordHash: string;
@@ -20,7 +31,7 @@ export interface AccountInputDto extends Omit<
 
 export interface AccountOutputDto extends Omit<AccountDto, "updatedAt"> {
   id: string;
-  userId: string;
+  accountId: string;
   provider: string;
   providerAccountId: string;
   passwordHash: string;

@@ -4,8 +4,14 @@ import { Prisma } from "../../../../../generated/prisma";
 import { UserEntity } from "../entities/user.entity";
 
 export abstract class UserRepository extends BaseSearchableRepository<UserEntity> {
-  abstract findByEmail(email: string): Promise<boolean | null>;
-  abstract findByCpf(cpf: string): Promise<boolean | null>;
+  abstract findByEmail(email: string): Promise<UserEntity | null>;
+
+  abstract findByCpf(cpf: string): Promise<UserEntity | null>;
+
+  abstract existsByEmail(email: string): Promise<boolean>;
+
+  abstract existsByCpf(cpf: string): Promise<boolean>;
+
   abstract createWithTx(
     entity: UserEntity,
     tx: Prisma.TransactionClient,

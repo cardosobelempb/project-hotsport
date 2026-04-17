@@ -1,112 +1,121 @@
 import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 
 import { Optional } from "@/core/domain/common/types";
-import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
+import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
+import { ConsentMustAcceptTermsError } from "@/modulos/voucher/domain/errors/consent-must-accept-terms.error";
+
 import { LgpdConsentStatus } from "../enums/lgpd-consent-status.enum";
 
 export interface LgpdConsentProps {
   userId: UUIDVO;
   organizationId: UUIDVO;
-  // O que o usuário aceitou
   consentTerms: boolean;
   consentMarketing: boolean;
   consentDataSharing: boolean;
   consentAnalytics: boolean;
-  // Rastreabilidade (obrigatório pela LGPD)
   ipAddress: string;
   macAddress: string;
   userAgent: string;
   consentVersion: string;
-  // Ciclo de vida
   status: LgpdConsentStatus;
+  withdrawnAt?: Date | null;
   createdAt: Date;
   updatedAt: Date | null;
-  withdrawnAt: Date | null;
 }
 
-export class LgpdConsentEntity extends BaseEntity<LgpdConsentProps> {
-  get userId(): UUIDVO {
+export class LgpdConsentEntity extends BaseAggregate<LgpdConsentProps> {
+  get userId() {
     return this.props.userId;
   }
 
-  get organizationId(): UUIDVO {
+  get organizationId() {
     return this.props.organizationId;
   }
 
-  get consentTerms(): boolean {
+  get consentTerms() {
     return this.props.consentTerms;
   }
 
-  get consentMarketing(): boolean {
+  get consentMarketing() {
     return this.props.consentMarketing;
   }
 
-  get consentDataSharing(): boolean {
+  get consentDataSharing() {
     return this.props.consentDataSharing;
   }
 
-  get consentAnalytics(): boolean {
+  get consentAnalytics() {
     return this.props.consentAnalytics;
   }
 
-  get ipAddress(): string {
+  get ipAddress() {
     return this.props.ipAddress;
   }
 
-  get macAddress(): string {
+  get macAddress() {
     return this.props.macAddress;
   }
 
-  get userAgent(): string {
+  get userAgent() {
     return this.props.userAgent;
   }
 
-  get consentVersion(): string {
+  get consentVersion() {
     return this.props.consentVersion;
   }
 
-  get status(): LgpdConsentStatus {
+  get status() {
     return this.props.status;
   }
 
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date | null {
-    return this.props.updatedAt;
-  }
-
-  get withdrawnAt(): Date | null {
+  get withdrawnAt() {
     return this.props.withdrawnAt;
   }
 
-  private touch(): void {
-    this.props.updatedAt = new Date();
+  get createdAt(): Date {
+    return this.createdAt;
   }
 
-  withdraw(): void {
-    if (this.props.status === LgpdConsentStatus.WITHDRAWN) return;
+  get updatedAt(): Date | null {
+    return this.updatedAt;
+  }
 
+  revoke() {
+    if (this.props.status === LgpdConsentStatus.REVOKED) return;
+    this.props.status = LgpdConsentStatus.REVOKED;
+    this.props.withdrawnAt = new Date();
+    this.touch();
+  }
+
+  withdraw() {
+    if (this.props.status === LgpdConsentStatus.WITHDRAWN) return;
     this.props.status = LgpdConsentStatus.WITHDRAWN;
     this.props.withdrawnAt = new Date();
     this.touch();
   }
 
+  private touch() {
+    this.props.updatedAt = new Date();
+  }
+
   static create(
     props: Optional<
       LgpdConsentProps,
-      "status" | "createdAt" | "updatedAt" | "withdrawnAt"
+      "status" | "withdrawnAt" | "createdAt" | "updatedAt"
     >,
     id?: UUIDVO,
-  ): LgpdConsentEntity {
+  ) {
+    if (!props.consentTerms) {
+      throw new ConsentMustAcceptTermsError("");
+    }
+
     return new LgpdConsentEntity(
       {
         ...props,
         status: props.status ?? LgpdConsentStatus.ACTIVE,
+        withdrawnAt: props.withdrawnAt ?? null,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: null,
-        withdrawnAt: null,
+        updatedAt: props.updatedAt ?? null,
       },
       id,
     );

@@ -1,4 +1,4 @@
-import { PaymentRepository } from "../../domain/repositories/PaymentRepository";
+import { PaymentRepository } from "../../domain/repositories/payment-repository";
 import { PaymentPrismaRepository } from "../../infrastructure/repositories/prisma/payment-prisma.repository";
 import { GetPaymentsInputDto } from "../dto/get-payments-input.dto";
 import { PaymentOutputDto } from "../dto/payment-output.dto";

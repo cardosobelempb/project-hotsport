@@ -5,12 +5,12 @@ import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
 import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 
 export interface TokenProps {
-  id: UUIDVO;
   userId: UUIDVO;
   accessToken: string;
   refreshToken: string;
   expiresAt: Date;
   createdAt: Date;
+  updatedAt: Date | null;
 }
 
 export class TokenEntity extends BaseEntity<TokenProps> {
@@ -26,7 +26,7 @@ export class TokenEntity extends BaseEntity<TokenProps> {
     return this.props.refreshToken;
   }
 
-  get expiresAt(): string | null {
+  get expiresAt(): string {
     return this.props.expiresAt.toISOString();
   }
 
@@ -34,9 +34,16 @@ export class TokenEntity extends BaseEntity<TokenProps> {
     return this.props.createdAt;
   }
 
-  static create(props: Optional<TokenProps, "createdAt">, id?: UUIDVO) {
+  static create(
+    props: Optional<TokenProps, "createdAt" | "updatedAt">,
+    id?: UUIDVO,
+  ) {
     return new TokenEntity(
-      { ...props, createdAt: props.createdAt ?? new Date() },
+      {
+        ...props,
+        createdAt: props.createdAt ?? new Date(),
+        updatedAt: props.updatedAt ?? null,
+      },
       id,
     );
   }
