@@ -1,14 +1,11 @@
-import { BillingCycle } from "@/modulos/subscription/domain/enums/biling-cycle.enum";
-import { SubscriptionPlanStatus } from "../../domain/enums/subscription-plan-status.enum";
-
 interface SubscriptionPlanDto {
   id: string;
-  organizationId: string | null;
+  organizationId: string;
   code: string;
   name: string;
   description: string | null;
-  status: SubscriptionPlanStatus;
-  billingCycle: BillingCycle;
+  status: string;
+  billingCycle: string;
   amount: number;
   currency: string;
   trialDays: number | null;
@@ -48,12 +45,12 @@ export interface SubscriptionPlanOutputDto extends Omit<
   "updatedAt" | "deletedAt"
 > {
   id: string;
-  organizationId: string | null;
+  organizationId: string;
   code: string;
   name: string;
   description: string | null;
-  status: SubscriptionPlanStatus;
-  billingCycle: BillingCycle;
+  status: string;
+  billingCycle: string;
   amount: number;
   currency: string;
   trialDays: number | null;

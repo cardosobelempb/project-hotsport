@@ -1,9 +1,8 @@
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
-
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
 import { ConsentMustAcceptTermsError } from "@/modulos/voucher/domain/errors/consent-must-accept-terms.error";
 
+import { UUIDVO } from "@/common/domain/values-objects";
 import { LgpdConsentStatus } from "../enums/lgpd-consent-status.enum";
 
 export interface LgpdConsentProps {

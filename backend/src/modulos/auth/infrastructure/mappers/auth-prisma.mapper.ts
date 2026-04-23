@@ -1,4 +1,4 @@
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { Prisma, type Account } from "../../../../../generated/prisma";
 
 import { AccountEntity } from "@/modulos/account/domain/entities/account.entity";

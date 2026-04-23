@@ -1,9 +1,8 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseEntity } from "@/common/domain/entities/base.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface TokenProps {
-  tokenId: string;
   refreshToken: string;
   accessToken: string;
   expiresAt: Date;
@@ -12,10 +11,6 @@ export interface TokenProps {
 }
 
 export class TokenEntity extends BaseEntity<TokenProps> {
-  get tokenId() {
-    return this.props.tokenId;
-  }
-
   get refreshToken() {
     return this.props.refreshToken;
   }

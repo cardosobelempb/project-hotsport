@@ -7,7 +7,7 @@ interface UserDto {
   phoneNumber: string;
   cpf: string;
   email: string;
-  status: UserStatus;
+  status: string;
   createdAt: string;
   updatedAt: string | null;
 }

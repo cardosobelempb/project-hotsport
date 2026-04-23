@@ -1,6 +1,6 @@
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { Account as PrismaAccount } from "../../../../../generated/prisma";
 
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 import { AccountEntity } from "../../domain/entities/account.entity";
 
 export class AccountMapper {

@@ -1,9 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { env } from "@/core/infrastructure/env";
-
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+import { env } from "@/common/infrastructure/env";
 import { AuthLoginUseCase } from "@/modulos/auth/application/usecases/signin-auth.use-case";
 import {
   AuthLoginBodySchema,

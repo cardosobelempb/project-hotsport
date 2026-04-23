@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { ConflictError } from "@/core/domain/errors/usecases/conflict.error";
+import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 import { CreateAccountUseCase } from "../../../application/usecases/create-account.use-case";
 import {
   CreateAccountBodySchema,

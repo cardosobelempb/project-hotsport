@@ -1,4 +1,3 @@
-export * from './Either';
-export * from './Left';
-export * from './Right';
-
+export * from "./either";
+export * from "./left";
+export * from "./right";

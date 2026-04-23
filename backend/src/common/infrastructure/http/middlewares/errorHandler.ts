@@ -1,7 +1,6 @@
+import { ValidationError } from "@/common/domain/errors/ValidationError";
 import dayjs from "dayjs";
 import { FastifyReply, FastifyRequest } from "fastify";
-
-import { ValidationError } from "@/common/domain";
 
 /**
  * Estrutura padrão de erro HTTP

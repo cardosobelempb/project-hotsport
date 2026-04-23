@@ -106,7 +106,6 @@ model Organization {
   slug      String             @unique @db.VarChar(100)
   logoUrl   String?            @map("logo_url") @db.VarChar(500)
   status    OrganizationStatus @default(ACTIVE)
-  isActive  Boolean            @default(true)
   deletedAt DateTime?          @map("deleted_at")
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime?          @updatedAt @map("updated_at")

@@ -1,5 +1,5 @@
-import { BaseHashComparer } from "@/core/domain/common/shared/base-hash-comparer";
-import { BaseHashGenerator } from "@/core/domain/common/shared/base-hash-generator";
+import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
+import { BaseHashGenerator } from "@/common/domain/shared/base-hash-generator";
 import { compare, hash } from "bcryptjs";
 
 export class BcryptHasher implements BaseHashGenerator, BaseHashComparer {

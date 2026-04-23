@@ -1,8 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { AlreadyExistsError } from "@/core/domain/errors/usecases/already-exists.error";
-
+import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
 import { CreateMikrotikUseCase } from "@/modulos/mikrotik/application/usecases/create-mikrotik.use-case";
 import {
   CreateMikrotikMikrotikSchema,

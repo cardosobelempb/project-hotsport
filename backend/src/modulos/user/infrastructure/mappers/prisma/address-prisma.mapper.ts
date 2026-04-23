@@ -3,7 +3,7 @@ import {
   Address as PrismaAddress,
 } from "../../../../../../generated/prisma";
 
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { AddressType } from "@/modulos/user/domain/enums/address-type.enum";
 import { AddressEntity } from "../../../domain/entities/address.entity";
 

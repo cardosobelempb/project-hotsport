@@ -1,31 +1,33 @@
-import { BadRequestError } from '../../errors'
+import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BaseVO } from "../base.vo";
 
-export class LongitudeVO {
-  private readonly _value: number
+export class LongitudeVO extends BaseVO<number> {
+  protected readonly value: number;
 
   constructor(value: number) {
+    super(value);
     if (!LongitudeVO.isValid(value)) {
       throw new BadRequestError(
         `Invalid longitude: ${value}. Must be between -180 and 180.`,
-      )
+      );
     }
-    this._value = value
+    this.value = value;
   }
 
   public static isValid(value: number): boolean {
-    return value >= -180 && value <= 180
+    return value >= -180 && value <= 180;
   }
 
-  public get value(): number {
-    return this._value
+  public isValid(): boolean {
+    return LongitudeVO.isValid(this.value);
   }
 
   public toString(): string {
-    return this._value.toString()
+    return this.value.toString();
   }
 
   /** Compara com outro LongitudeVO */
   public equals(other: LongitudeVO): boolean {
-    return this._value === other.value
+    return this.value === other.value;
   }
 }

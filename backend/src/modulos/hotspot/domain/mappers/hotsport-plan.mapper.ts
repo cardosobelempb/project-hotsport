@@ -1,4 +1,4 @@
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import {
   HotsportPlanOutputDto,
   HotsportPlanRawDto,

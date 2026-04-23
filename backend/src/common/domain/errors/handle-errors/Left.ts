@@ -1,4 +1,4 @@
-import { Right } from './Right'
+import { Right } from "./right";
 
 /**
  * Representa um valor no contexto de falha (lado esquerdo do Either).
@@ -8,11 +8,11 @@ import { Right } from './Right'
  * R -> Tipo do sucesso (não utilizado aqui, mas mantido para compatibilidade com Either<L, R>)
  */
 export class Left<L, R> {
-  readonly value: L
+  readonly value: L;
 
   constructor(value: L) {
     // Atributo imutável, evita estados inconsistentes
-    this.value = value
+    this.value = value;
   }
 
   /**
@@ -20,7 +20,7 @@ export class Left<L, R> {
    * Sempre false aqui — Left representa erro.
    */
   isRight(): this is Right<L, R> {
-    return false
+    return false;
   }
 
   /**
@@ -28,7 +28,7 @@ export class Left<L, R> {
    * Sempre true — mantém compatibilidade com API funcional.
    */
   isLeft(): this is Left<L, R> {
-    return true
+    return true;
   }
 
   /**
@@ -39,7 +39,7 @@ export class Left<L, R> {
    * Essa implementação mantém o tipo do erro e ignora transformações no success.
    */
   map<T>(_: (r: R) => T): Left<L, T> {
-    return new Left(this.value)
+    return new Left(this.value);
   }
 
   /**
@@ -49,14 +49,14 @@ export class Left<L, R> {
    * Útil para garantir handling funcional explícito.
    */
   fold<T>(onLeft: (l: L) => T, _?: (r: R) => T): T {
-    return onLeft(this.value)
+    return onLeft(this.value);
   }
 
   /**
    * Representação amigável para debug.
    */
   toString(): string {
-    return `Left(${JSON.stringify(this.value)})`
+    return `Left(${JSON.stringify(this.value)})`;
   }
 }
 

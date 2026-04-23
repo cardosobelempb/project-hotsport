@@ -1,6 +1,6 @@
 import { IDomainError } from "@/common/domain/errors/domain/IDomainError";
-import { StandardError } from "@/core/domain/errors/standard.errror";
-import { CodeError } from "@/core/domain/errors/usecases/code.error";
+import { StandardError } from "@/common/domain/errors/StandardError";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
 
 export class ConsentMustAcceptTermsError
   extends StandardError

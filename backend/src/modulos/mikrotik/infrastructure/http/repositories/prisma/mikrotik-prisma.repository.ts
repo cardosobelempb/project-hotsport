@@ -4,12 +4,22 @@ import { Prisma } from "../../../../../../../generated/prisma";
 import {
   SearchInput,
   SearchOutput,
-} from "@/core/domain/repositories/search.repository";
+} from "@/common/domain/repositories/search.repository";
 import { MikrotikRepository } from "@/modulos/mikrotik/domain/repositories/mikrotik.repository";
 import { prisma } from "@/shared/lib/db";
 import { MikrotikMapper } from "../../../mappers/mikrotik.mapper";
 
 export class MikrotikPrismaRepository implements MikrotikRepository {
+  listByOrganization(organizationId: string): Promise<MikrotikEntity[]> {
+    throw new Error("Method not implemented.");
+  }
+  findOnline(organizationId: string): Promise<MikrotikEntity[]> {
+    throw new Error("Method not implemented.");
+  }
+  exists(id: string): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+
   async search(params: SearchInput): Promise<SearchOutput<MikrotikEntity>> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 15;

@@ -1,9 +1,9 @@
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import {
   Prisma,
   Token as PrismaToken,
 } from "../../../../../../../generated/prisma";
 
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 import { TokenEntity } from "@/modulos/account/domain/entities/token.entity";
 
 export class TokenPrismaMapper {

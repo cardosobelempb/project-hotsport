@@ -1,5 +1,4 @@
-import { BaseSearchableRepository } from "@/core/domain/repositories/base-searchable.repository";
-
+import { BaseSearchableRepository } from "@/common/domain/repositories/base-searchable.repository";
 import { Prisma } from "../../../../../generated/prisma";
 import { UserEntity } from "../entities/user.entity";
 

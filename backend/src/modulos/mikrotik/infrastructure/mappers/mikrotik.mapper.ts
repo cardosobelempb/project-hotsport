@@ -1,9 +1,9 @@
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import {
   Prisma,
   Mikrotik as PrismaMikrotik,
 } from "../../../../../generated/prisma";
 
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 import { CreatMikrotikOutputDto } from "../../application/dto/create-mikrotik.output";
 import { MikrotikEntity } from "../../domain/entities/mikrotik-entity";
 

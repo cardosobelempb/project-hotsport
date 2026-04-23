@@ -2,10 +2,11 @@ import { UserEntity } from "@/modulos/user/domain/entities/user.entity";
 import { UserRepository } from "@/modulos/user/domain/repositories/user.repository";
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 
-import { BaseHashComparer } from "@/core/domain/common/shared/base-hash-comparer";
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { CodeError } from "@/core/domain/errors/usecases/code.error";
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+
+import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
 import { AccountEntity } from "@/modulos/account/domain/entities/account.entity";
 import { AccountRepository } from "../../domain/repositories/AccountRepository";
 import { AuthLoginBodySchemaType } from "../../infrastructure/http/schemas/signin-auth.schema";

@@ -1,6 +1,6 @@
-import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
-import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { UserOutputDto, UserRawDto } from "../../application/dto/user.dto";
 import { UserEntity } from "../entities/user.entity";
 import { UserStatus } from "../enums/user-status.enum";

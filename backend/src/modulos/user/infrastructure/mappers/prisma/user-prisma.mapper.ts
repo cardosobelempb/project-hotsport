@@ -1,13 +1,13 @@
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
 import {
   Prisma,
   User as PrismaUser,
   UserStatus as PrismaUserStatus,
 } from "../../../../../../generated/prisma";
 
-import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
-import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
-import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { UserEntity } from "../../../domain/entities/user.entity";
 import { UserStatus } from "../../../domain/enums/user-status.enum";
 

@@ -1,6 +1,6 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { UUIDVO } from "@/common/domain/values-objects";
 import { HotspotUserStatus } from "../enums/hotsport-user-status.enum";
 import { HotspotUserBlockedError } from "../errors/hotspot-user-blocked.error";
 

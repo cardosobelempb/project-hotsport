@@ -1,11 +1,11 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { BillingCycle } from "@/modulos/subscription/domain/enums/biling-cycle.enum";
 import { SubscriptionPlanStatus } from "../enums/subscription-plan-status.enum";
 
 export interface SubscriptionPlanProps {
-  organizationId: string | null;
+  organizationId: UUIDVO;
   code: string;
   name: string;
   description: string | null;

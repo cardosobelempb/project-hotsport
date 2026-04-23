@@ -1,10 +1,8 @@
-import { VoucherStatus } from "../../domain/emuns/voucher-status.enum";
-
 interface VoucherDto {
   organizationId: string;
   planId: string;
   code: string;
-  status: VoucherStatus;
+  status: string;
   mikrotikId: string;
   usedAt: string | null;
   expiresAt: string | null;
@@ -48,7 +46,7 @@ export interface VoucherOutputDto extends Omit<
   organizationId: string;
   planId: string;
   code: string;
-  status: VoucherStatus;
+  status: string;
   mikrotikId: string;
   usedAt: string | null;
   expiresAt: string | null;

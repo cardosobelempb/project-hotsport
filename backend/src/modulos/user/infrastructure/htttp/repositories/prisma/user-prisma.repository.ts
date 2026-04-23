@@ -4,7 +4,7 @@ import { prisma } from "@/shared/lib/db";
 import {
   SearchInput,
   SearchOutput,
-} from "@/core/domain/repositories/search.repository";
+} from "@/common/domain/repositories/search.repository";
 import { UserRepository } from "@/modulos/user/domain/repositories/user.repository";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { UserPrismaMapper } from "../../../mappers/prisma/user-prisma.mapper";
@@ -69,6 +69,12 @@ export class UserPrismaRepository implements UserRepository {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return null;
     return UserPrismaMapper.toDomain(user);
+  }
+
+  async exists(id: string): Promise<boolean> {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) return false;
+    return true;
   }
 
   async findByCpf(cpf: string): Promise<UserEntity | null> {

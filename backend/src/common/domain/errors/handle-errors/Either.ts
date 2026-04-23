@@ -1,5 +1,5 @@
-import { Left } from './Left'
-import { Right } from './Right'
+import { Left } from "./left";
+import { Right } from "./right";
 
 /**
  * Representa um valor que pode ser falha (Left) ou sucesso (Right).
@@ -7,7 +7,7 @@ import { Right } from './Right'
  * L -> tipo da falha
  * R -> tipo do sucesso
  */
-export type Either<L, R> = Left<L, R> | Right<L, R>
+export type Either<L, R> = Left<L, R> | Right<L, R>;
 
 /**
  * Cria um Either do tipo Left (falha).
@@ -17,8 +17,8 @@ export type Either<L, R> = Left<L, R> | Right<L, R>
  *   return left("Email inválido")
  */
 export const left = <L, R = never>(value: L): Either<L, R> => {
-  return new Left(value)
-}
+  return new Left(value);
+};
 
 /**
  * Cria um Either do tipo Right (sucesso).
@@ -27,5 +27,5 @@ export const left = <L, R = never>(value: L): Either<L, R> => {
  *   return right({ id: 1, name: "John" })
  */
 export const right = <R, L = never>(value: R): Either<L, R> => {
-  return new Right(value)
-}
+  return new Right(value);
+};

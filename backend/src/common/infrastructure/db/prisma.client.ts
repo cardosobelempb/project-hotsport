@@ -1,9 +1,14 @@
-import { PrismaClient } from "@/generated/prisma/index.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
+import { PrismaClient } from "../../../../generated/prisma";
+
+export type PrismaTransaction = Omit<PrismaClient, "$on" | "$use" | "$extends">;
 
 import { Logger } from "../observability/logger";
 
 declare global {
-  var __prisma: PrismaClient | undefined;
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | PrismaTransaction | undefined;
 }
 
 type PrismaFactoryOptions = {
@@ -11,11 +16,22 @@ type PrismaFactoryOptions = {
 };
 
 function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error("DATABASE_URL não está definida.");
+  }
+
+  // ✅ ADAPTER (obrigatório no Prisma 7 com engine "client")
+  const adapter = new PrismaPg({
+    connectionString,
+  });
+
   const prisma = new PrismaClient({
+    adapter,
     log: [
       { level: "warn", emit: "event" },
       { level: "error", emit: "event" },
-      // Em produção você pode remover query/info para não vazar dados
       { level: "info", emit: "event" },
     ],
   });
@@ -30,14 +46,17 @@ function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
 }
 
 /**
- * Singleton: reutiliza no dev para evitar "too many connections"
+ * Singleton: evita múltiplas conexões em dev
  */
 export function getPrismaClient(
   options: PrismaFactoryOptions = {},
-): PrismaClient {
+): PrismaClient | PrismaTransaction {
   if (process.env.NODE_ENV !== "production") {
-    if (!globalThis.__prisma) globalThis.__prisma = buildPrismaClient(options);
+    if (!globalThis.__prisma) {
+      globalThis.__prisma = buildPrismaClient(options);
+    }
     return globalThis.__prisma;
   }
+
   return buildPrismaClient(options);
 }

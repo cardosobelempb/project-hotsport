@@ -8,9 +8,12 @@ export const ParamsIdNumberSchema = z.object({
   id: z.coerce.number().int(),
 });
 
+export type ParamsIdNumber = z.infer<typeof ParamsIdNumberSchema>;
+
 export const ParamsIdStringSchema = z.object({
   id: z.string().min(1),
 });
+export type ParamsIdString = z.infer<typeof ParamsIdStringSchema>;
 
 // Compat (se ainda existir uso antigo)
 export const ParamsIdSchema = ParamsIdStringSchema;

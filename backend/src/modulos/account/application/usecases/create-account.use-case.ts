@@ -6,14 +6,13 @@ import { AccountRepository } from "../../domain/repositories/account-repository"
 import { prisma } from "@/shared/lib/db";
 import { BcryptHasher } from "../../../../shared/cryptography/bcrypt-hasher";
 
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { ConflictError } from "@/core/domain/errors/usecases/conflict.error";
-import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
-import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
-import { UserMapper } from "@/modulos/user/infrastructure/mappers/prisma/user-prisma.mapper";
-
-import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
+import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { UserMapper } from "@/modulos/user/domain/mappers/user-mapper";
 import { CreateAccountInputDto } from "../dto/create-account.input.ts";
 import { CreateAccountOutputDto } from "../dto/create-account.output";
 

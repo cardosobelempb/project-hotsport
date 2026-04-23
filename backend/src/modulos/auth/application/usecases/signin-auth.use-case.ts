@@ -1,9 +1,7 @@
-import { BaseHashComparer } from "@/core/domain/common/shared/base-hash-comparer";
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { CodeError } from "@/core/domain/errors/usecases/code.error";
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
-import { MemberRepository } from "@/modulos/member/domain/repositories/member.repository";
-import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
 import { UserRepository } from "@/modulos/user/domain/repositories/user.repository";
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 import { AccountRepository } from "../../domain/repositories/AccountRepository";
@@ -24,8 +22,8 @@ export type AuthLoginUseCaseResult = Either<
 export class AuthLoginUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly memberRepository: MemberRepository,
-    private readonly organizarionRepository: OrganizationRepository,
+    // private readonly memberRepository: MemberRepository,
+    // private readonly organizarionRepository: OrganizationRepository,
     private readonly accountRepository: AccountRepository,
     private readonly hashCompare: BaseHashComparer,
     private readonly jwtTokenUseCase: JwtTokenProvider,
@@ -50,16 +48,16 @@ export class AuthLoginUseCase {
       return left(new UnauthorizedError(CodeError.UNAUTHORIZED));
     }
 
-    const organization = await this.organizarionRepository.findById(
-      user.id.toString(),
-    );
+    // const organization = await this.organizarionRepository.findById(
+    //   user.id.toString(),
+    // );
 
-    if (!organization) {
-      return left(new UnauthorizedError(CodeError.UNAUTHORIZED));
-    }
+    // if (!organization) {
+    //   return left(new UnauthorizedError(CodeError.UNAUTHORIZED));
+    // }
 
-    const member = await this.memberRepository.findById(user.id.toString());
-    console.log("Member encontrado:", member?.userId.toString());
+    // const member = await this.memberRepository.findById(user.id.toString());
+    // console.log("Member encontrado:", member?.userId.toString());
     if (!user) return left(new UnauthorizedError(CodeError.UNAUTHORIZED));
 
     const { accessToken, refreshToken } =

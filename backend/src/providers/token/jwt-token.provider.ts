@@ -1,4 +1,4 @@
-import { Env } from "@/core/infrastructure/env";
+import { Env } from "@/common/infrastructure/env";
 import { randomUUID } from "crypto";
 import { sign } from "jsonwebtoken";
 

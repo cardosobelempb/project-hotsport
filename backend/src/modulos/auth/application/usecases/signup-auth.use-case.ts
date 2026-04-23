@@ -1,12 +1,11 @@
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
 import { UserRepository } from "@/modulos/user/domain/repositories/user.repository";
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 import { AccountRepository } from "../../domain/repositories/AccountRepository";
 import { AuthLoginResponseType } from "../../infrastructure/http/schemas/signin-auth.schema";
-
-import { BaseHashComparer } from "@/core/domain/common/shared/base-hash-comparer";
-import { CodeError } from "@/core/domain/errors/usecases/code.error";
 
 export interface AuthLoginUseCaseInput {
   email: string;

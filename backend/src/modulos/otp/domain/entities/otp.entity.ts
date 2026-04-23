@@ -1,7 +1,7 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface OtpProps {
   phone: PhoneVO;

@@ -126,7 +126,6 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   slug: 'slug',
   logoUrl: 'logoUrl',
   status: 'status',
-  isActive: 'isActive',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

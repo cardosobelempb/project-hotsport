@@ -1,11 +1,13 @@
-import { BadRequestError } from '../../errors'
-import { I18nAbstract } from '../../common/abstract'
+import { BaseI18n } from "../../common/shared/base-I18n";
+import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BaseVO } from "../base.vo";
 
-export class LatitudeVO {
-  private readonly _value: number
+export class LatitudeVO extends BaseVO<number> {
+  protected readonly value: number;
 
   private constructor(value: number) {
-    this._value = value
+    super(value);
+    this.value = value;
   }
 
   /**
@@ -13,33 +15,32 @@ export class LatitudeVO {
    * @param value Número da latitude
    * @param i18n Instância de tradução (opcional)
    */
-  public static create(value: number, i18n?: I18nAbstract): LatitudeVO {
+  public static create(value: number, i18n?: BaseI18n): LatitudeVO {
     if (!this.isValid(value)) {
       const message =
-        i18n?.t('errors.latitude.invalid', { args: { value } }) ??
-        `Invalid latitude: ${value}. Must be between -90 and 90.`
-      throw new BadRequestError(message)
+        i18n?.t("errors.latitude.invalid", { args: { value } }) ??
+        `Invalid latitude: ${value}. Must be between -90 and 90.`;
+      throw new BadRequestError(message);
     }
-    return new LatitudeVO(value)
+    return new LatitudeVO(value);
+  }
+
+  public isValid(): boolean {
+    return LatitudeVO.isValid(this.value);
   }
 
   /** Verifica se um valor é uma latitude válida */
   public static isValid(value: number): boolean {
-    return typeof value === 'number' && value >= -90 && value <= 90
-  }
-
-  /** Retorna o valor */
-  public get value(): number {
-    return this._value
+    return typeof value === "number" && value >= -90 && value <= 90;
   }
 
   /** Compara com outro LatitudeVO */
   public equals(other: LatitudeVO): boolean {
-    return this._value === other.value
+    return this.value === other.value;
   }
 
   /** Retorna como string */
   public toString(): string {
-    return this._value.toString()
+    return this.value.toString();
   }
 }

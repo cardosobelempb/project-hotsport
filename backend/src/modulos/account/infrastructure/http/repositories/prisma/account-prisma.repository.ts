@@ -1,9 +1,8 @@
 import {
   SearchInput,
   SearchOutput,
-} from "@/core/domain/repositories/search.repository";
-
-import { getPrismaClient } from "@/core/infrastructure/db/prisma.client";
+} from "@/common/domain/repositories/search.repository";
+import { getPrismaClient } from "@/common/infrastructure/db/prisma.client";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { AccountEntity } from "../../../../domain/entities/account.entity";
 import { AccountRepository } from "../../../../domain/repositories/account-repository";
@@ -72,6 +71,11 @@ export class AccountPrismaRepository implements AccountRepository {
     });
     if (!account) return null;
     return AccountMapper.toDomain(account);
+  }
+
+  async exists(id: string): Promise<boolean> {
+    const account = await this.prisma.account.findUnique({ where: { id } });
+    return !!account;
   }
 
   async findByEmail(email: string): Promise<AccountEntity | null> {

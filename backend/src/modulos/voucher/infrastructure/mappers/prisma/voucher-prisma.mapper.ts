@@ -1,10 +1,10 @@
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import {
   Prisma,
   Voucher as PrismaVoucher,
   VoucherStatus as PrismaVoucherStatus,
 } from "../../../../../../generated/prisma";
 
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
 import { VoucherStatus } from "@/modulos/voucher/domain/emuns/voucher-status.enum";
 import { VoucherEntity } from "@/modulos/voucher/domain/entities/voucher-entity";
 

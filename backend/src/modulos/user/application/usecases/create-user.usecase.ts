@@ -1,14 +1,15 @@
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { UserEntity } from "../../domain/entities/user.entity";
-
-import { AlreadyExistsError } from "@/core/domain/errors/usecases/already-exists.error";
-import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
-import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
-import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
 import { UserRepository } from "../../domain/repositories/user.repository";
 
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+
+import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
+import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { UserEntity } from "../../domain/entities/user.entity";
 import { UserMapper } from "../../domain/mappers/user-mapper";
 import { UserInputDto, UserOutputDto } from "../dto/user.dto";
+
 export type UserRegisterUseCaseResult = Either<
   AlreadyExistsError,
   { user: UserOutputDto }

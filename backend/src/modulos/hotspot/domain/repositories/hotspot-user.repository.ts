@@ -1,4 +1,4 @@
-import { BaseSearchableRepository } from "@/core/domain/repositories/base-searchable.repository";
+import { BaseSearchableRepository } from "@/common/domain/repositories/base-searchable.repository";
 import { HotsportUserEntity } from "../entities/hotsport-user-entity";
 
 export abstract class HotspotUserRepository extends BaseSearchableRepository<HotsportUserEntity> {
@@ -8,6 +8,4 @@ export abstract class HotspotUserRepository extends BaseSearchableRepository<Hot
   ): Promise<HotsportUserEntity | null>;
 
   abstract listByMikrotik(mikrotikId: string): Promise<HotsportUserEntity[]>;
-
-  abstract exists(username: string, organizationId: string): Promise<boolean>;
 }

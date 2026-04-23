@@ -2845,7 +2845,6 @@ export namespace Prisma {
     slug: string | null
     logoUrl: string | null
     status: $Enums.OrganizationStatus | null
-    isActive: boolean | null
     deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2857,7 +2856,6 @@ export namespace Prisma {
     slug: string | null
     logoUrl: string | null
     status: $Enums.OrganizationStatus | null
-    isActive: boolean | null
     deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2869,7 +2867,6 @@ export namespace Prisma {
     slug: number
     logoUrl: number
     status: number
-    isActive: number
     deletedAt: number
     createdAt: number
     updatedAt: number
@@ -2883,7 +2880,6 @@ export namespace Prisma {
     slug?: true
     logoUrl?: true
     status?: true
-    isActive?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2895,7 +2891,6 @@ export namespace Prisma {
     slug?: true
     logoUrl?: true
     status?: true
-    isActive?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2907,7 +2902,6 @@ export namespace Prisma {
     slug?: true
     logoUrl?: true
     status?: true
-    isActive?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -2992,7 +2986,6 @@ export namespace Prisma {
     slug: string
     logoUrl: string | null
     status: $Enums.OrganizationStatus
-    isActive: boolean
     deletedAt: Date | null
     createdAt: Date
     updatedAt: Date | null
@@ -3021,7 +3014,6 @@ export namespace Prisma {
     slug?: boolean
     logoUrl?: boolean
     status?: boolean
-    isActive?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3045,7 +3037,6 @@ export namespace Prisma {
     slug?: boolean
     logoUrl?: boolean
     status?: boolean
-    isActive?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3057,7 +3048,6 @@ export namespace Prisma {
     slug?: boolean
     logoUrl?: boolean
     status?: boolean
-    isActive?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3069,13 +3059,12 @@ export namespace Prisma {
     slug?: boolean
     logoUrl?: boolean
     status?: boolean
-    isActive?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logoUrl" | "status" | "isActive" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
+  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "logoUrl" | "status" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     members?: boolean | Organization$membersArgs<ExtArgs>
     mikrotiks?: boolean | Organization$mikrotiksArgs<ExtArgs>
@@ -3114,7 +3103,6 @@ export namespace Prisma {
       slug: string
       logoUrl: string | null
       status: $Enums.OrganizationStatus
-      isActive: boolean
       deletedAt: Date | null
       createdAt: Date
       updatedAt: Date | null
@@ -3557,7 +3545,6 @@ export namespace Prisma {
     readonly slug: FieldRef<"Organization", 'String'>
     readonly logoUrl: FieldRef<"Organization", 'String'>
     readonly status: FieldRef<"Organization", 'OrganizationStatus'>
-    readonly isActive: FieldRef<"Organization", 'Boolean'>
     readonly deletedAt: FieldRef<"Organization", 'DateTime'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
@@ -23206,7 +23193,6 @@ export namespace Prisma {
     slug: 'slug',
     logoUrl: 'logoUrl',
     status: 'status',
-    isActive: 'isActive',
     deletedAt: 'deletedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -23547,13 +23533,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -23606,6 +23585,13 @@ export namespace Prisma {
    * Reference to a field of type 'AddressType[]'
    */
   export type ListEnumAddressTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AddressType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -23803,7 +23789,6 @@ export namespace Prisma {
     slug?: StringFilter<"Organization"> | string
     logoUrl?: StringNullableFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
-    isActive?: BoolFilter<"Organization"> | boolean
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -23826,7 +23811,6 @@ export namespace Prisma {
     slug?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
-    isActive?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -23852,7 +23836,6 @@ export namespace Prisma {
     name?: StringFilter<"Organization"> | string
     logoUrl?: StringNullableFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
-    isActive?: BoolFilter<"Organization"> | boolean
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -23875,7 +23858,6 @@ export namespace Prisma {
     slug?: SortOrder
     logoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
-    isActive?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -23893,7 +23875,6 @@ export namespace Prisma {
     slug?: StringWithAggregatesFilter<"Organization"> | string
     logoUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusWithAggregatesFilter<"Organization"> | $Enums.OrganizationStatus
-    isActive?: BoolWithAggregatesFilter<"Organization"> | boolean
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
@@ -25347,7 +25328,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -25370,7 +25350,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -25393,7 +25372,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -25416,7 +25394,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -25439,7 +25416,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -25451,7 +25427,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -25463,7 +25438,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -27116,11 +27090,6 @@ export namespace Prisma {
     not?: NestedEnumOrganizationStatusFilter<$PrismaModel> | $Enums.OrganizationStatus
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -27254,7 +27223,6 @@ export namespace Prisma {
     slug?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
-    isActive?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -27266,7 +27234,6 @@ export namespace Prisma {
     slug?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
-    isActive?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -27278,7 +27245,6 @@ export namespace Prisma {
     slug?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
-    isActive?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -27343,14 +27309,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumOrganizationStatusFilter<$PrismaModel>
     _max?: NestedEnumOrganizationStatusFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -27546,6 +27504,11 @@ export namespace Prisma {
     not?: NestedEnumAddressTypeFilter<$PrismaModel> | $Enums.AddressType
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type AddressCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -27605,6 +27568,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAddressTypeFilter<$PrismaModel>
     _max?: NestedEnumAddressTypeFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type AccountProviderProviderAccountIdCompoundUniqueInput = {
@@ -28726,10 +28697,6 @@ export namespace Prisma {
     set?: $Enums.OrganizationStatus
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
   }
@@ -29326,6 +29293,10 @@ export namespace Prisma {
 
   export type EnumAddressTypeFieldUpdateOperationsInput = {
     set?: $Enums.AddressType
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type UserUpdateOneRequiredWithoutAddressesNestedInput = {
@@ -29926,11 +29897,6 @@ export namespace Prisma {
     not?: NestedEnumOrganizationStatusFilter<$PrismaModel> | $Enums.OrganizationStatus
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -30033,14 +29999,6 @@ export namespace Prisma {
     _max?: NestedEnumOrganizationStatusFilter<$PrismaModel>
   }
 
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -30110,6 +30068,11 @@ export namespace Prisma {
     not?: NestedEnumAddressTypeFilter<$PrismaModel> | $Enums.AddressType
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedEnumAddressTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.AddressType | EnumAddressTypeFieldRefInput<$PrismaModel>
     in?: $Enums.AddressType[] | ListEnumAddressTypeFieldRefInput<$PrismaModel>
@@ -30118,6 +30081,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAddressTypeFilter<$PrismaModel>
     _max?: NestedEnumAddressTypeFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -31190,7 +31161,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -31212,7 +31182,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -31291,7 +31260,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -31313,7 +31281,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32093,7 +32060,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32115,7 +32081,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32153,7 +32118,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32175,7 +32139,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32197,7 +32160,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32219,7 +32181,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32257,7 +32218,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32279,7 +32239,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32301,7 +32260,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32323,7 +32281,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32433,7 +32390,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32455,7 +32411,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32509,7 +32464,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32531,7 +32485,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32605,7 +32558,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32627,7 +32579,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32665,7 +32616,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32687,7 +32637,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32764,7 +32713,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32786,7 +32734,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32853,7 +32800,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32875,7 +32821,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -32979,7 +32924,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33001,7 +32945,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33142,7 +33085,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33164,7 +33106,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33249,7 +33190,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33271,7 +33211,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33293,7 +33232,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33315,7 +33253,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33403,7 +33340,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33425,7 +33361,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33463,7 +33398,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33485,7 +33419,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33612,7 +33545,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33634,7 +33566,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33721,7 +33652,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33743,7 +33673,6 @@ export namespace Prisma {
     slug: string
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    isActive?: boolean
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -33826,7 +33755,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33848,7 +33776,6 @@ export namespace Prisma {
     slug?: StringFieldUpdateOperationsInput | string
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    isActive?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

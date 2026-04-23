@@ -1,4 +1,4 @@
-import { Left } from './Left'
+import { Left } from "./left";
 
 /**
  * Representa o lado de sucesso do Either.
@@ -8,25 +8,25 @@ import { Left } from './Left'
  * R -> Tipo de sucesso
  */
 export class Right<L, R> {
-  readonly value: R
+  readonly value: R;
 
   constructor(value: R) {
     // Mantém imutabilidade e integridade
-    this.value = value
+    this.value = value;
   }
 
   /**
    * Sempre true para Right — usado para narrowing.
    */
   isRight(): this is Right<L, R> {
-    return true
+    return true;
   }
 
   /**
    * Sempre false — mantém compatibilidade com a API funcional.
    */
   isLeft(): this is Left<L, R> {
-    return false
+    return false;
   }
 
   /**
@@ -36,8 +36,8 @@ export class Right<L, R> {
    * Segue semântica FP: map NÃO lida com erros.
    */
   map<T>(fn: (r: R) => T): Right<L, T> {
-    const newValue = fn(this.value)
-    return new Right(newValue)
+    const newValue = fn(this.value);
+    return new Right(newValue);
   }
 
   /**
@@ -48,14 +48,14 @@ export class Right<L, R> {
    * Útil para extrair o valor sem precisar checar Left/Right manualmente.
    */
   fold<T>(_: (l: L) => T, onRight: (r: R) => T): T {
-    return onRight(this.value)
+    return onRight(this.value);
   }
 
   /**
    * Representação útil para logs e debugging.
    */
   toString(): string {
-    return `Right(${JSON.stringify(this.value)})`
+    return `Right(${JSON.stringify(this.value)})`;
   }
 }
 

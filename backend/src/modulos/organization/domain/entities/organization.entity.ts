@@ -1,21 +1,10 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { SlugVO, UUIDVO } from "@/common/domain/values-objects";
+import { OrganizationDto } from "../../application/dto/organization.dto";
 import { OrganizationStatus } from "../enums/organization.enum";
 
-export interface OrganizationProps {
-  name: string;
-  slug: SlugVO;
-  logoUrl: string | null;
-  status: OrganizationStatus;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-}
-
-export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
+export class OrganizationEntity extends BaseAggregate<OrganizationDto> {
   get name() {
     return this.props.name;
   }
@@ -25,10 +14,6 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
   get logoUrl() {
     return this.props.logoUrl;
   }
-  get isActive() {
-    return this.props.isActive;
-  }
-
   get status() {
     return this.props.status;
   }
@@ -49,27 +34,25 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
     this.props.updatedAt = new Date();
   }
 
-  activate() {
-    if (this.props.isActive) return;
-    this.props.isActive = true;
+  changeName(name: string): void {
+    this.props.name = name;
     this.touch();
   }
 
-  deactivate() {
-    if (!this.props.isActive) return;
-    this.props.isActive = false;
+  changeSlug(slug: SlugVO): void {
+    this.props.slug = slug;
+    this.touch();
+  }
+
+  changeLogoUrl(logoUrl: string | null): void {
+    this.props.logoUrl = logoUrl;
     this.touch();
   }
 
   static create(
     props: Optional<
-      OrganizationProps,
-      | "logoUrl"
-      | "createdAt"
-      | "updatedAt"
-      | "isActive"
-      | "status"
-      | "deletedAt"
+      OrganizationDto,
+      "logoUrl" | "createdAt" | "updatedAt" | "status" | "deletedAt"
     >,
     id?: UUIDVO,
   ) {
@@ -78,7 +61,6 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
         ...props,
         logoUrl: props.logoUrl ?? null,
         status: props.status ?? OrganizationStatus.ACTIVE,
-        isActive: props.isActive ?? true,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: null,
         deletedAt: null,

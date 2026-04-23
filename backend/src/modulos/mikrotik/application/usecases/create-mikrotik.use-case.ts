@@ -4,9 +4,9 @@ import {
   Either,
   left,
   right,
-} from "@/core/domain/errors/handle-errors/either.js";
-import { AlreadyExistsError } from "@/core/domain/errors/usecases/already-exists.error.js";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo.js";
+} from "@/common/domain/errors/handle-errors/either.js";
+import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error.js";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo.js";
 import { MikrotikRepository } from "@/modulos/mikrotik/domain/repositories/mikrotik.repository";
 import { MikrotikEntity } from "../../domain/entities/mikrotik-entity.js";
 import { MikrotikMapper } from "../../infrastructure/mappers/mikrotik.mapper.js";

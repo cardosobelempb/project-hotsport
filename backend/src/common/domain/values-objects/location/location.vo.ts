@@ -1,18 +1,24 @@
-import { LatitudeVO } from './latitude.vo'
-import { LongitudeVO } from './longitude.vo'
+import { BaseVO } from "../base.vo";
+import { LatitudeVO } from "./latitude.vo";
+import { LongitudeVO } from "./longitude.vo";
 
-export class LocationVO {
+export class LocationVO extends BaseVO<{
+  latitude: LatitudeVO;
+  longitude: LongitudeVO;
+}> {
   private constructor(
     public readonly latitude: LatitudeVO,
     public readonly longitude: LongitudeVO,
-  ) {}
+  ) {
+    super({ latitude, longitude });
+  }
 
   /** Factory para criar uma nova instância */
   public static create(
     latitude: LatitudeVO,
     longitude: LongitudeVO,
   ): LocationVO {
-    return new LocationVO(latitude, longitude)
+    return new LocationVO(latitude, longitude);
   }
 
   /** Compara se duas localizações são iguais */
@@ -20,34 +26,41 @@ export class LocationVO {
     return (
       this.latitude.equals(other.latitude) &&
       this.longitude.equals(other.longitude)
-    )
+    );
+  }
+
+  public isValid(): boolean {
+    return this.latitude.isValid() && this.longitude.isValid();
   }
 
   /** Calcula a distância entre dois pontos usando Haversine */
-  public distanceTo(other: LocationVO, unit: 'km' | 'm' = 'km'): number {
-    const R = unit === 'm' ? 6371000 : 6371 // Raio da Terra
-    const toRadians = (deg: number) => (deg * Math.PI) / 180
+  public distanceTo(other: LocationVO, unit: "km" | "m" = "km"): number {
+    const R = unit === "m" ? 6371000 : 6371; // Raio da Terra
+    const toRadians = (deg: number) => (deg * Math.PI) / 180;
 
-    const dLat = toRadians(other.latitude.value - this.latitude.value)
-    const dLon = toRadians(other.longitude.value - this.longitude.value)
+    const dLat = toRadians(
+      other.latitude.getValue() - this.latitude.getValue(),
+    );
+    const dLon = toRadians(
+      other.longitude.getValue() - this.longitude.getValue(),
+    );
 
-    const lat1 = toRadians(this.latitude.value)
-    const lat2 = toRadians(other.latitude.value)
+    const lat1 = toRadians(this.latitude.getValue());
+    const lat2 = toRadians(other.latitude.getValue());
 
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c
+    return R * c;
   }
 
   /** Representação em string */
   public toString(): string {
-    return `(${this.latitude.value}, ${this.longitude.value})`
+    return `(${this.latitude.getValue()}, ${this.longitude.getValue()})`;
   }
 }
-
 
 /**
 Exemplo de uso:

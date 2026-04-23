@@ -1,14 +1,18 @@
-import { ErrorCode } from '../services'
-import { StandardError } from '../StandardError'
-import { IControllerError } from './IControllerError'
+import { StandardError } from "../standard.errror";
+import { CodeError } from "../usecases/code.error";
 
-export class BadRequestError extends StandardError implements IControllerError {
+import { BaseControllerError } from "./base-controller.error";
+
+export class BadRequestError
+  extends StandardError
+  implements BaseControllerError
+{
   constructor(path: string) {
     super({
-      error: 'BadRequestError',
-      message: ErrorCode.BAD_REQUEST,
+      error: "BadRequestError",
+      message: CodeError.BAD_REQUEST,
       statusCode: 400,
       path,
-    })
+    });
   }
 }

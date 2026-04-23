@@ -1,8 +1,6 @@
-// domain/entities/token.entity.ts
-
-import { Optional } from "@/core/domain/common/types";
-import { BaseEntity } from "@/core/domain/domain/entities/base.entity";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseEntity } from "@/common/domain/entities/base.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface TokenProps {
   userId: UUIDVO;

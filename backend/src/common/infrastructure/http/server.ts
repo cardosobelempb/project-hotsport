@@ -1,17 +1,17 @@
 import "dotenv/config";
 
+import { env } from "../env/index.js";
+import { buildLogger } from "../observability/logger.js";
 import { buildApp } from "./app.js";
 
-const PORT = Number(process.env["PORT"] ?? 4949);
-const HOST = process.env["HOST"] ?? "127.0.0.1";
+const PORT = env.PORT;
+const HOST = env.HOST;
 
-const isProd = process.env.NODE_ENV === "production";
+const isProd = env.NODE_ENV === "production";
 
 // Só usa PUBLIC_HOST em desenvolvimento (para links clicáveis).
 // Em produção, por padrão, usa o próprio HOST (ou você pode omitir logs de URL).
-const PUBLIC_HOST = !isProd
-  ? (process.env["PUBLIC_HOST"] ?? "localhost")
-  : HOST;
+const PUBLIC_HOST = !isProd ? (env.PUBLIC_HOST ?? "localhost") : HOST;
 
 function printStartupBanner({
   publicHost,
@@ -20,13 +20,14 @@ function printStartupBanner({
   publicHost: string;
   port: number;
 }) {
+  const logger = buildLogger();
   const baseUrl = `http://${publicHost}:${port}`;
-  console.log("");
-  console.log("Hotspot API");
-  console.log(`- API:  ${baseUrl}`);
-  console.log(`- Docs: ${baseUrl}/docs`);
+  logger.info({}, "");
+  logger.info({}, "Hotspot API");
+  logger.info({}, `- API:  ${baseUrl}`);
+  logger.info({}, `- Docs: ${baseUrl}/docs`);
   // console.log(`- JSON: ${baseUrl}/swagger.json`);
-  console.log("");
+  logger.info({}, "");
   // URLs “puras” tendem a ser clicáveis em mais terminais
   // console.log(`${baseUrl}/docs`);
   // console.log(`${baseUrl}/swagger.json`);

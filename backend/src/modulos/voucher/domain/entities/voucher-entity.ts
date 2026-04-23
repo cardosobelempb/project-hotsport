@@ -1,6 +1,6 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { VoucherStatus } from "../emuns/voucher-status.enum";
 import { InvalidVoucherTransitionError } from "../errors/invalid-voucher-transition.error";
 import { VoucherExpiredError } from "../errors/voucher-expired.error";

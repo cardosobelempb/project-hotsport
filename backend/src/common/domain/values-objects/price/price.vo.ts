@@ -1,36 +1,36 @@
-import { BadRequestError } from '../../errors'
-import { messages } from '../locales/locales'
+import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BaseVO } from "../base.vo";
+import { messages } from "../locales/locales";
 
 /** Idiomas suportados para formatação monetária */
-export type SupportedLang = 'pt' | 'en'
+export type SupportedLang = "pt" | "en";
 
 /** Configurações opcionais para criação e formatação de preços */
 export interface PriceOptions {
-  lang?: SupportedLang
-  currency?: string
-  minimumFractionDigits?: number
-  maximumFractionDigits?: number
-  minValue?: number
+  lang?: SupportedLang;
+  currency?: string;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+  minValue?: number;
 }
 
 /**
  * ✅ Value Object que representa um preço monetário.
  * Garante consistência, imutabilidade e formatação internacional.
  */
-export class PriceVO {
-  private static readonly DEFAULT_LANG: SupportedLang = 'en'
-  private static readonly DEFAULT_CURRENCY = 'USD'
-  private static readonly DEFAULT_MIN_VALUE = 0
+export class PriceVO extends BaseVO<number> {
+  private static readonly DEFAULT_LANG: SupportedLang = "en";
+  private static readonly DEFAULT_CURRENCY = "USD";
+  private static readonly DEFAULT_MIN_VALUE = 0;
 
-  private readonly value: number
-  private readonly currency: string
-  private readonly lang: SupportedLang
+  private readonly currency: string;
+  private readonly lang: SupportedLang;
 
   /** 🔒 Construtor privado — use `create()` para instanciar. */
   private constructor(value: number, currency: string, lang: SupportedLang) {
-    this.value = value
-    this.currency = currency
-    this.lang = lang
+    super(value);
+    this.currency = currency;
+    this.lang = lang;
   }
 
   // ============================================
@@ -50,27 +50,27 @@ export class PriceVO {
       lang = this.DEFAULT_LANG,
       currency = this.DEFAULT_CURRENCY,
       minValue = this.DEFAULT_MIN_VALUE,
-    } = options
+    } = options;
 
-    const msg = messages[lang] ?? messages[this.DEFAULT_LANG]
+    const msg = messages[lang] ?? messages[this.DEFAULT_LANG];
 
-    const numericValue = this.parseValue(input, msg)
+    const numericValue = this.parseValue(input, msg);
 
     if (numericValue < minValue) {
       throw new BadRequestError(
         msg.PRICE_NEGATIVE ??
           `Price must be greater than or equal to ${minValue}.`,
-      )
+      );
     }
 
     if (!this.isCurrencySupported(currency)) {
       throw new BadRequestError(
-        msg.PRICE_UNSUPPORTED_CURRENCY?.replace('{currency}', currency) ??
+        msg.PRICE_UNSUPPORTED_CURRENCY?.replace("{currency}", currency) ??
           `Unsupported currency: ${currency}`,
-      )
+      );
     }
 
-    return new PriceVO(numericValue, currency, lang)
+    return new PriceVO(numericValue, currency, lang);
   }
 
   // ============================================
@@ -79,35 +79,35 @@ export class PriceVO {
 
   /** Retorna o valor numérico puro (sem formatação). */
   public getValue(): number {
-    return this.value
+    return this.value;
   }
 
   /** Retorna a moeda associada (ex: 'USD', 'BRL'). */
   public getCurrency(): string {
-    return this.currency
+    return this.currency;
   }
 
   /** Retorna o idioma associado. */
   public getLang(): SupportedLang {
-    return this.lang
+    return this.lang;
   }
 
   /** Compara se dois preços são equivalentes (valor e moeda). */
-  public equals(other?: PriceVO | null): boolean {
-    if (!other) return false
-    return this.value === other.value && this.currency === other.currency
+  public equals(other?: BaseVO<number> | null): boolean {
+    if (!other || !(other instanceof PriceVO)) return false;
+    return this.value === other.value && this.currency === other.currency;
   }
 
   /** Soma dois PriceVO (mesma moeda obrigatória). */
   public add(other: PriceVO): PriceVO {
-    this.ensureSameCurrency(other)
-    return new PriceVO(this.value + other.value, this.currency, this.lang)
+    this.ensureSameCurrency(other);
+    return new PriceVO(this.value + other.value, this.currency, this.lang);
   }
 
   /** Subtrai outro PriceVO (mesma moeda obrigatória). */
   public subtract(other: PriceVO): PriceVO {
-    this.ensureSameCurrency(other)
-    return new PriceVO(this.value - other.value, this.currency, this.lang)
+    this.ensureSameCurrency(other);
+    return new PriceVO(this.value - other.value, this.currency, this.lang);
   }
 
   /** Formata o preço com base em idioma, moeda e precisão. */
@@ -117,19 +117,31 @@ export class PriceVO {
       currency = this.currency,
       minimumFractionDigits = 2,
       maximumFractionDigits = 2,
-    } = options
+    } = options;
 
-    return new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat(lang === "pt" ? "pt-BR" : "en-US", {
+      style: "currency",
       currency,
       minimumFractionDigits,
       maximumFractionDigits,
-    }).format(this.value)
+    }).format(this.value);
   }
 
   /** Representação textual formatada (ex: "$10.00" ou "R$ 10,00"). */
   public toString(): string {
-    return this.format()
+    return this.format();
+  }
+
+  public isValid(): boolean {
+    return (
+      typeof this.value === "number" &&
+      !isNaN(this.value) &&
+      this.value >= 0 &&
+      typeof this.currency === "string" &&
+      this.currency.length > 0 &&
+      PriceVO["isCurrencySupported"](this.currency) &&
+      (this.lang === "pt" || this.lang === "en")
+    );
   }
 
   // ============================================
@@ -139,10 +151,10 @@ export class PriceVO {
   /** Valida se uma moeda é suportada pela API Intl. */
   private static isCurrencySupported(currency: string): boolean {
     try {
-      new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(1)
-      return true
+      new Intl.NumberFormat("en-US", { style: "currency", currency }).format(1);
+      return true;
     } catch {
-      return false
+      return false;
     }
   }
 
@@ -151,7 +163,7 @@ export class PriceVO {
     if (this.currency !== other.currency) {
       throw new BadRequestError(
         `Currency mismatch: cannot operate ${this.currency} with ${other.currency}.`,
-      )
+      );
     }
   }
 
@@ -160,28 +172,28 @@ export class PriceVO {
     input: string | number,
     msg: Record<string, string>,
   ): number {
-    if (input === null || input === undefined || input === '') {
-      throw new BadRequestError(msg.EMPTY ?? 'Price cannot be empty.')
+    if (input === null || input === undefined || input === "") {
+      throw new BadRequestError(msg.EMPTY ?? "Price cannot be empty.");
     }
 
-    let numericValue: number
-    if (typeof input === 'string') {
+    let numericValue: number;
+    if (typeof input === "string") {
       // Remove símbolos, substitui vírgula por ponto e elimina múltiplos pontos
       const cleaned = input
-        .replace(/[^\d,.-]/g, '')
-        .replace(',', '.')
-        .replace(/(\..*)\./g, '$1')
+        .replace(/[^\d,.-]/g, "")
+        .replace(",", ".")
+        .replace(/(\..*)\./g, "$1");
 
-      numericValue = parseFloat(cleaned)
+      numericValue = parseFloat(cleaned);
     } else {
-      numericValue = input
+      numericValue = input;
     }
 
     if (isNaN(numericValue)) {
-      throw new BadRequestError(msg.PRICE_INVALID ?? 'Invalid price value.')
+      throw new BadRequestError(msg.PRICE_INVALID ?? "Invalid price value.");
     }
 
-    return numericValue
+    return numericValue;
   }
 }
 

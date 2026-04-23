@@ -1,41 +1,46 @@
-import { BadRequestError } from '../../errors'
-import { HashAbstract } from '../../common/abstract/HashAbstract'
+import { BaseHash } from "../../common/shared/base-Hash";
+import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BaseVO } from "../base.vo";
 
 /**
  * Define as regras de validação para criação de senhas.
  */
 export interface PasswordOptions {
-  minLength?: number
-  maxLength?: number
-  requireUppercase?: boolean
-  requireLowercase?: boolean
-  requireDigit?: boolean
-  requireSpecialChar?: boolean
+  minLength?: number;
+  maxLength?: number;
+  requireUppercase?: boolean;
+  requireLowercase?: boolean;
+  requireDigit?: boolean;
+  requireSpecialChar?: boolean;
 }
 
 /**
  * Value Object responsável por encapsular e validar senhas.
  * Aplica validações consistentes, permite hashing e comparação segura.
  */
-export class PasswordVO {
-  private readonly value: string
-  private readonly hasher?: HashAbstract
-  private readonly options: Required<PasswordOptions>
+export class PasswordVO extends BaseVO<string> {
+  private readonly hasher?: BaseHash;
+  private readonly options: Required<PasswordOptions>;
+  private static readonly DEFAULT_MIN_LENGTH = 8;
+  private static readonly DEFAULT_MAX_LENGTH = 64;
+  protected readonly value: string;
 
   constructor(
     password: string,
-    hasher?: HashAbstract,
+    hasher?: BaseHash,
     options: PasswordOptions = {},
   ) {
+    super(password);
+
     if (!password || password.trim().length === 0) {
-      throw new BadRequestError('Password cannot be empty.')
+      throw new BadRequestError("Password cannot be empty.");
     }
 
-    this.value = password
+    this.value = password;
 
     // Só atribui se hash existe
     if (hasher !== undefined) {
-      this.hasher = hasher
+      this.hasher = hasher;
     }
 
     // Define valores padrão — evita checagens repetidas
@@ -46,9 +51,9 @@ export class PasswordVO {
       requireLowercase: options.requireLowercase ?? true,
       requireDigit: options.requireDigit ?? true,
       requireSpecialChar: options.requireSpecialChar ?? true,
-    }
+    };
 
-    this.validate(password)
+    this.validate(password);
   }
 
   /**
@@ -63,34 +68,34 @@ export class PasswordVO {
       requireLowercase,
       requireDigit,
       requireSpecialChar,
-    } = this.options
+    } = this.options;
 
     if (password.length < minLength) {
       throw new BadRequestError(
         `Password must be at least ${minLength} characters.`,
-      )
+      );
     }
 
     if (password.length > maxLength) {
       throw new BadRequestError(
         `Password must be at most ${maxLength} characters.`,
-      )
+      );
     }
 
     if (requireUppercase && !/[A-Z]/.test(password)) {
       throw new BadRequestError(
-        'Password must include at least one uppercase letter.',
-      )
+        "Password must include at least one uppercase letter.",
+      );
     }
 
     if (requireLowercase && !/[a-z]/.test(password)) {
       throw new BadRequestError(
-        'Password must include at least one lowercase letter.',
-      )
+        "Password must include at least one lowercase letter.",
+      );
     }
 
     if (requireDigit && !/\d/.test(password)) {
-      throw new BadRequestError('Password must include at least one digit.')
+      throw new BadRequestError("Password must include at least one digit.");
     }
 
     if (
@@ -98,8 +103,8 @@ export class PasswordVO {
       !/[!@#$%^&*(),.?":{}|<>_\-\\[\];'/+=~`]/.test(password)
     ) {
       throw new BadRequestError(
-        'Password must include at least one special character.',
-      )
+        "Password must include at least one special character.",
+      );
     }
   }
 
@@ -108,10 +113,19 @@ export class PasswordVO {
    */
   public static confirm(password?: string, confirmPassword?: string): void {
     if (!password || !confirmPassword) {
-      throw new BadRequestError('Password and confirmation cannot be empty.')
+      throw new BadRequestError("Password and confirmation cannot be empty.");
     }
     if (password !== confirmPassword) {
-      throw new BadRequestError('Password and confirmation do not match.')
+      throw new BadRequestError("Password and confirmation do not match.");
+    }
+  }
+
+  public isValid(): boolean {
+    try {
+      this.validate(this.value);
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -121,11 +135,11 @@ export class PasswordVO {
   public static async validateOldPassword(
     oldPassword: string,
     oldHash: string,
-    hasher: HashAbstract,
+    hasher: BaseHash,
   ): Promise<void> {
-    if (!hasher) throw new BadRequestError('Hasher not provided.')
-    const match = await hasher.compare(oldPassword, oldHash)
-    if (!match) throw new BadRequestError('Old password is incorrect.')
+    if (!hasher) throw new BadRequestError("Hasher not provided.");
+    const match = await hasher.compare(oldPassword, oldHash);
+    if (!match) throw new BadRequestError("Old password is incorrect.");
   }
 
   /**
@@ -137,23 +151,23 @@ export class PasswordVO {
     useNumbers = true,
     useSymbols = true,
   ): string {
-    const lower = 'abcdefghijklmnopqrstuvwxyz'
-    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    const numbers = '0123456789'
-    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?'
+    const lower = "abcdefghijklmnopqrstuvwxyz";
+    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-    let chars = lower
-    if (useUpperCase) chars += upper
-    if (useNumbers) chars += numbers
-    if (useSymbols) chars += symbols
+    let chars = lower;
+    if (useUpperCase) chars += upper;
+    if (useNumbers) chars += numbers;
+    if (useSymbols) chars += symbols;
 
-    let password = ''
+    let password = "";
     for (let i = 0; i < length; i++) {
-      const index = Math.floor(Math.random() * chars.length)
-      password += chars[index]
+      const index = Math.floor(Math.random() * chars.length);
+      password += chars[index];
     }
 
-    return password
+    return password;
   }
 
   /**
@@ -161,9 +175,9 @@ export class PasswordVO {
    */
   public async hash(saltRounds = 10): Promise<string> {
     if (!this.hasher) {
-      throw new BadRequestError('Hasher not provided. Cannot hash password.')
+      throw new BadRequestError("Hasher not provided. Cannot hash password.");
     }
-    return this.hasher.hash(this.value, saltRounds)
+    return this.hasher.hash(this.value, saltRounds);
   }
 
   /**
@@ -171,9 +185,9 @@ export class PasswordVO {
    */
   public async verify(password: string, hash: string): Promise<boolean> {
     if (!this.hasher) {
-      throw new BadRequestError('Hasher not provided. Cannot verify password.')
+      throw new BadRequestError("Hasher not provided. Cannot verify password.");
     }
-    return this.hasher.compare(password, hash)
+    return this.hasher.compare(password, hash);
   }
 
   /**
@@ -182,24 +196,24 @@ export class PasswordVO {
   public async matchesHash(hash: string): Promise<boolean> {
     if (!this.hasher) {
       throw new BadRequestError(
-        'Hasher not provided. Cannot check hash validity.',
-      )
+        "Hasher not provided. Cannot check hash validity.",
+      );
     }
-    return this.hasher.compare(this.value, hash)
+    return this.hasher.compare(this.value, hash);
   }
 
   /**
    * Verifica se uma string tem formato de hash bcrypt válido.
    */
   public static isValidBcryptHash(hash?: string): boolean {
-    if (!hash) return false
-    const bcryptRegex = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/
-    return bcryptRegex.test(hash)
+    if (!hash) return false;
+    const bcryptRegex = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+    return bcryptRegex.test(hash);
   }
 
   /** Retorna a senha em texto puro (⚠️ use com cuidado). */
   public getValue(): string {
-    return this.value
+    return this.value;
   }
 }
 

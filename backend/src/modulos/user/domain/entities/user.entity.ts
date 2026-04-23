@@ -1,9 +1,9 @@
-import { Optional } from "@/core/domain/common/types";
-import { BaseAggregate } from "@/core/domain/domain/entities/base-agregate.entity";
-import { CpfVO } from "@/core/domain/values-objects/cpf/cpf.vo";
-import { EmailVO } from "@/core/domain/values-objects/email/email.vo";
-import { PhoneVO } from "@/core/domain/values-objects/phone/phone.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { Optional } from "@/common/domain/types/Optional";
+import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { UserStatus } from "../enums/user-status.enum";
 
 export interface UserProps {

@@ -1,9 +1,8 @@
-import { env } from "@/core/infrastructure/env";
-
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
-import { UserMapper } from "@/modulos/user/infrastructure/mappers/prisma/user-prisma.mapper";
-import { UserPrismaRepository } from "@/modulos/user/infrastructure/repositories/user-prisma.repository";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+import { env } from "@/common/infrastructure/env";
+import { UserMapper } from "@/modulos/user/domain/mappers/user-mapper";
+import { UserPrismaRepository } from "@/modulos/user/infrastructure/htttp/repositories/prisma/user-prisma.repository";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { AuthSessionResponseType } from "../../infrastructure/http/schemas/session-auth.schema";
 

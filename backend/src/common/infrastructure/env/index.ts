@@ -1,42 +1,66 @@
-import 'dotenv/config'
-import { z } from 'zod'
-import { EnvValidationError } from './EnvValidationError'
+import { parseEnvArray } from "@/shared/schemas/helpers";
+import "dotenv/config";
+import { z } from "zod";
+import { EnvValidationError } from "./env-validation.error";
 
-/**
- * Esquema de validação das variáveis de ambiente.
- * Executado durante o bootstrap da aplicação.
- */
 export const envSchema = z.object({
+  // App configuration
+  TITLE: z.string().default("Hotspot API"),
+  DESCRIPTION: z.string().default("API para gerenciamento de hotspots Wi-Fi"),
+  VERSION: z.string().default("1.0.0"),
   NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
-  PORT: z.coerce.number().default(3333),
-  DB_TYPE: z.literal('postgres').default('postgres'),
-  DB_SCHEMA: z.string().default('public'),
-  API_URL: z.url().default('http://localhost:3333'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL é obrigatória'),
-  APP_PORT: z.coerce.number().default(8080),
-  DB_HOST: z.string().default('localhost'),
-  DB_PORT: z.coerce.number().default(5432),
-  DB_NAME: z.string().default('postgres'),
-  DB_USER: z.string().default('postgres'),
-  DB_PASSWORD: z.string().default('postgres'),
-  DB_DIALECT: z.string().default('postgres'),
-})
+    .enum(["development", "production", "test"])
+    .default("development"),
+  PORT: z.coerce.number().default(4949),
+  HOST: z.string().default("127.0.0.1"),
+  PUBLIC_HOST: z.string().default("localhost"),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  ORGANIZATION_NAME: z.string().default("Hotspot Inc."),
+  ORIGIN: z.string().transform(parseEnvArray),
 
-const parsedEnv = envSchema.safeParse(process.env)
+  // Database
+  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
+  // POSTGRES_USER: z
+  //   .string()
+  //   .min(1, "POSTGRES_USER é obrigatório")
+  //   .default("postgres"),
+  // POSTGRES_PASSWORD: z
+  //   .string()
+  //   .min(1, "POSTGRES_PASSWORD é obrigatório")
+  //   .default("docker"),
+  // POSTGRES_DB: z
+  //   .string()
+  //   .min(1, "POSTGRES_DB é obrigatório")
+  //   .default("hotspot"),
 
-if (!parsedEnv.success) {
-  const error = new EnvValidationError('env')
+  // JWT
+  JWT_SECRET_KEY: z.string().min(1, "JWT_SECRET_KEY é obrigatória"),
+  JWT_EXPIRES_IN: z.string().default("1h"),
+  ACCESS_TOKEN_SECRET_KEY: z
+    .string()
+    .min(1, "ACCESS_TOKEN_SECRET_KEY é obrigatória"),
+  REFRESH_TOKEN_SECRET_KEY: z
+    .string()
+    .min(1, "REFRESH_TOKEN_SECRET_KEY é obrigatória"),
+  ACCESS_TOKEN_EXPIRES_IN: z.string().default("15m"),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
 
-  /**
-   * Mapeia os erros do Zod para o modelo de erro da aplicação.
-   */
-  parsedEnv.error.issues.forEach(issue => {
-    error.addFieldError(issue.path.join('.') || 'env', issue.message)
-  })
+  // Cookie
+  COOKIE_SECRET: z.string().min(1, "COOKIE_SECRET é obrigatória"),
+});
 
-  throw error.toJSON()
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  const error = new EnvValidationError("process.env");
+
+  parsed.error.issues.forEach((issue) => {
+    error.addFieldError(issue.path.join(".") || "env", issue.message);
+  });
+
+  console.error(error.toJSON());
+  process.exit(1); // ✅ fail fast — nunca sobe com env inválido
 }
 
-export const env = parsedEnv.data
+export const env = parsed.data;
+export type Env = z.infer<typeof envSchema>;
