@@ -1,15 +1,15 @@
 import { BaseUseCase } from "@/common/application/usecase/base-usecase";
 import { Either, right } from "@/common/domain/errors/handle-errors";
+import { BasePaginatedResponse } from "@/common/infrastructure/repositories/base-paginated-response";
 import { OrganizationMapper } from "../../domain/mappers/organization.mapper";
 import { OrganizationRepository } from "../../domain/repositories/organization.repository";
-import {
-  OrganizationSearchDto,
-  OrganizationSearchPresentDto,
-} from "../dto/organization-search.dto";
+import { PaginatedResponseDto } from "../../infrastructure/http/schemas/organization-search.shema";
+import { OrganizationPresentDto } from "../dto/organization-present.dto";
+import { OrganizationSearchDto } from "../dto/organization-search.dto";
 
 export type OrganizationsSearchUseCaseResponse = Either<
   null,
-  OrganizationSearchPresentDto
+  PaginatedResponseDto<OrganizationPresentDto>
 >;
 
 export class OrganizationSearchUseCase implements BaseUseCase<
@@ -23,25 +23,48 @@ export class OrganizationSearchUseCase implements BaseUseCase<
   async execute(
     input: OrganizationSearchDto,
   ): Promise<OrganizationsSearchUseCaseResponse> {
-    const result = await this.organizationRepository.search({
-      page: input.page ?? 1,
-      perPage: input.perPage ?? 15,
-      filter: input.filter ?? "",
-      sortBy: input.sortBy ?? "createdAt",
-      sortDirection: input.sortDirection ?? "desc",
+    /**
+     * Busca no repositório
+     */
+    const result = await this.organizationRepository.search(input);
+
+    /**
+     * Mapeia entidades → DTO de apresentação
+     */
+    const organizations = result.items.map((organization) =>
+      OrganizationMapper.toOutput(organization),
+    );
+
+    /**
+     * Converte para o padrão:
+     *
+     * {
+     *   content,
+     *   pageable,
+     *   last,
+     *   totalPages,
+     *   totalElements,
+     *   size,
+     *   number,
+     *   sort,
+     *   first,
+     *   numberOfElements,
+     *   empty
+     * }
+     */
+    const paginatedResponse = BasePaginatedResponse.fromSearchOutput({
+      items: organizations,
+      total: result.total,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      perPage: result.perPage,
+      sortBy: result.sortBy,
+      sortDirection: result.sortDirection,
     });
 
-    return right({
-      items: result.items.map(OrganizationMapper.toOutput),
-      meta: {
-        currentPage: result.currentPage,
-        perPage: result.perPage,
-        total: result.total,
-        totalPages: result.totalPages,
-        sortBy: result.sortBy,
-        sortDirection: result.sortDirection,
-        filter: result.filter,
-      },
-    });
+    /**
+     * Retorno final
+     */
+    return right(paginatedResponse);
   }
 }

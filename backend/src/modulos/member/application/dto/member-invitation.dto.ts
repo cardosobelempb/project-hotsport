@@ -1,13 +1,13 @@
+import { MemberInvitationStatus } from "../../domain/emuns/member-invitation-status.enum";
 import { MemberRole } from "../../domain/emuns/member-roles.enum";
-import { MemberStatus } from "../../domain/emuns/member-status.enum";
 
 export interface MemberDto {
   organizationId: string;
-  userId: string;
   invitedBy: string | null;
   role: MemberRole;
-  status: MemberStatus;
-  joinedAt: string;
+  email: string;
+  invitationStatus: MemberInvitationStatus;
+  expiresAt: Date | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

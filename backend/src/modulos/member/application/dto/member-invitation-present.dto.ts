@@ -1,7 +1,8 @@
 import { MemberRole } from "../../domain/emuns/member-roles.enum";
 import { MemberStatus } from "../../domain/emuns/member-status.enum";
 
-export interface MemberDto {
+export interface MemberPresentDto {
+  id: string;
   organizationId: string;
   userId: string;
   invitedBy: string | null;
@@ -9,6 +10,4 @@ export interface MemberDto {
   status: MemberStatus;
   joinedAt: string;
   createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
 }

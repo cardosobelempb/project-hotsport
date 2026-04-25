@@ -136,6 +136,11 @@ exports.Prisma.MemberScalarFieldEnum = {
   organizationId: 'organizationId',
   userId: 'userId',
   role: 'role',
+  status: 'status',
+  invitationStatus: 'invitationStatus',
+  joinedAt: 'joinedAt',
+  invitedBy: 'invitedBy',
+  expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -175,6 +180,7 @@ exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   provider: 'provider',
+  type: 'type',
   providerAccountId: 'providerAccountId',
   passwordHash: 'passwordHash',
   createdAt: 'createdAt',
@@ -184,8 +190,7 @@ exports.Prisma.AccountScalarFieldEnum = {
 exports.Prisma.TokenScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  refreshToken: 'refreshToken',
-  accessToken: 'accessToken',
+  token: 'token',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -380,8 +385,25 @@ exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
 exports.MemberRole = exports.$Enums.MemberRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER',
   OPERATOR: 'OPERATOR',
   HOTSPOT_USER: 'HOTSPOT_USER'
+};
+
+exports.MemberStatus = exports.$Enums.MemberStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BLOCKED: 'BLOCKED'
+};
+
+exports.MemberInvitationStatus = exports.$Enums.MemberInvitationStatus = {
+  ACTIVE: 'ACTIVE',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED',
+  INVITED: 'INVITED',
+  PENDING: 'PENDING',
+  REMOVED: 'REMOVED'
 };
 
 exports.UserStatus = exports.$Enums.UserStatus = {
@@ -395,6 +417,24 @@ exports.AddressType = exports.$Enums.AddressType = {
   WORK: 'WORK',
   BILLING: 'BILLING',
   OTHER: 'OTHER'
+};
+
+exports.AccountProvider = exports.$Enums.AccountProvider = {
+  EMAIL: 'EMAIL',
+  GOOGLE: 'GOOGLE',
+  FACEBOOK: 'FACEBOOK',
+  APPLE: 'APPLE'
+};
+
+exports.AccountType = exports.$Enums.AccountType = {
+  PASSWORD: 'PASSWORD',
+  OAUTH: 'OAUTH',
+  OTP: 'OTP'
+};
+
+exports.TokenType = exports.$Enums.TokenType = {
+  REFRESH: 'REFRESH',
+  ACCESS: 'ACCESS'
 };
 
 exports.Environment = exports.$Enums.Environment = {

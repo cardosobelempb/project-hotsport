@@ -8,15 +8,26 @@ export interface OrganizationSearchDto {
   sortDirection: "asc" | "desc";
 }
 
+// export interface OrganizationSearchPresentDto {
+//   items: OrganizationPresentDto[];
+//   meta: {
+//     currentPage: number;
+//     perPage: number;
+//     total: number;
+//     totalPages: number;
+//     sortBy: string | null;
+//     sortDirection: "asc" | "desc";
+//     filter: string;
+//   };
+// }
+
 export interface OrganizationSearchPresentDto {
   items: OrganizationPresentDto[];
-  meta: {
-    currentPage: number;
-    perPage: number;
-    total: number;
-    totalPages: number;
-    sortBy: string | null;
-    sortDirection: "asc" | "desc";
-    filter: string;
-  };
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  perPage: number;
+  sortBy: string | null;
+  sortDirection: "asc" | "desc";
+  filter: string;
 }

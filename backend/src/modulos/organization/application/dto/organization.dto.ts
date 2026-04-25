@@ -1,4 +1,4 @@
-import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
+import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { OrganizationStatus } from "../../domain/enums/organization.enum";
 
 export interface OrganizationDto {

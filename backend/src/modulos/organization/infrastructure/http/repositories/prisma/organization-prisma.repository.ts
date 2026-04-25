@@ -7,7 +7,10 @@ import {
   SearchInput,
   SearchOutput,
 } from "@/common/domain/repositories/search.repository";
-import { Prisma } from "../../../../../../../generated/prisma";
+import {
+  OrganizationStatus,
+  Prisma,
+} from "../../../../../../../generated/prisma";
 import { OrganizationPrismaMapper } from "../../mappers/prisma/organization-prisma.mapper";
 
 export class OrganizationPrismaRepository implements OrganizationRepository {
@@ -38,9 +41,12 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
     const filter = params.filter?.trim() ?? "";
     const sortDirection = params.sortDirection ?? "desc";
 
+    /**
+     * Campos permitidos para ordenação
+     */
     const allowedSortBy: Array<
       keyof Prisma.OrganizationOrderByWithRelationInput
-    > = ["name", "slug", "createdAt", "updatedAt"];
+    > = ["name", "slug", "status", "createdAt", "updatedAt"];
 
     const sortBy = allowedSortBy.includes(
       params.sortBy as keyof Prisma.OrganizationOrderByWithRelationInput,
@@ -48,9 +54,16 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
       ? (params.sortBy as keyof Prisma.OrganizationOrderByWithRelationInput)
       : "createdAt";
 
+    /**
+     * Filtro
+     */
     const where = this.buildWhere(filter);
+
     const skip = (page - 1) * perPage;
 
+    /**
+     * Query paginada
+     */
     const [total, organizations] = await this.prisma.$transaction([
       this.prisma.organization.count({ where }),
       this.prisma.organization.findMany({
@@ -60,6 +73,11 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
         take: perPage,
       }),
     ]);
+
+    /**
+     * Retorno compatível com
+     * PaginatedResponseDto.fromSearchOutput()
+     */
 
     return {
       items: organizations.map(OrganizationPrismaMapper.toDomain),
@@ -80,6 +98,9 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
       OR: [
         { name: { contains: filter, mode: "insensitive" } },
         { slug: { contains: filter, mode: "insensitive" } },
+        {
+          status: { equals: filter.toLocaleUpperCase() as OrganizationStatus },
+        },
       ],
     };
   }

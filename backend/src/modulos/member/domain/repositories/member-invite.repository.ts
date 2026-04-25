@@ -1,7 +1,7 @@
 import { BaseSearchableRepository } from "@/common/domain/repositories/base-searchable.repository";
 import { MemberEntity } from "../entities/member-entity";
 
-export abstract class MemberRepository extends BaseSearchableRepository<MemberEntity> {
+export abstract class MemberInviteRepository extends BaseSearchableRepository<MemberEntity> {
   abstract findByUserAndOrganization(
     userId: string,
     organizationId: string,
