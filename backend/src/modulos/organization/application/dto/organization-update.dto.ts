@@ -1,5 +1,5 @@
 export interface OrganizationUpdateDto {
-  name: string;
-  slug: string | null;
-  logoUrl: string | null;
+  name?: string | undefined;
+  logoUrl?: string | null | undefined;
+  slug?: string | null | undefined;
 }

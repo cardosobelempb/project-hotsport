@@ -1,6 +1,9 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { SlugVO, UUIDVO } from "@/common/domain/values-objects";
+
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
+import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { OrganizationDto } from "../../application/dto/organization.dto";
 import { OrganizationStatus } from "../enums/organization.enum";
 
@@ -32,6 +35,45 @@ export class OrganizationEntity extends BaseAggregate<OrganizationDto> {
 
   private touch() {
     this.props.updatedAt = new Date();
+  }
+
+  inactive() {
+    if (this.props.status === OrganizationStatus.INACTIVE) {
+      throw new BadRequestError({
+        fieldName: "status",
+        value: this.props.status,
+        message: "Organization is already inactive",
+      });
+    }
+
+    this.props.status = OrganizationStatus.INACTIVE;
+    this.touch();
+  }
+
+  activate() {
+    if (this.props.status === OrganizationStatus.ACTIVE) {
+      throw new BadRequestError({
+        fieldName: "status",
+        value: this.props.status,
+        message: "Organization is already active",
+      });
+    }
+
+    this.props.status = OrganizationStatus.ACTIVE;
+    this.touch();
+  }
+
+  suspend() {
+    if (this.props.status === OrganizationStatus.SUSPENDED) {
+      throw new BadRequestError({
+        fieldName: "status",
+        value: this.props.status,
+        message: "Organization is already suspended",
+      });
+    }
+
+    this.props.status = OrganizationStatus.SUSPENDED;
+    this.touch();
   }
 
   changeName(name: string): void {

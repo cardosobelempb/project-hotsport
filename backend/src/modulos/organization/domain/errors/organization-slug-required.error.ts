@@ -1,6 +1,6 @@
-import { StandardError } from "@/core/domain/errors/standard.errror";
-import { BaseUseCaseError } from "@/core/domain/errors/usecases/base-usecase.error.ts";
-import { CodeError } from "@/core/domain/errors/usecases/code.error";
+import { BaseUseCaseError } from "@/common/application/errors/base-usecase.error";
+import { StandardError } from "@/common/domain/errors/standard.errror";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
 
 export class OrganizationSlugRequiredError
   extends StandardError

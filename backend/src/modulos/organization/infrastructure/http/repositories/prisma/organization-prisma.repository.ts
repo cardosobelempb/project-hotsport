@@ -1,15 +1,16 @@
 import { getPrismaClient } from "@/common/infrastructure/db/prisma.client";
-import {
-  SearchInput,
-  SearchOutput,
-} from "@/core/domain/repositories/search.repository";
+
 import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
 
+import {
+  SearchInput,
+  SearchOutput,
+} from "@/common/domain/repositories/search.repository";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { OrganizationPrismaMapper } from "../../mappers/prisma/organization-prisma.mapper";
 
-export class PrismaOrganizationRepository implements OrganizationRepository {
+export class OrganizationPrismaRepository implements OrganizationRepository {
   private prisma = getPrismaClient();
 
   async findBySlug(slug: string): Promise<OrganizationEntity | null> {
@@ -97,7 +98,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const organization = OrganizationPrismaMapper.toPersistence(entity);
 
     const createdOrganization = await this.prisma.organization.create({
-      data: { ...organization },
+      data: organization,
     });
 
     return OrganizationPrismaMapper.toDomain(createdOrganization);
@@ -115,7 +116,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
     const updatedOrganization = await this.prisma.organization.update({
       where: { id: entity.id.getValue() },
-      data: { organization },
+      data: organization,
     });
 
     return OrganizationPrismaMapper.toDomain(updatedOrganization);

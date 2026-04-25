@@ -1,9 +1,29 @@
 import { z } from "zod";
 
 export const OrganizationUpdateSchema = z.object({
-  name: z.string().min(1, "Name must be at least 1 character"),
-  slug: z.string().min(1, "Slug must be at least 1 character").nullable(),
-  logoUrl: z.string().url("Logo URL must be a valid URL").nullable(),
+  // organizationId: z.string().uuid(),
+
+  name: z.string().trim().min(2).max(120).optional(),
+
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .regex(/^[a-z0-9-]+$/)
+    .nullable()
+    .optional(),
+
+  logoUrl: z
+    .string()
+    .url()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      if (!val || val === "") return null;
+      return val;
+    }),
 });
 
 export type OrganizationUpdateDto = z.infer<typeof OrganizationUpdateSchema>;

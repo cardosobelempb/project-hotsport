@@ -1,5 +1,5 @@
 import { BaseI18n } from "../../common/shared/base-I18n";
-import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 
 interface NameOptions {

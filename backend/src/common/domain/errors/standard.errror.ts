@@ -1,15 +1,19 @@
 export class StandardError extends Error {
   readonly timestamp: Date;
   readonly statusCode: number;
+  readonly code?: string;
   readonly error: string;
-  readonly path?: string | null; // ✅ opcional — nem sempre disponível no momento do throw
+  readonly path?: string;
+  readonly fieldName?: string;
 
   constructor(params: {
     timestamp?: Date;
     statusCode?: number;
+    code?: string;
     error: string;
     message: string;
-    path?: string; // ✅ opcional
+    path?: string;
+    fieldName?: string;
   }) {
     super(params.message);
 
@@ -18,18 +22,50 @@ export class StandardError extends Error {
 
     this.timestamp = params.timestamp ?? new Date();
     this.statusCode = params.statusCode ?? 400;
+    this.code = params.code ?? this.name;
     this.error = params.error;
-    this.path = params.path ?? null; // ✅ só define se for passado, senão fica undefined
+
+    // com exactOptionalPropertyTypes
+    // só define se realmente existir
+    if (params.path) {
+      this.path = params.path;
+    }
+
+    if (params.fieldName) {
+      this.fieldName = params.fieldName;
+    }
   }
 
   toJSON() {
-    return {
+    const response: {
+      name: string;
+      statusCode: number;
+      code?: string;
+      error: string;
+      message: string;
+      path?: string;
+      fieldName?: string;
+      timestamp: string;
+    } = {
       name: this.name,
+      statusCode: this.statusCode,
       error: this.error,
       message: this.message,
-      statusCode: this.statusCode,
-      path: this.path,
-      timestamp: this.timestamp.toISOString(), // ✅ ISO string — consistente com o error handler
+      timestamp: this.timestamp.toISOString(),
     };
+
+    if (this.code) {
+      response.code = this.code;
+    }
+
+    if (this.path) {
+      response.path = this.path;
+    }
+
+    if (this.fieldName) {
+      response.fieldName = this.fieldName;
+    }
+
+    return response;
   }
 }

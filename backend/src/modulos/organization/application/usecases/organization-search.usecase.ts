@@ -1,6 +1,5 @@
-import { BaseUseCase } from "@/core/application";
-import { Either, right } from "@/core/domain/errors/handle-errors";
-
+import { BaseUseCase } from "@/common/application/usecase/base-usecase";
+import { Either, right } from "@/common/domain/errors/handle-errors";
 import { OrganizationMapper } from "../../domain/mappers/organization.mapper";
 import { OrganizationRepository } from "../../domain/repositories/organization.repository";
 import {

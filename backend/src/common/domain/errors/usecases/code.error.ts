@@ -1,41 +1,64 @@
 /**
- * Catálogo centralizado de códigos de erro com mensagens claras e legíveis.
- * Segue o padrão: <domínio>.<descrição>.error
+ * Catálogo centralizado de códigos de erro da aplicação.
+ *
+ * Padrão:
+ * <contexto>.<motivo>.error
+ *
+ * Exemplos:
+ * - general.bad-request.error
+ * - auth.invalid-credentials.error
+ * - organization.already-exists.error
  */
 export enum CodeError {
-  // ---- GENERAL ERRORS ----
-  BAD_REQUEST = "general.invalid-request.error", // A requisição está mal formatada ou incompleta
-  FORBIDDEN = "general.action-forbidden.error", // Usuário autenticado, mas sem permissão
-  UNAUTHORIZED = "general.unauthorized-access.error", // Necessário autenticação
-  ACCESS_DENIED = "general.access-denied.error", // Acesso negado por regra de segurança
-  METHOD_NOT_ALLOWED = "general.method-not-allowed.error", // Método HTTP não suportado
-  NOT_ALLOWED = "general.operation-not-allowed.error", // Operação proibida pelo sistema
+  // ---------------------------------------------------------------------------
+  // General / HTTP
+  // ---------------------------------------------------------------------------
+  BAD_REQUEST = "general.bad-request.error",
+  UNAUTHORIZED = "general.unauthorized.error",
+  FORBIDDEN = "general.forbidden.error",
+  ACCESS_DENIED = "general.access-denied.error",
+  METHOD_NOT_ALLOWED = "general.method-not-allowed.error",
+  UNSUPPORTED_MEDIA_TYPE = "general.unsupported-media-type.error",
+  INTERNAL_SERVER_ERROR = "general.internal-server-error.error",
 
-  // ---- RESOURCE / ENTITY ERRORS ----
-  NOT_FOUND = "resource.not-found.error", // Recurso solicitado não existe
-  ENTITY_NOT_FOUND = "resource.entity-not-found.error", // Entidade específica não encontrada
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
+  VALIDATION_ERROR = "validation.failed.error",
+  INVALID_PAYLOAD = "validation.invalid-payload.error",
+  INVALID_FIELD = "validation.invalid-field.error",
+  INVALID_SORT_FIELD = "validation.invalid-sort-field.error",
+  UNPROCESSABLE_ENTITY = "validation.unprocessable-entity.error",
 
-  // ---- USER ERRORS ----
-  USER_NOT_FOUND = "user.not-found.error", // Usuário não existe
-  USER_FOUND = "user.already-exists.error", // Já existe um usuário com esses dados
-  INVALID_USER = "user.invalid-data.error", // Dados do usuário são inválidos
-  INVALID_CREDENTIALS = "user.invalid-credentials.error", // Login ou senha incorretos
-  INVALID_TOKEN = "user.invalid-token.error", // Token expirado, inválido ou corrompido
-  INVALID_CREDENTIALS_OR_TOKEN = "user.invalid-authentication.error", // Credenciais ou token inválido
-  EMAIL_NOT_FOUND = "user.email-not-found.error", // Email não cadastrado
+  // ---------------------------------------------------------------------------
+  // Resource
+  // ---------------------------------------------------------------------------
+  NOT_FOUND = "resource.not-found.error",
+  ENTITY_NOT_FOUND = "resource.entity-not-found.error",
+  ALREADY_EXISTS = "resource.already-exists.error",
+  DUPLICATE_RECORD = "resource.duplicate-record.error",
 
-  // ---- VALIDATION ERRORS ----
-  UNPROCESSABLE_ENTITY = "validation.data-invalid.error", // Dados enviados inválidos
-  VALIDATION_ERROR = "validation.validation-failed.error", // Erros de validação genéricos
-  VALID_SORT = "validation.invalid-sort-field.error", // Campo enviado para ordenação é inválido
+  // ---------------------------------------------------------------------------
+  // Conflict / Integrity
+  // ---------------------------------------------------------------------------
+  CONFLICT = "conflict.operation-conflict.error",
+  INTEGRITY_VIOLATION = "conflict.integrity-violation.error",
+  DATA_INTEGRITY_VIOLATION = "conflict.data-integrity-violation.error",
 
-  // ---- CONFLICTS & INTEGRITY ----
-  CONFLICT_ERROR = "conflict.operation-conflict.error", // Conflito em alguma operação
-  DUPLICATE_ERROR = "conflict.duplicate-record.error", // Registro já existe no sistema
-  INTEGRITY_VIOLATION = "conflict.integrity-violation.error", // Violação de integridade referencial
-  DATA_INTEGRITY_VIOLATION = "conflict.data-integrity-violation.error", // Dados conflitantes ou inválidos
-  UNSUPPORTED_MEDIA_TYPE = "unsupported.media.type.error", // Dados  formato do payload não é um formato suportado
+  // ---------------------------------------------------------------------------
+  // Auth / Account / User
+  // ---------------------------------------------------------------------------
+  USER_NOT_FOUND = "user.not-found.error",
+  USER_ALREADY_EXISTS = "user.already-exists.error",
+  USER_INVALID_DATA = "user.invalid-data.error",
+  INVALID_CREDENTIALS = "auth.invalid-credentials.error",
+  INVALID_TOKEN = "auth.invalid-token.error",
+  INVALID_AUTHENTICATION = "auth.invalid-authentication.error",
+  EMAIL_NOT_FOUND = "auth.email-not-found.error",
 
-  WHATSAPP_ERROR = "whatsapp.service.error", // Erro genérico relacionado ao serviço de WhatsApp
-  RATE_LIMIT_ERROR = "rate.limit.exceeded.error", // Erro de limite de taxa excedido
+  // ---------------------------------------------------------------------------
+  // External services
+  // ---------------------------------------------------------------------------
+  WHATSAPP_SERVICE_ERROR = "external.whatsapp-service.error",
+  RATE_LIMIT_EXCEEDED = "external.rate-limit-exceeded.error",
 }

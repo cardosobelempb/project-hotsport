@@ -15,7 +15,7 @@ export class ValidationError extends StandardError {
 
   addFieldError(fieldName: string, message: string): this {
     this.fieldErrors.push(new FieldMessage({ fieldName, message }));
-    return this; // ✅ fluent API: permite encadear .addFieldError().addFieldError()
+    return this;
   }
 
   getFieldErrors(): ReadonlyArray<FieldMessage> {
@@ -30,10 +30,24 @@ export class ValidationError extends StandardError {
     return this.fieldErrors.map((e) => e.message);
   }
 
+  getIssues() {
+    return this.fieldErrors.map((error) => ({
+      field: error.fieldName,
+      message: error.message,
+    }));
+  }
+
+  get firstFieldName(): string | undefined {
+    return this.getIssues()[0]?.field;
+  }
+
   toJSON() {
+    const issues = this.getIssues();
+
     return {
       ...super.toJSON(),
-      errors: this.getFieldErrors(),
+      ...(this.firstFieldName && { fieldName: this.firstFieldName }),
+      ...(issues.length > 0 && { issues }),
     };
   }
 }

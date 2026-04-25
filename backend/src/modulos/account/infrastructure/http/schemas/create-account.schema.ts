@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { UserStatusSchema } from "@/modulos/user/domain/enums/user-status.enum";
-import { ErrorSchema, ValidationErrorSchema } from "@/shared/schemas/error";
+import { HttpErrorSchema } from "@/shared/schemas/error";
 import {
   CpfString,
   EmailString,
@@ -47,9 +47,9 @@ export const CreateAccountUserSchema = z.object({
 
 export const CreateAccountResponseSchema = {
   201: CreateAccountUserSchema,
-  409: ErrorSchema,
-  422: ValidationErrorSchema,
-  500: ErrorSchema,
+  409: HttpErrorSchema,
+  422: HttpErrorSchema,
+  500: HttpErrorSchema,
 };
 
 // export type CreateAccountResponseType = z.infer<

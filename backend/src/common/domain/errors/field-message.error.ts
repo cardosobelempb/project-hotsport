@@ -1,6 +1,6 @@
 export interface FieldMessageProps {
-  fieldName: string
-  message: string
+  fieldName: string;
+  message: string;
 }
 
 /**
@@ -10,11 +10,11 @@ export interface FieldMessageProps {
  * Este objeto é imutável por design.
  */
 export class FieldMessage {
-  readonly fieldName: string
-  readonly message: string
+  readonly fieldName: string;
+  readonly message: string;
 
   constructor(props: FieldMessageProps) {
-    this.fieldName = props.fieldName
-    this.message = props.message
+    this.fieldName = props.fieldName;
+    this.message = props.message;
   }
 }

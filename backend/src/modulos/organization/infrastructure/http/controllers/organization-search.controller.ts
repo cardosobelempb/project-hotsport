@@ -3,8 +3,8 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { OrganizationSearchUseCase } from "@/modulos/organization/application/usecases/organization-search.usecase";
 import {
+  OrganizationSearchPresentSchema,
   OrganizationSearchSchema,
-  OrganizationsPresentSchema,
 } from "../schemas/organization-search.shema";
 
 export const organizationSearchController = (
@@ -13,12 +13,12 @@ export const organizationSearchController = (
   return async (app: FastifyInstance): Promise<void> => {
     app.withTypeProvider<ZodTypeProvider>().route({
       method: "GET",
-      url: "/organizations",
+      url: "/",
       schema: {
         tags: ["Organization"],
         summary: "Lista organizações com paginação e filtro",
         querystring: OrganizationSearchSchema,
-        response: OrganizationsPresentSchema,
+        response: OrganizationSearchPresentSchema,
       },
       handler: async (request, reply) => {
         const result = await organizationSearchUseCase.execute({
@@ -30,7 +30,7 @@ export const organizationSearchController = (
         });
 
         return reply.status(200).send({
-          items: result.value?.items,
+          items: result.value?.items || [],
           meta: {
             currentPage: result.value?.items.length
               ? result.value?.meta.currentPage

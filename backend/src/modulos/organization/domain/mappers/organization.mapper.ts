@@ -1,6 +1,5 @@
-import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
-
+import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { OrganizationPresentDto } from "../../application/dto/organization-present.dto";
 import { OrganizationRawDto } from "../../application/dto/organization-raw.dto";
 import { OrganizationEntity } from "../entities/organization.entity";

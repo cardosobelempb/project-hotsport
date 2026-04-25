@@ -14,7 +14,7 @@ import { env } from "../env/index.js";
 import { fromFastifyLogger } from "../observability/logger.js";
 
 import { getPrismaClient } from "../db/prisma.client.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
+import { errorHandler } from "./middlewares/error-handler.js";
 import { registerRoutes } from "./routes.js";
 
 export type BuildAppOptions = {
@@ -36,7 +36,24 @@ export async function buildApp(
   const isProd = process.env.NODE_ENV === "production";
 
   const app = Fastify({
+    // Evita log de erros de validação, que já são tratados pelo errorHandler
     disableRequestLogging: true,
+    //
+    schemaErrorFormatter(errors, dataVar) {
+      const validationError = new Error(
+        "Existem campos inválidos na requisição.",
+      );
+
+      Object.assign(validationError, {
+        statusCode: 400,
+        code: "VALIDATION_ERROR",
+        error: "Validation Error",
+        validation: errors,
+      });
+
+      return validationError;
+    },
+    // Configura o logger do Fastify de acordo com o ambiente e as opções fornecidas
     logger:
       options.logger === false
         ? false
@@ -66,6 +83,9 @@ export async function buildApp(
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
+  // Handler global de erros
+  app.setErrorHandler(errorHandler);
+
   // CORS
   await app.register(fastifyCors, {
     origin: options.cors?.origin ?? env.ORIGIN,
@@ -79,6 +99,7 @@ export async function buildApp(
     throw new Error("Missing required environment variable: COOKIE_SECRET");
   }
 
+  // Cookie
   await app.register(fastifyCookie, {
     secret: cookieSecret,
   });
@@ -114,7 +135,6 @@ export async function buildApp(
 
   // Routes (tudo aqui)
   await registerRoutes(app);
-  app.setErrorHandler(errorHandler); // ✅ sempre por último
 
   return app;
 }

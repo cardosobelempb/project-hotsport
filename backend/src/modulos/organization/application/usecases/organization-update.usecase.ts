@@ -1,18 +1,23 @@
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 
+import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
+
+import { OrganizationSlugAlreadyExistsError } from "../../domain/errors/organization-slug-already-exists.error";
 import { OrganizationMapper } from "../../domain/mappers/organization.mapper";
 import { OrganizationRepository } from "../../domain/repositories/organization.repository";
 
-import { OrganizationNotFoundError } from "../../domain/errors/organization-not-found.error";
-import { OrganizationSlugAlreadyExistsError } from "../../domain/errors/organization-slug-already-exists.error";
-
+import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { OrganizationParams } from "../../infrastructure/http/schemas/organization.shema";
 import { OrganizationPresentDto } from "../dto/organization-present.dto";
 import { OrganizationUpdateDto } from "../dto/organization-update.dto";
 
 export type OrganizationUpdateUseCaseResponse = Either<
-  OrganizationNotFoundError | OrganizationSlugAlreadyExistsError,
+  | BadRequestError
+  | NotFoundError
+  | ConflictError
+  | OrganizationSlugAlreadyExistsError,
   { organization: OrganizationPresentDto }
 >;
 
@@ -26,7 +31,13 @@ export class OrganizationUpdateUseCase {
     input: OrganizationUpdateDto,
   ): Promise<OrganizationUpdateUseCaseResponse> {
     if (!organizationId) {
-      return left(new OrganizationNotFoundError(`Organization id is required`));
+      return left(
+        new BadRequestError({
+          fieldName: "organizationId",
+          value: `${organizationId}`,
+          message: "Organization ID is required",
+        }),
+      );
     }
 
     const organization =
@@ -34,28 +45,38 @@ export class OrganizationUpdateUseCase {
 
     if (!organization) {
       return left(
-        new OrganizationNotFoundError(
-          `Organization with id "${organizationId}" not found`,
-        ),
+        new NotFoundError({
+          fieldName: "organizationId",
+          value: organizationId,
+          message: "Organization not found",
+        }),
       );
     }
 
-    if (input.slug) {
-      const normalizedSlug = SlugVO.create(input.slug);
+    if (input.slug !== undefined) {
+      const normalizedSlug = SlugVO.create(input.slug || "");
 
-      const organizationWithSameSlug =
-        await this.organizationRepository.findBySlug(normalizedSlug.getValue());
+      if (normalizedSlug.getValue() !== organization.slug) {
+        const organizationWithSameSlug =
+          await this.organizationRepository.findBySlug(
+            normalizedSlug.getValue(),
+          );
 
-      if (
-        organizationWithSameSlug &&
-        organizationWithSameSlug.id !== organization.id
-      ) {
-        return left(
-          new OrganizationSlugAlreadyExistsError(normalizedSlug.getValue()),
-        );
+        if (
+          organizationWithSameSlug &&
+          organizationWithSameSlug.id !== organization.id
+        ) {
+          return left(
+            new ConflictError({
+              fieldName: "slug",
+              value: normalizedSlug.getValue(),
+              message: "Organization slug already exists",
+            }),
+          );
+        }
+
+        organization.changeSlug(normalizedSlug);
       }
-
-      organization.changeSlug(normalizedSlug);
     }
 
     if (input.name !== undefined) {

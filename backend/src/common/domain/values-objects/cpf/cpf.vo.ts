@@ -1,4 +1,4 @@
-import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BadRequestError } from "../../errors/controllers/bad-request.error";
 
 export class CpfVO {
   private readonly value: string;

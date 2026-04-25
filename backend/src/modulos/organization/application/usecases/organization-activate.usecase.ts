@@ -6,14 +6,14 @@ import { OrganizationAlreadyInactiveError } from "../../domain/errors/organizati
 import { OrganizationRepository } from "../../domain/repositories/organization.repository";
 import { OrganizationParams } from "../../infrastructure/http/schemas/organization.shema";
 
-export type OrganizationDeactivateUseCaseResponse = Either<
+export type OrganizationActivateUseCaseResponse = Either<
   BadRequestError | NotFoundError | OrganizationAlreadyInactiveError,
   { message: string }
 >;
 
-export class OrganizationDeactivateUseCase implements BaseUseCase<
+export class OrganizationActivateUseCase implements BaseUseCase<
   OrganizationParams,
-  OrganizationDeactivateUseCaseResponse
+  OrganizationActivateUseCaseResponse
 > {
   constructor(
     private readonly organizationRepository: OrganizationRepository,
@@ -21,7 +21,7 @@ export class OrganizationDeactivateUseCase implements BaseUseCase<
 
   async execute({
     organizationId,
-  }: OrganizationParams): Promise<OrganizationDeactivateUseCaseResponse> {
+  }: OrganizationParams): Promise<OrganizationActivateUseCaseResponse> {
     if (!organizationId) {
       return left(
         new BadRequestError({
@@ -45,12 +45,10 @@ export class OrganizationDeactivateUseCase implements BaseUseCase<
       );
     }
 
-    organization.inactive();
+    organization.activate();
 
     await this.organizationRepository.save(organization);
 
-    return right({
-      message: "Organization deactivated successfully",
-    });
+    return right({ message: "Organization activated successfully" });
   }
 }

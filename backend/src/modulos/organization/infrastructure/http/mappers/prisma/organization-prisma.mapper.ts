@@ -1,10 +1,10 @@
+import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import {
   Prisma,
   Organization as PrismaOrganization,
 } from "../../../../../../../generated/prisma";
 
-import { SlugVO } from "@/core/domain/values-objects/slug/slug.vo";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
 import { OrganizationStatus } from "@/modulos/organization/domain/enums/organization.enum";
 

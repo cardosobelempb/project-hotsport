@@ -1,4 +1,4 @@
-import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 import { messages } from "./desciption-message.vo";
 

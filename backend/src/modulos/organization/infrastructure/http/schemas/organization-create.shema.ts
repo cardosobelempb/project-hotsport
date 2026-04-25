@@ -1,14 +1,15 @@
 import { z } from "zod";
 
-export const organizationCreateSchema = z.object({
+export const OrganizationCreateSchema = z.object({
   name: z.string().min(1, "Name is required"),
 
   slug: z
-    .string()
-    .trim()
-    .min(2, "Slug is required")
-    .max(120)
-    .regex(/^[a-z0-9-]+$/),
+    .string("Slug must be a string")
+    .min(1, "Slug é obrigatório")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "O slug deve conter apenas letras minúsculas, números e hífen",
+    ),
 
   logoUrl: z
     .string()
@@ -18,4 +19,4 @@ export const organizationCreateSchema = z.object({
     .transform((val) => val ?? null),
 });
 
-export type OrganizationCreateDto = z.infer<typeof organizationCreateSchema>;
+export type OrganizationCreateDto = z.infer<typeof OrganizationCreateSchema>;

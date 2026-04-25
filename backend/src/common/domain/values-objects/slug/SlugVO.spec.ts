@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { SlugVO } from "./slug.vo";
 
 // 🧪 Testes do Value Object SlugVO

@@ -1,29 +1,28 @@
+import { OrganizationActivateUseCase } from "@/modulos/organization/application/usecases/organization-activate.usecase";
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-
-import { OrganizationFindByIdUseCase } from "@/modulos/organization/application/usecases/organization-find-by-id.usecase";
-import { OrganizationFindByIdPresentSchema } from "../schemas/organization-present.shema";
+import { OrganizationActivatePresentSchema } from "../schemas/organization-present.shema";
 
 const OrganizationParamsSchema = z.object({
   organizationId: z.string().uuid(),
 });
 
-export const organizationFindByIdController = (
-  organizationFindByIdUseCase: OrganizationFindByIdUseCase,
+export const organizationActivateController = (
+  organizationActivateUseCase: OrganizationActivateUseCase,
 ) => {
   return async (app: FastifyInstance): Promise<void> => {
     app.withTypeProvider<ZodTypeProvider>().route({
       method: "GET",
-      url: "/:organizationId",
+      url: "/activate/:organizationId",
       schema: {
         tags: ["Organization"],
         summary: "Busca uma organização por ID",
         params: OrganizationParamsSchema,
-        response: OrganizationFindByIdPresentSchema,
+        response: OrganizationActivatePresentSchema,
       },
       handler: async (request, reply) => {
-        const result = await organizationFindByIdUseCase.execute({
+        const result = await organizationActivateUseCase.execute({
           organizationId: request.params.organizationId,
         });
 
@@ -31,7 +30,7 @@ export const organizationFindByIdController = (
           throw result.value;
         }
 
-        return reply.status(200).send(result.value.organization);
+        return reply.status(200).send({ message: result.value.message });
       },
     });
   };

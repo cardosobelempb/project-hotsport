@@ -1,6 +1,6 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { UUIDVO } from "@/common/domain/values-objects";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface AccountProps {
   userId: UUIDVO;

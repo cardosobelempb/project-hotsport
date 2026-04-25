@@ -7,12 +7,15 @@ export class BadRequestError
   extends StandardError
   implements BaseControllerError
 {
-  constructor(path: string) {
+  constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
-      error: "BadRequestError",
-      message: CodeError.BAD_REQUEST,
       statusCode: 400,
-      path,
+      code: CodeError.BAD_REQUEST,
+      error: "BadRequestError",
+      message:
+        params.message ??
+        `${params.fieldName} "${params.value}" é inválido ou está faltando`,
+      fieldName: params.fieldName,
     });
   }
 }

@@ -6,12 +6,15 @@ export class UnauthorizedError
   extends StandardError
   implements BaseUseCaseError
 {
-  constructor(path: string) {
+  constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
-      error: "UnauthorizedError",
-      message: CodeError.UNAUTHORIZED,
       statusCode: 401,
-      path,
+      code: CodeError.UNAUTHORIZED,
+      error: "UnauthorizedError",
+      message:
+        params.message ??
+        `${params.fieldName} "${params.value}" não autorizado`,
+      fieldName: params.fieldName,
     });
   }
 }

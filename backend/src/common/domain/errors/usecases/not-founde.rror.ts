@@ -3,12 +3,15 @@ import { BaseUseCaseError } from "./base-usecase.error.ts";
 import { CodeError } from "./code.error";
 
 export class NotFoundError extends StandardError implements BaseUseCaseError {
-  constructor(path: string) {
+  constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
-      error: "ConflictError",
-      message: CodeError.CONFLICT_ERROR,
-      statusCode: 404,
-      path,
+      statusCode: 409,
+      code: CodeError.NOT_FOUND,
+      error: "NotFoundError",
+      message:
+        params.message ??
+        `${params.fieldName} "${params.value}" não encontrado`,
+      fieldName: params.fieldName,
     });
   }
 }

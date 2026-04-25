@@ -1,14 +1,14 @@
-import { BaseUseCase } from "@/core/application";
-import { Either, left, right } from "@/core/domain/errors/handle-errors";
-
-import { OrganizationNotFoundError } from "../../domain/errors/organization-not-found.error";
+import { BaseUseCase } from "@/common/application/usecase/base-usecase";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
+import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { OrganizationMapper } from "../../domain/mappers/organization.mapper";
 import { OrganizationRepository } from "../../domain/repositories/organization.repository";
 import { OrganizationParams } from "../../infrastructure/http/schemas/organization.shema";
 import { OrganizationPresentDto } from "../dto/organization-present.dto";
 
 export type OrganizationFindByIdUseCaseResponse = Either<
-  OrganizationNotFoundError,
+  BadRequestError | NotFoundError,
   { organization: OrganizationPresentDto }
 >;
 
@@ -24,7 +24,13 @@ export class OrganizationFindByIdUseCase implements BaseUseCase<
     organizationId,
   }: OrganizationParams): Promise<OrganizationFindByIdUseCaseResponse> {
     if (!organizationId) {
-      return left(new OrganizationNotFoundError(`Organization id is required`));
+      return left(
+        new BadRequestError({
+          fieldName: "organizationId",
+          value: `${organizationId}`,
+          message: "Organization ID is required",
+        }),
+      );
     }
 
     const organization =
@@ -32,9 +38,11 @@ export class OrganizationFindByIdUseCase implements BaseUseCase<
 
     if (!organization) {
       return left(
-        new OrganizationNotFoundError(
-          `Organization with id "${organizationId}" not found`,
-        ),
+        new NotFoundError({
+          fieldName: "organizationId",
+          value: organizationId,
+          message: "Organization not found",
+        }),
       );
     }
 

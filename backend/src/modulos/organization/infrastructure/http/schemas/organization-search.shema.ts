@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { OrganizationPresentSchema } from "./organization-present.shema";
+import { OrganizationBaseSchema } from "./organization-present.shema";
 
 export const OrganizationSearchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -11,8 +11,8 @@ export const OrganizationSearchSchema = z.object({
   sortDirection: z.enum(["asc", "desc"]).default("desc"),
 });
 
-export const OrganizationsPresentSchema = z.object({
-  items: z.array(OrganizationPresentSchema),
+export const OrganizationSearchResponseSchema = z.object({
+  items: z.array(OrganizationBaseSchema),
   meta: z.object({
     currentPage: z.number().int().min(1),
     perPage: z.number().int().min(1),
@@ -24,7 +24,11 @@ export const OrganizationsPresentSchema = z.object({
   }),
 });
 
-export type OrganizationSearchDto = z.infer<typeof OrganizationSearchSchema>;
-export type OrganizationsPresentDto = z.infer<
-  typeof OrganizationsPresentSchema
->;
+export const OrganizationSearchPresentSchema = {
+  200: OrganizationSearchResponseSchema,
+} as const;
+
+// export type OrganizationSearchDto = z.infer<typeof OrganizationSearchSchema>;
+// export type OrganizationsPresentDto = z.infer<
+//   typeof OrganizationSearchPresentSchema
+// >;

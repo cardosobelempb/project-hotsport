@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BadRequestError } from "../../errors/controllers/BadRequestError";
+import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { NameVO } from "./name.vo";
 
 describe("NameVO", () => {

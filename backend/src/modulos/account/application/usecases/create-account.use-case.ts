@@ -39,13 +39,21 @@ export class CreateAccountUseCase {
 
     if (userWithSameCpf) {
       return left(
-        new ConflictError(`ValidatorMessage.DUPLICATE_VALUE: ${input.cpf}`),
+        new ConflictError({
+          fieldName: "cpf",
+          value: input.cpf,
+          message: `Cpf "${input.cpf}" já existe`,
+        }),
       );
     }
 
     if (authWithSameEmail) {
       return left(
-        new ConflictError(`ValidatorMessage.DUPLICATE_VALUE: ${input.email}`),
+        new ConflictError({
+          fieldName: "email",
+          value: input.email,
+          message: `Email "${input.email}" já existe`,
+        }),
       );
     }
 
@@ -66,20 +74,6 @@ export class CreateAccountUseCase {
       providerAccountId: UUIDVO.create(newUser.id.getValue()),
     });
 
-    console.log("User and account created successfully:", {
-      user: {
-        ...newUser,
-        id: newUser.id.getValue(),
-        email: newUser.email.toString(),
-        phone: newUser.phoneNumber?.getValue(),
-        cpf: newUser.cpf.getValue(),
-      },
-      account: {
-        ...newAccount,
-        userId: newAccount.userId.getValue(),
-        providerAccountId: newAccount.providerAccountId.toString(),
-      },
-    });
     // ✅ transação apenas nos writes, passando tx para os repositórios
     const [saveUser] = await prisma.$transaction(async (tx) => {
       const user = await this.userRepository.createWithTx(newUser, tx);
