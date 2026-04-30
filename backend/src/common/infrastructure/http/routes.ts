@@ -1,8 +1,8 @@
-import { accountRoutes } from "@/modulos/account/infrastructure/http/routes/account.routes";
 import { authRoutes } from "@/modulos/auth/infrastructure/http/routes/auth.routes";
-import { mikrotikRoutes } from "@/modulos/mikrotik/infrastructure/http/routes/mikrtik.routes";
+import { accountRoutes } from "@/modulos/identity/infrastructure/http/routes/account.routes";
+import { userRoutes } from "@/modulos/identity/infrastructure/http/routes/user.routes";
+import { mikrotikRoutes } from "@/modulos/network/mikrotik/infrastructure/http/routes/mikrtik.routes";
 import { oerganizationRoutes } from "@/modulos/organization/infrastructure/http/routers/organization.routes";
-import { userRoutes } from "@/modulos/user/infrastructure/htttp/routes/user.routes";
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";

@@ -8,8 +8,8 @@ export class AlreadyExistsError
   constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
       statusCode: 409,
-      code: "ALREADY_EXISTS",
-      error: "Conflict",
+      code: "AlreadyExistsError",
+      error: "AlreadyExistsError",
       message:
         params.message ?? `${params.fieldName} "${params.value}" já existe`,
       fieldName: params.fieldName,

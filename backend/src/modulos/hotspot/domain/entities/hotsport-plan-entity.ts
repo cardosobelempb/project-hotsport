@@ -1,12 +1,12 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { UUIDVO } from "@/common/domain/values-objects";
-import { HotspotPlanType } from "../enums/hotsport-plan.enuns";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { HotspotPlanTypeDto } from "@/shared/enums/hotspot-plan-type.enum";
 
 export interface HotsportPlanProps {
   organizationId: UUIDVO;
   name: string;
-  type: HotspotPlanType;
+  type: HotspotPlanTypeDto;
   durationSecs: number | null;
   dataLimitMb: number | null;
   createdAt: Date;
@@ -48,21 +48,21 @@ export class HotsportPlanEntity extends BaseAggregate<HotsportPlanProps> {
   }
 
   changeToTime(durationSecs: number) {
-    this.props.type = HotspotPlanType.TIME;
+    this.props.type = HotspotPlanTypeDto.TIME;
     this.props.durationSecs = durationSecs;
     this.props.dataLimitMb = null;
     this.touch();
   }
 
   changeToData(dataLimitMb: number) {
-    this.props.type = HotspotPlanType.DATA;
+    this.props.type = HotspotPlanTypeDto.DATA;
     this.props.dataLimitMb = dataLimitMb;
     this.props.durationSecs = null;
     this.touch();
   }
 
   changeToUnlimited() {
-    this.props.type = HotspotPlanType.UNLIMITED;
+    this.props.type = HotspotPlanTypeDto.UNLIMITED;
     this.props.durationSecs = null;
     this.props.dataLimitMb = null;
     this.touch();
@@ -82,7 +82,7 @@ export class HotsportPlanEntity extends BaseAggregate<HotsportPlanProps> {
     return new HotsportPlanEntity(
       {
         ...props,
-        type: props.type ?? HotspotPlanType.TIME,
+        type: props.type ?? HotspotPlanTypeDto.TIME,
         durationSecs: props.durationSecs ?? null,
         dataLimitMb: props.dataLimitMb ?? null,
         createdAt: props.createdAt ?? new Date(),

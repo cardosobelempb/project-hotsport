@@ -2,7 +2,7 @@ import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import {
   HotsportPlanOutputDto,
   HotsportPlanRawDto,
-} from "../../application/dto/hotsport-pan.dto";
+} from "../../../application/dto/hotsport-pan.dto";
 import { HotsportPlanEntity } from "../entities/hotsport-plan-entity";
 
 export class HotsportPlanMapper {

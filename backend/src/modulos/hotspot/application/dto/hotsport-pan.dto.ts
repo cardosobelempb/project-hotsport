@@ -1,4 +1,4 @@
-import { HotspotPlanType } from "../../domain/enums/hotsport-plan.enuns";
+import { HotspotPlanTypeDto } from "@/shared/enums/hotspot-plan-type.enum";
 
 interface HotsportPlanDto {
   id: string;
@@ -6,7 +6,7 @@ interface HotsportPlanDto {
   name: string;
   duratioSec: number;
   dataLimitMb: number;
-  type: HotspotPlanType;
+  type: HotspotPlanTypeDto;
   createdAt: string;
   updatedAt: string | null;
 }
@@ -41,7 +41,7 @@ export interface HotsportPlanOutputDto extends Omit<
   name: string;
   duratioSec: number;
   dataLimitMb: number;
-  type: HotspotPlanType;
+  type: HotspotPlanTypeDto;
   createdAt: string;
 }
 

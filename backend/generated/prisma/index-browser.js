@@ -137,6 +137,7 @@ exports.Prisma.MemberScalarFieldEnum = {
   userId: 'userId',
   role: 'role',
   status: 'status',
+  email: 'email',
   invitationStatus: 'invitationStatus',
   joinedAt: 'joinedAt',
   invitedBy: 'invitedBy',
@@ -241,6 +242,7 @@ exports.Prisma.MikrotikScalarFieldEnum = {
   ipAddress: 'ipAddress',
   username: 'username',
   passwordHash: 'passwordHash',
+  activeUser: 'activeUser',
   status: 'status',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
@@ -362,9 +364,207 @@ exports.Prisma.PaymentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CampaignScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  description: 'description',
+  isActive: 'isActive',
+  views: 'views',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CampaignItemScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  organizationId: 'organizationId',
+  type: 'type',
+  order: 'order',
+  fileUrl: 'fileUrl',
+  durationSeconds: 'durationSeconds',
+  title: 'title',
+  destinationLink: 'destinationLink',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrganizationConfigScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  configType: 'configType',
+  configJson: 'configJson',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrganizationVpnPeerScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  wgClientId: 'wgClientId',
+  name: 'name',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PortalScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  activeCampaignId: 'activeCampaignId',
+  templateId: 'templateId',
+  name: 'name',
+  slug: 'slug',
+  type: 'type',
+  redirectUrl: 'redirectUrl',
+  htmlContent: 'htmlContent',
+  description: 'description',
+  isActive: 'isActive',
+  customCss: 'customCss',
+  logoUrl: 'logoUrl',
+  primaryColor: 'primaryColor',
+  backgroundColor: 'backgroundColor',
+  registrationFields: 'registrationFields',
+  showPlans: 'showPlans',
+  showLgpd: 'showLgpd',
+  settings: 'settings',
+  whatsappEnabled: 'whatsappEnabled',
+  whatsappTemplate: 'whatsappTemplate',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PortalTemplateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  thumbnailUrl: 'thumbnailUrl',
+  htmlTemplate: 'htmlTemplate',
+  cssTemplate: 'cssTemplate',
+  type: 'type',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.LeadScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  cpf: 'cpf',
+  mac: 'mac',
+  ip: 'ip',
+  status: 'status',
+  source: 'source',
+  observations: 'observations',
+  lgpdAccepted: 'lgpdAccepted',
+  lgpdAcceptedAt: 'lgpdAcceptedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ConnectionLogScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  username: 'username',
+  cpf: 'cpf',
+  mac: 'mac',
+  assignedIp: 'assignedIp',
+  nasIp: 'nasIp',
+  connectionStartAt: 'connectionStartAt',
+  connectionEndAt: 'connectionEndAt',
+  inputBytes: 'inputBytes',
+  outputBytes: 'outputBytes',
+  durationSeconds: 'durationSeconds',
+  disconnectReason: 'disconnectReason',
+  authResult: 'authResult',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.WhatsappLogScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  portalId: 'portalId',
+  phone: 'phone',
+  message: 'message',
+  contextType: 'contextType',
+  referenceId: 'referenceId',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  skipReason: 'skipReason',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UpdateScalarFieldEnum = {
+  id: 'id',
+  description: 'description',
+  changelog: 'changelog',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AppliedUpdateScalarFieldEnum = {
+  id: 'id',
+  description: 'description',
+  appliedAt: 'appliedAt'
+};
+
+exports.Prisma.UpdateFileScalarFieldEnum = {
+  id: 'id',
+  updateId: 'updateId',
+  filePath: 'filePath',
+  fileContent: 'fileContent',
+  action: 'action'
+};
+
+exports.Prisma.UpdateMigrationScalarFieldEnum = {
+  id: 'id',
+  updateId: 'updateId',
+  sqlContent: 'sqlContent',
+  order: 'order'
+};
+
+exports.Prisma.UpdateApplyLogScalarFieldEnum = {
+  id: 'id',
+  updateId: 'updateId',
+  step: 'step',
+  status: 'status',
+  message: 'message',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.FileSnapshotScalarFieldEnum = {
+  id: 'id',
+  filePath: 'filePath',
+  md5Hash: 'md5Hash',
+  snapshotDate: 'snapshotDate'
+};
+
+exports.Prisma.SchemaSnapshotScalarFieldEnum = {
+  tableName: 'tableName',
+  columnsJson: 'columnsJson',
+  indexesJson: 'indexesJson',
+  createSql: 'createSql',
+  snapshotDate: 'snapshotDate'
+};
+
+exports.Prisma.SystemBackupScalarFieldEnum = {
+  id: 'id',
+  updateId: 'updateId',
+  type: 'type',
+  dbDumpPath: 'dbDumpPath',
+  filesZipPath: 'filesZipPath',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -375,6 +575,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
   ACTIVE: 'ACTIVE',
@@ -504,6 +710,47 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   REFUNDED: 'REFUNDED'
 };
 
+exports.CampaignItemType = exports.$Enums.CampaignItemType = {
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO'
+};
+
+exports.OrganizationConfigType = exports.$Enums.OrganizationConfigType = {
+  MERCADOPAGO: 'MERCADOPAGO',
+  EFI: 'EFI',
+  WHATSAPP: 'WHATSAPP'
+};
+
+exports.LeadStatus = exports.$Enums.LeadStatus = {
+  NEW: 'NEW',
+  CONTACTED: 'CONTACTED',
+  CONVERTED: 'CONVERTED',
+  DISCARDED: 'DISCARDED'
+};
+
+exports.WhatsappLogStatus = exports.$Enums.WhatsappLogStatus = {
+  OK: 'OK',
+  ERROR: 'ERROR',
+  SKIPPED: 'SKIPPED'
+};
+
+exports.UpdateFileAction = exports.$Enums.UpdateFileAction = {
+  CREATE: 'CREATE',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE'
+};
+
+exports.UpdateApplyLogStatus = exports.$Enums.UpdateApplyLogStatus = {
+  INFO: 'INFO',
+  OK: 'OK',
+  ERROR: 'ERROR'
+};
+
+exports.SystemBackupType = exports.$Enums.SystemBackupType = {
+  PRE_UPDATE: 'PRE_UPDATE',
+  MANUAL: 'MANUAL'
+};
+
 exports.Prisma.ModelName = {
   Organization: 'Organization',
   Member: 'Member',
@@ -521,7 +768,24 @@ exports.Prisma.ModelName = {
   LgpdConsent: 'LgpdConsent',
   SubscriptionPlan: 'SubscriptionPlan',
   Subscription: 'Subscription',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  Campaign: 'Campaign',
+  CampaignItem: 'CampaignItem',
+  OrganizationConfig: 'OrganizationConfig',
+  OrganizationVpnPeer: 'OrganizationVpnPeer',
+  Portal: 'Portal',
+  PortalTemplate: 'PortalTemplate',
+  Lead: 'Lead',
+  ConnectionLog: 'ConnectionLog',
+  WhatsappLog: 'WhatsappLog',
+  Update: 'Update',
+  AppliedUpdate: 'AppliedUpdate',
+  UpdateFile: 'UpdateFile',
+  UpdateMigration: 'UpdateMigration',
+  UpdateApplyLog: 'UpdateApplyLog',
+  FileSnapshot: 'FileSnapshot',
+  SchemaSnapshot: 'SchemaSnapshot',
+  SystemBackup: 'SystemBackup'
 };
 
 /**

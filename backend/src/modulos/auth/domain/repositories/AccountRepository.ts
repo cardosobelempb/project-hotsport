@@ -1,9 +1,8 @@
-import { BaseSearchableRepository } from "@/core/domain/repositories/base-searchable.repository";
-
-import { AccountEntity } from "@/modulos/account/domain/entities/account.entity";
+import { BaseRepository } from "@/common/domain/repositories/base.repository";
+import { AccountEntity } from "@/modulos/identity/domain/entities/account.entity";
 import { Prisma } from "../../../../../generated/prisma";
 
-export abstract class AccountRepository extends BaseSearchableRepository<AccountEntity> {
+export abstract class AccountRepository extends BaseRepository<AccountEntity> {
   abstract findByEmail(email: string): Promise<AccountEntity | null>;
   abstract createWithTx(
     entity: AccountEntity,

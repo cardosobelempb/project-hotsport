@@ -1,5 +1,7 @@
 // import { HotspotUserStatus } from "../../domain/enums/hotsport-user-status.enum";
 
+import { HotspotUserStatusDto } from "@/shared/enums/hotspot-user-status.enum";
+
 // export interface HotsportUserDto {
 //   id: string;
 //   hotsportuserId: string;
@@ -42,8 +44,6 @@
 
 // export interface HotsportUserOptionalDto extends Partial<HotsportUserDto> {}
 
-import { HotspotUserStatus } from "../../domain/enums/hotsport-user-status.enum";
-
 interface HotsportUserDto {
   id: string;
   hotsportuserId: string;
@@ -52,7 +52,7 @@ interface HotsportUserDto {
   passwordHash: string;
   macAddress: string;
   ipAddress: string;
-  status: HotspotUserStatus;
+  status: HotspotUserStatusDto;
   createdAt: string;
   updatedAt: string | null;
 }
@@ -93,7 +93,7 @@ export interface HotsportUserOutputDto extends Omit<
   passwordHash: string;
   macAddress: string;
   ipAddress: string;
-  status: HotspotUserStatus;
+  status: HotspotUserStatusDto;
   createdAt: string;
 }
 

@@ -1,7 +1,6 @@
 import z from "zod";
-import { HttpErrorSchema } from "./error";
 import { PageableSchema } from "./pageable.schema";
-import { SortSchema } from "./sort.schema";
+import { SortSchema } from "./sort.schema.schema";
 
 /**
  * Generic paginated response schema
@@ -28,11 +27,11 @@ export const PaginatedPresent = z.object({
 
 export const PaginatedPresentSchema = {
   200: PaginatedPresent,
-  404: HttpErrorSchema,
-  409: HttpErrorSchema,
-  422: HttpErrorSchema,
-  500: HttpErrorSchema,
-  default: HttpErrorSchema,
+  // 404: HttpErrorSchema,
+  // 409: HttpErrorSchema,
+  // 422: HttpErrorSchema,
+  // 500: HttpErrorSchema,
+  // default: HttpErrorSchema,
 } as const;
 
 export type SortDto = z.infer<typeof SortSchema>;

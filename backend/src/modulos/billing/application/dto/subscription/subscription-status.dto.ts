@@ -1,0 +1,9 @@
+export enum SubscriptionStatusDto {
+  TRIALING = "TRIALING",
+  ACTIVE = "ACTIVE",
+  PAST_DUE = "PAST_DUE",
+  SUSPENDED = "SUSPENDED",
+  CANCELED = "CANCELED",
+  EXPIRED = "EXPIRED",
+  INACTIVE = "INACTIVE",
+}

@@ -1,0 +1,8 @@
+export enum PaymentStatusDto {
+  PENDING = "PENDING",
+  PAID = "PAID",
+  FAILED = "FAILED",
+  ARCHIVED = "ARCHIVED",
+  CANCELED = "CANCELED",
+  REFUNDED = "REFUNDED",
+}

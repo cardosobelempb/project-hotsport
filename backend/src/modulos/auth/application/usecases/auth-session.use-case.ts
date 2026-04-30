@@ -1,8 +1,10 @@
 import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
 import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
 import { env } from "@/common/infrastructure/env";
-import { UserMapper } from "@/modulos/user/domain/mappers/user-mapper";
-import { UserPrismaRepository } from "@/modulos/user/infrastructure/htttp/repositories/prisma/user-prisma.repository";
+
+import { UserMapper } from "@/modulos/identity/domain/mappers/user-mapper";
+import { UserPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/user-prisma.repository";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { AuthSessionResponseType } from "../../infrastructure/http/schemas/session-auth.schema";
 
@@ -34,7 +36,13 @@ export class AuthSessionUseCase {
     accessToken,
   }: AuthSessionUseCaseInput): Promise<AuthSessionUseCaseResult> {
     if (!accessToken) {
-      return left(new UnauthorizedError("Unauthorized"));
+      return left(
+        new UnauthorizedError({
+          fieldName: "accessToken",
+          value: accessToken,
+          message: `${CodeError.UNAUTHORIZED}: Access token is required`,
+        }),
+      );
     }
 
     const decoded = verifyToken(accessToken, env.ACCESS_TOKEN_SECRET_KEY || "");
@@ -45,16 +53,28 @@ export class AuthSessionUseCase {
       !("sub" in decoded) ||
       !decoded.sub
     ) {
-      return left(new UnauthorizedError("Unauthorized"));
+      return left(
+        new UnauthorizedError({
+          fieldName: "accessToken",
+          value: accessToken,
+          message: `${CodeError.UNAUTHORIZED}: Access token is required`,
+        }),
+      );
     }
 
     const user = await this.userPrismaRepository.findById(
       decoded.sub.toString(),
     );
     if (!user) {
-      return left(new UnauthorizedError("Unauthorized"));
+      return left(
+        new UnauthorizedError({
+          fieldName: "accessToken",
+          value: accessToken,
+          message: `${CodeError.UNAUTHORIZED}: Access token is required`,
+        }),
+      );
     }
 
-    return right({ user: UserMapper.toOutput(user) });
+    return right({ user: UserMapper.toPresenter(user) });
   }
 }

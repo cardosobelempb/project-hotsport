@@ -4,10 +4,19 @@ import { Optional } from "@/common/domain/types/Optional";
 import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { OrganizationDto } from "../../application/dto/organization.dto";
 import { OrganizationStatus } from "../enums/organization.enum";
 
-export class OrganizationEntity extends BaseAggregate<OrganizationDto> {
+interface OrganizationProps {
+  name: string;
+  slug: SlugVO;
+  logoUrl: string | null;
+  status: OrganizationStatus | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+}
+
+export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
   get name() {
     return this.props.name;
   }
@@ -93,7 +102,7 @@ export class OrganizationEntity extends BaseAggregate<OrganizationDto> {
 
   static create(
     props: Optional<
-      OrganizationDto,
+      OrganizationProps,
       "logoUrl" | "createdAt" | "updatedAt" | "status" | "deletedAt"
     >,
     id?: UUIDVO,

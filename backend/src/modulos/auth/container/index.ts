@@ -1,10 +1,11 @@
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 
 import { env } from "@/common/infrastructure/env";
-import { AccountPrismaRepository } from "@/modulos/account/infrastructure/http/repositories/prisma/account-prisma.repository";
 import { AuthSessionUseCase } from "@/modulos/auth/application/usecases/auth-session.use-case";
 import { AuthLoginUseCase } from "@/modulos/auth/application/usecases/signin-auth.use-case";
-import { UserPrismaRepository } from "@/modulos/user/infrastructure/htttp/repositories/prisma/user-prisma.repository";
+import { AccountPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/account-prisma.repository";
+
+import { UserPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/user-prisma.repository";
 import { BcryptHasher } from "@/shared/cryptography/bcrypt-hasher";
 
 // ── Repositories ──────────────────────────────────────────────────────────────

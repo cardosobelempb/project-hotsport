@@ -18,10 +18,10 @@ export const UUIDString = z.string().uuid("Invalid UUID format");
 export type UUIDStringType = z.infer<typeof UUIDString>;
 
 // ✅ Para INPUT (body) — aceita Date ou string e transforma
-export const IsoDateTimeInput = z
-  .union([z.string(), z.date()])
-  .transform((val) => (val instanceof Date ? val.toISOString() : val));
-export type IsoDateTimeInputType = z.infer<typeof IsoDateTimeInput>;
+// export const IsoDateTimeInput = z
+//   .union([z.string(), z.date()])
+//   .transform((val) => (val instanceof Date ? val.toISOString() : val));
+// export type IsoDateTimeInputType = z.infer<typeof IsoDateTimeInput>;
 
 // ✅ Para OUTPUT (response) — sempre string pura, sem union/transform
 export const IsoDateTimeOutput = z.string().datetime({ offset: true });
@@ -65,3 +65,31 @@ export const withPasswordConfirmation = <T extends z.ZodRawShape>(
     }
   });
 };
+
+export const UuidSchema = z.string().uuid("ID inválido");
+export const EmailSchema = z.string().email("E-mail inválido").max(255);
+export const CpfSchema = z.string().min(11).max(14);
+export const PhoneSchema = z.string().min(8).max(30);
+export const CurrencySchema = z
+  .string()
+  .length(3)
+  .transform((value) => value.toUpperCase());
+export const MoneySchema = z.number().positive("Valor deve ser maior que zero");
+export const SortDirectionSchema = z.enum(["asc", "desc"]);
+
+/**
+ * Aceita string ISO ou Date e normaliza para string ISO.
+ * Necessário porque Fastify serializa Date como objeto — não string.
+ *
+ * @example
+ * createdAt: IsoDateTimeInput           // obrigatório
+ * updatedAt: IsoDateTimeInput.nullable() // opcional nulo
+ */
+export const IsoDateTimeInput = z.coerce
+  .date()
+  .transform((d) => d.toISOString());
+
+/**
+ * UUID string validado
+ */
+export const UUIDSchema = z.string().uuid();

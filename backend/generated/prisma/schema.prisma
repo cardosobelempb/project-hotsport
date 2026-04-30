@@ -135,6 +135,47 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum CampaignItemType {
+  IMAGE @map("imagem")
+  VIDEO @map("video")
+}
+
+enum OrganizationConfigType {
+  MERCADOPAGO @map("mercadopago")
+  EFI         @map("efi")
+  WHATSAPP    @map("whatsapp")
+}
+
+enum LeadStatus {
+  NEW       @map("novo")
+  CONTACTED @map("contactado")
+  CONVERTED @map("convertido")
+  DISCARDED @map("descartado")
+}
+
+enum UpdateFileAction {
+  CREATE @map("create")
+  UPDATE @map("update")
+  DELETE @map("delete")
+}
+
+enum UpdateApplyLogStatus {
+  INFO  @map("info")
+  OK    @map("ok")
+  ERROR @map("erro")
+}
+
+enum SystemBackupType {
+  PRE_UPDATE @map("pre_update")
+  MANUAL     @map("manual")
+}
+
+enum WhatsappLogStatus {
+  OK      @map("ok")
+  ERROR   @map("erro")
+  SKIPPED @map("skipped")
+}
+
 model Organization {
   id        String             @id @default(uuid()) @db.Uuid
   name      String             @db.VarChar(100)
@@ -154,9 +195,17 @@ model Organization {
   mpConfig     MercadoPagoConfig?
   efiConfig    EfiConfig?
 
-  subscriptionPlans SubscriptionPlan[]
-  subscriptions     Subscription[]
-  payments          Payment[]
+  subscriptionPlans   SubscriptionPlan[]
+  subscriptions       Subscription[]
+  payments            Payment[]
+  campaigns           Campaign[]
+  campaignItems       CampaignItem[]
+  organizationConfigs OrganizationConfig[]
+  vpnPeers            OrganizationVpnPeer[]
+  portals             Portal[]
+  leads               Lead[]
+  connectionLogs      ConnectionLog[]
+  whatsappLogs        WhatsappLog[]
 
   @@index([slug])
   @@index([status])
@@ -170,6 +219,7 @@ model Member {
   userId           String                 @map("user_id") @db.Uuid
   role             MemberRole             @default(OPERATOR)
   status           MemberStatus           @default(ACTIVE)
+  email            String                 @db.VarChar(255)
   invitationStatus MemberInvitationStatus @default(PENDING) @map("invitation_status")
   joinedAt         DateTime               @default(now()) @map("joined_at")
   invitedBy        String?                @map("invited_by") @db.Uuid
@@ -287,7 +337,7 @@ model Otp {
 }
 
 model MercadoPagoConfig {
-  id                   Int       @id @default(autoincrement())
+  id                   String    @id @default(uuid()) @db.Uuid
   organizationId       String    @unique @db.Uuid
   publicKey            String?   @map("public_key")
   accessTokenEncrypted String?   @map("access_token")
@@ -303,7 +353,7 @@ model MercadoPagoConfig {
 }
 
 model EfiConfig {
-  id             Int         @id @default(autoincrement())
+  id             String      @id @default(uuid()) @db.Uuid
   organizationId String      @unique @db.Uuid
   clientId       String
   clientSecret   String
@@ -327,6 +377,7 @@ model Mikrotik {
   ipAddress      String         @map("ip_address") @db.VarChar(15)
   username       String
   passwordHash   String
+  activeUser     Boolean        @default(false) @map("active_user")
   status         MikrotikStatus @default(OFFLINE)
   deletedAt      DateTime?      @map("deleted_at")
   createdAt      DateTime       @default(now()) @map("created_at")
@@ -521,4 +572,283 @@ model Payment {
   @@index([dueAt])
   @@index([deletedAt])
   @@map("payment")
+}
+
+model Campaign {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String    @db.VarChar(150)
+  description    String?
+  isActive       Boolean   @default(true) @map("is_active")
+  views          Int       @default(0)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @updatedAt @map("updated_at")
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  items        CampaignItem[]
+  portals      Portal[]
+
+  @@index([organizationId])
+  @@map("campaign")
+}
+
+model CampaignItem {
+  id              String           @id @default(uuid()) @db.Uuid
+  campaignId      String           @map("campaign_id") @db.Uuid
+  organizationId  String           @map("organization_id") @db.Uuid
+  type            CampaignItemType
+  order           Int              @default(0)
+  fileUrl         String           @map("file_url") @db.VarChar(500)
+  durationSeconds Int              @default(5) @map("duration_seconds")
+  title           String?          @db.VarChar(200)
+  destinationLink String?          @map("destination_link") @db.VarChar(500)
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, order])
+  @@index([organizationId])
+  @@map("campaign_item")
+}
+
+model OrganizationConfig {
+  id             String                 @id @default(uuid()) @db.Uuid
+  organizationId String                 @map("organization_id") @db.Uuid
+  configType     OrganizationConfigType @map("config_type")
+  configJson     Json                   @map("config_json")
+  isActive       Boolean                @default(true) @map("is_active")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime?              @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, configType])
+  @@map("organization_config")
+}
+
+model OrganizationVpnPeer {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  wgClientId     String   @map("wg_client_id") @db.VarChar(100)
+  name           String?  @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([wgClientId])
+  @@map("organization_vpn_peer")
+}
+
+model Portal {
+  id               String  @id @default(uuid()) @db.Uuid
+  organizationId   String? @map("organization_id") @db.Uuid
+  activeCampaignId String? @map("active_campaign_id") @db.Uuid
+  templateId       String? @map("template_id") @db.Uuid
+
+  name               String   @db.VarChar(100)
+  slug               String   @db.VarChar(50)
+  type               String?  @default("basico") @db.VarChar(50)
+  redirectUrl        String?  @map("redirect_url") @db.VarChar(500)
+  htmlContent        String?  @map("html_content")
+  description        String?
+  isActive           Boolean  @default(true) @map("is_active")
+  customCss          String?  @map("custom_css")
+  logoUrl            String?  @map("logo_url") @db.VarChar(500)
+  primaryColor       String?  @default("#3B82F6") @map("primary_color") @db.VarChar(7)
+  backgroundColor    String?  @default("#0f111a") @map("background_color") @db.VarChar(7)
+  registrationFields Json?    @map("registration_fields")
+  showPlans          Boolean  @default(false) @map("show_plans")
+  showLgpd           Boolean  @default(true) @map("show_lgpd")
+  settings           String?
+  whatsappEnabled    Boolean  @default(false) @map("whatsapp_enabled")
+  whatsappTemplate   String?  @map("whatsapp_template")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  activeCampaign Campaign?       @relation(fields: [activeCampaignId], references: [id], onDelete: SetNull)
+  template       PortalTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  whatsappLogs   WhatsappLog[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([activeCampaignId])
+  @@map("portal")
+}
+
+model PortalTemplate {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @db.VarChar(255)
+  description  String?
+  thumbnailUrl String?  @map("thumbnail_url") @db.VarChar(500)
+  htmlTemplate String   @map("html_template")
+  cssTemplate  String?  @map("css_template")
+  type         String?  @default("basico") @db.VarChar(50)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  portals Portal[]
+
+  @@map("portal_template")
+}
+
+model Lead {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @map("organization_id") @db.Uuid
+  name           String?    @db.VarChar(255)
+  email          String?    @db.VarChar(255)
+  phone          String?    @db.VarChar(50)
+  cpf            String?    @db.VarChar(20)
+  mac            String?    @db.VarChar(50)
+  ip             String?    @db.VarChar(50)
+  status         LeadStatus @default(NEW)
+  source         String?    @default("portal") @db.VarChar(50)
+  observations   String?
+  lgpdAccepted   Boolean    @default(false) @map("lgpd_accepted")
+  lgpdAcceptedAt DateTime?  @map("lgpd_accepted_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime?  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("lead")
+}
+
+model ConnectionLog {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String    @map("organization_id") @db.Uuid
+  username          String    @db.VarChar(64)
+  cpf               String?   @db.VarChar(14)
+  mac               String    @db.VarChar(50)
+  assignedIp        String    @map("assigned_ip") @db.VarChar(45)
+  nasIp             String    @map("nas_ip") @db.VarChar(45)
+  connectionStartAt DateTime  @map("connection_start_at")
+  connectionEndAt   DateTime? @map("connection_end_at")
+  inputBytes        BigInt    @default(0) @map("input_bytes")
+  outputBytes       BigInt    @default(0) @map("output_bytes")
+  durationSeconds   Int       @default(0) @map("duration_seconds")
+  disconnectReason  String?   @map("disconnect_reason") @db.VarChar(32)
+  authResult        String?   @map("auth_result") @db.VarChar(32)
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([cpf])
+  @@index([mac])
+  @@index([assignedIp])
+  @@index([connectionStartAt, connectionEndAt])
+  @@index([username])
+  @@map("connection_log")
+}
+
+model WhatsappLog {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  portalId       String?           @map("portal_id") @db.Uuid
+  phone          String?           @db.VarChar(20)
+  message        String?
+  contextType    String?           @map("context_type") @db.VarChar(50)
+  referenceId    String?           @map("reference_id") @db.Uuid
+  status         WhatsappLogStatus
+  errorMessage   String?           @map("error_message")
+  skipReason     String?           @map("skip_reason") @db.VarChar(50)
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  portal       Portal?      @relation(fields: [portalId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([status])
+  @@index([portalId])
+  @@map("whatsapp_log")
+}
+
+model Update {
+  id          String   @id @db.VarChar(20)
+  description String?
+  changelog   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  files      UpdateFile[]
+  migrations UpdateMigration[]
+
+  @@map("update")
+}
+
+model AppliedUpdate {
+  id          String   @id @db.VarChar(20)
+  description String?
+  appliedAt   DateTime @default(now()) @map("applied_at")
+
+  @@map("applied_update")
+}
+
+model UpdateFile {
+  id          String            @id @default(uuid()) @db.Uuid
+  updateId    String?           @map("update_id") @db.VarChar(20)
+  filePath    String?           @map("file_path") @db.VarChar(500)
+  fileContent String?           @map("file_content")
+  action      UpdateFileAction? @default(UPDATE)
+
+  update Update? @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@index([updateId])
+  @@map("update_file")
+}
+
+model UpdateMigration {
+  id         String  @id @default(uuid()) @db.Uuid
+  updateId   String? @map("update_id") @db.VarChar(20)
+  sqlContent String? @map("sql_content")
+  order      Int?    @default(1)
+
+  update Update? @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@index([updateId])
+  @@map("update_migration")
+}
+
+model UpdateApplyLog {
+  id        String               @id @default(uuid()) @db.Uuid
+  updateId  String               @map("update_id") @db.VarChar(20)
+  step      String               @db.VarChar(50)
+  status    UpdateApplyLogStatus @default(INFO)
+  message   String?
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  @@index([updateId])
+  @@index([createdAt])
+  @@map("update_apply_log")
+}
+
+model FileSnapshot {
+  id           String   @id @default(uuid()) @db.Uuid
+  filePath     String?  @unique @map("file_path") @db.VarChar(500)
+  md5Hash      String?  @map("md5_hash") @db.VarChar(32)
+  snapshotDate DateTime @default(now()) @map("snapshot_date")
+
+  @@map("file_snapshot")
+}
+
+model SchemaSnapshot {
+  tableName    String   @id @map("table_name") @db.VarChar(128)
+  columnsJson  String   @map("columns_json")
+  indexesJson  String   @map("indexes_json")
+  createSql    String?  @map("create_sql")
+  snapshotDate DateTime @updatedAt @map("snapshot_date")
+
+  @@map("schema_snapshot")
+}
+
+model SystemBackup {
+  id           String            @id @default(uuid()) @db.Uuid
+  updateId     String?           @map("update_id") @db.VarChar(20)
+  type         SystemBackupType? @default(MANUAL)
+  dbDumpPath   String?           @map("db_dump_path") @db.VarChar(500)
+  filesZipPath String?           @map("files_zip_path") @db.VarChar(500)
+  createdAt    DateTime          @default(now()) @map("created_at")
+
+  @@map("system_backup")
 }

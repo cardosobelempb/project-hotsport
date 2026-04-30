@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { AuthSessionUseCase } from "@/modulos/auth/application/usecases/auth-session.use-case";
-import { AuthSessionResponseSchema } from "../schemas/session-auth.schema";
 
 export const authSessionController = (
   authSessionUseCase: AuthSessionUseCase,
@@ -14,7 +13,7 @@ export const authSessionController = (
       schema: {
         tags: ["Auth"],
         summary: "Authenticate a user",
-        response: AuthSessionResponseSchema,
+        // response: AuthSessionResponseSchema,
       },
       handler: async (request, reply) => {
         // const result = await authSessionUseCase.execute({

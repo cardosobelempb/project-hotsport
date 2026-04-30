@@ -1,0 +1,6 @@
+export enum BillingCycleDto {
+  MONTHLY = "MONTHLY",
+  QUARTERLY = "QUARTERLY",
+  SEMIANNUAL = "SEMIANNUAL",
+  YEARLY = "YEARLY",
+}

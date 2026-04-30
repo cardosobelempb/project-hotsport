@@ -1,0 +1,6 @@
+export enum PlanStatusDto {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  SEMIANNUAL = "SEMIANNUAL",
+  ARCHIVED = "ARCHIVED",
+}

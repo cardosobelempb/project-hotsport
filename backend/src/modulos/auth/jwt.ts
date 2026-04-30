@@ -1,4 +1,5 @@
-import { UnauthorizedError } from "@/core/domain/errors/usecases/unauthorized.error";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
 
@@ -27,7 +28,11 @@ export const signJwt = (payload: JwtPayload): string => {
 export const verifyJwt = (token: string): JwtPayload => {
   const decoded = jwt.verify(token, getSecret());
   if (typeof decoded === "string") {
-    throw new UnauthorizedError("Token inválido");
+    throw new UnauthorizedError({
+      fieldName: "token",
+      value: token,
+      message: `${CodeError.UNAUTHORIZED}: Invalid token`,
+    });
   }
   const result: JwtPayload = { sub: String(decoded["sub"]) };
   if (typeof decoded["role"] === "string") {

@@ -1,14 +1,15 @@
-import { FieldMessage, MethodArgumentNotValidError } from '../errors'
-import { ValidErrors } from './valid-errors.validator'
-import { ValidationErrors } from './validation-errors.validator'
-import { ValidatorMessage } from './ValidatorMessage'
+import { MethodNotAllowedError } from "../errors/usecases/method-not-allowed.error";
+import { ValidErrors } from "./valid-errors.validator";
+import { ValidFieldMessage } from "./valid-field-message.validator";
+import { ValidationErrors } from "./validation-errors.validator";
+import { ValidatorMessage } from "./validator-message";
 
 export class ValidatorUtils {
   private constructor() {}
 
   static throwOnError(validErrors: ValidErrors): void {
     if (validErrors.hasErrors()) {
-      throw new MethodArgumentNotValidError(ValidErrors.toString())
+      throw new MethodNotAllowedError(ValidErrors.toString());
     }
   }
 
@@ -21,27 +22,26 @@ export class ValidatorUtils {
       validErrors.addErrors(
         fieldName,
         `${ValidatorMessage.MIN_LENGTH}${minLength} caracteres`,
-      )
-      return false
+      );
+      return false;
     }
-    return true
+    return true;
   }
 
   static validMaxLength(
     fieldName: string,
     maxLength: number,
-    FieldMessages: FieldMessage[],
+    validFieldMessages: ValidFieldMessage[],
   ): boolean {
     if (fieldName?.trim().length > maxLength) {
-      FieldMessages.push(
-        new FieldMessage(
-          fieldName,
-          `${ValidatorMessage.MIN_LENGTH}${maxLength} caracteres`,
+      validFieldMessages.push(
+        new ValidFieldMessage(
+          `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
         ),
-      )
-      return false
+      );
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateRequired(
@@ -52,10 +52,10 @@ export class ValidatorUtils {
       validErrors.addErrors(
         fieldName,
         `${fieldName}${ValidatorMessage.REQUIRED_FIELD}`,
-      )
-      return false
+      );
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateRequiredObject(
@@ -64,10 +64,10 @@ export class ValidatorUtils {
     validErrors: ValidationErrors,
   ): boolean {
     if (field === null || field === undefined) {
-      validErrors.addErrors(fieldName, ValidatorMessage.REQUIRED_FIELD)
-      return false
+      validErrors.addErrors(fieldName, ValidatorMessage.REQUIRED_FIELD);
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateMaxLength(
@@ -80,10 +80,10 @@ export class ValidatorUtils {
       ValidateErrors.addErrors(
         fieldName,
         `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
-      )
-      return false
+      );
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateMinLength(
@@ -96,10 +96,10 @@ export class ValidatorUtils {
       ValidateErrors.addErrors(
         fieldName,
         `${ValidatorMessage.MIN_LENGTH}${minLength} caracteres`,
-      )
-      return false
+      );
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateMaxValueValid(
@@ -109,10 +109,10 @@ export class ValidatorUtils {
     ValidateErrors: ValidationErrors,
   ): boolean {
     if (field !== null && field !== undefined && field > maxValue) {
-      ValidateErrors.addErrors(fieldName, ValidatorMessage.MAX_VALUE)
-      return false
+      ValidateErrors.addErrors(fieldName, ValidatorMessage.MAX_VALUE);
+      return false;
     }
-    return true
+    return true;
   }
 
   static validateMinValueValid(
@@ -122,9 +122,9 @@ export class ValidatorUtils {
     ValidateErrors: ValidationErrors,
   ): boolean {
     if (field !== null && field !== undefined && field < minValue) {
-      ValidateErrors.addErrors(fieldName, ValidatorMessage.MIN_VALUE)
-      return false
+      ValidateErrors.addErrors(fieldName, ValidatorMessage.MIN_VALUE);
+      return false;
     }
-    return true
+    return true;
   }
 }
