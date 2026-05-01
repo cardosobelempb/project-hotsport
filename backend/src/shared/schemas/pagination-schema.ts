@@ -55,28 +55,6 @@ export const PageSchema = <T extends z.ZodTypeAny>(contentSchema: T) =>
     empty: z.boolean(),
   });
 
-/*/* Schema de entrada para buscas paginadas */
-export const PageInputSchema = z
-  .object({
-    page: z.coerce.number().int().min(0).default(0),
-
-    size: z.coerce.number().int().min(1).max(100).default(20),
-
-    sort: z
-      .string()
-      .trim()
-      .regex(
-        /^[a-zA-Z][a-zA-Z0-9_.]*,(asc|desc)$/i,
-        "sort deve seguir o formato: campo,asc ou campo,desc",
-      )
-      .optional(),
-
-    filter: z.string().trim().default(""),
-  })
-  .strict();
-
-export type PageInputDto = z.infer<typeof PageInputSchema>;
-
 // ─── Tipos inferidos ──────────────────────────────────────────────────────────
 export type SortMeta = z.infer<typeof SortMetaSchema>;
 export type PageableMeta = z.infer<typeof PageableMetaSchema>;

@@ -7,7 +7,8 @@ import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
 
-import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
+import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
+import { OrganizationPresentDto } from "../../dto/organization.dto";
 import {
   OrganizationParams,
   UpdateOrganizationInput,
@@ -15,7 +16,7 @@ import {
 
 export type OrganizationUpdateUseCaseResponse = Either<
   BadRequestError | NotFoundError | ConflictError | AlreadyExistsError,
-  { organization: OrganizationEntity }
+  OrganizationPresentDto
 >;
 
 export class OrganizationUpdateUseCase {
@@ -87,8 +88,6 @@ export class OrganizationUpdateUseCase {
     const updatedOrganization =
       await this.organizationRepository.save(organization);
 
-    return right({
-      organization,
-    });
+    return right(OrganizationMapper.toUpdate(updatedOrganization));
   }
 }

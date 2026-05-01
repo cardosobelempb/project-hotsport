@@ -5,12 +5,14 @@ import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
+import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
+import { OrganizationPresentDto } from "../../dto/organization.dto";
 import { CreateOrganizationInput } from "../../schemas/organization.shema";
 
 export type OrganizationCreateUseCaseResponse = Either<
   AlreadyExistsError,
-  { organization: OrganizationEntity }
+  OrganizationPresentDto
 >;
 
 export class OrganizationCreateUseCase {
@@ -34,15 +36,17 @@ export class OrganizationCreateUseCase {
       );
     }
 
-    const organizationEntity = OrganizationEntity.create({
+    const organization = OrganizationEntity.create({
       name: input.name,
       slug: SlugVO.create(input.slug),
       logoUrl: input.logoUrl ?? null,
     });
 
-    const organization =
-      await this.organizationRepository.create(organizationEntity);
+    const createdOrganization =
+      await this.organizationRepository.create(organization);
+    const organizationDto = OrganizationMapper.toCreate(createdOrganization);
+    // console.log("User case =>", organizationDto);
 
-    return right({ organization });
+    return right(organizationDto);
   }
 }

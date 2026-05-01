@@ -5,13 +5,10 @@ import { OrganizationRepository } from "@/modulos/organization/domain/repositori
 
 import {
   Page,
-  SearchInput,
-} from "@/common/domain/repositories/search.repository";
-import { Sort } from "@/common/domain/repositories/types/pagination.types";
-import {
-  OrganizationStatus,
-  Prisma,
-} from "../../../../../../../generated/prisma";
+  PageInput,
+  Sort,
+} from "@/common/domain/repositories/types/pagination.types";
+import { Prisma } from "../../../../../../../generated/prisma";
 import { OrganizationPrismaMapper } from "../../mappers/prisma/organization-prisma.mapper";
 
 export class OrganizationPrismaRepository implements OrganizationRepository {
@@ -36,85 +33,75 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
 
     return !!organization;
   }
-  async page(params: SearchInput): Promise<Page<OrganizationEntity>> {
-    // ─── Paginação (zero-based, padrão Spring Boot) ───────────────────────
-    const pageNumber = params.page ?? 0; // Spring começa em 0, não em 1
-    const size = params.page ?? 20; // Padrão Spring Data: 20
-    const skip = pageNumber * size; // offset = page * size
+  async page(params: PageInput): Promise<Page<OrganizationEntity>> {
+    // ─── Paginação zero-based (padrão Spring) ─────────────────────────────
+    const pageNumber = params.page ?? 0; // ✅ zero-based — não mais ?? 1
+    const size = params.size ?? 20;
+    const skip = pageNumber * size; // ✅ 0 * 20 = 0, 1 * 20 = 20...
 
-    // ─── Ordenação (parse do formato 'campo,direção') ──────────────────────
+    // ─── Ordenação ────────────────────────────────────────────────────────
     const [rawSortBy = "createdAt", rawSortDir = "desc"] = (
-      params.sortBy ?? "createdAt,desc"
+      params.sort ?? "createdAt,desc"
     ).split(",");
 
     const allowedSortFields: Array<
       keyof Prisma.OrganizationOrderByWithRelationInput
     > = ["name", "slug", "status", "createdAt", "updatedAt"];
 
-    // Garante que somente campos permitidos sejam usados (evita SQL injection por campo)
     const sortBy = allowedSortFields.includes(
       rawSortBy as keyof Prisma.OrganizationOrderByWithRelationInput,
     )
       ? (rawSortBy as keyof Prisma.OrganizationOrderByWithRelationInput)
       : "createdAt";
 
-    // Garante que a direção seja apenas 'asc' ou 'desc'
     const sortDirection: Prisma.SortOrder =
       rawSortDir === "asc" ? "asc" : "desc";
 
-    const isSorted = !!params.sortBy;
-
-    // ─── Filtro ────────────────────────────────────────────────────────────
+    // ─── Filtro ───────────────────────────────────────────────────────────
     const filter = params.filter?.trim() ?? "";
     const where = this.buildWhere(filter);
 
-    // ─── Query paginada em transação atômica ──────────────────────────────
+    // ─── Query ────────────────────────────────────────────────────────────
     const [totalElements, organizations] = await this.prisma.$transaction([
       this.prisma.organization.count({ where }),
       this.prisma.organization.findMany({
         where,
         orderBy: { [sortBy]: sortDirection },
-        skip,
+        skip, // ✅ sempre >= 0
         take: size,
       }),
     ]);
 
-    // ─── Cálculos derivados ───────────────────────────────────────────────
+    // ─── Metadados ────────────────────────────────────────────────────────
     const totalPages = Math.ceil(totalElements / size);
     const numberOfElements = organizations.length;
-    const isFirst = pageNumber === 0;
-    const isLast = pageNumber >= totalPages - 1;
-    const isEmpty = numberOfElements === 0;
+    const isSorted = !!params.sort;
 
-    // ─── Metadados de sort (espelha Sort do Spring) ───────────────────────
     const sortMeta: Sort = {
       sorted: isSorted,
       unsorted: !isSorted,
       empty: !isSorted,
     };
 
-    // ─── Retorno no contrato Spring Data Page<T> ──────────────────────────
     return {
       content: organizations.map(OrganizationPrismaMapper.toDomain),
-
       pageable: {
         sort: sortMeta,
-        offset: skip, // posição absoluta do primeiro elemento
+        offset: skip,
         pageSize: size,
         pageNumber,
         paged: true,
         unpaged: false,
       },
-
       sort: sortMeta,
       totalElements,
       totalPages,
       numberOfElements,
       size,
-      number: pageNumber, // 'number' é o nome do campo no Spring (página atual)
-      first: isFirst,
-      last: isLast,
-      empty: isEmpty,
+      number: pageNumber,
+      first: pageNumber === 0,
+      last: pageNumber >= totalPages - 1,
+      empty: numberOfElements === 0,
     };
   }
 
@@ -125,9 +112,6 @@ export class OrganizationPrismaRepository implements OrganizationRepository {
       OR: [
         { name: { contains: filter, mode: "insensitive" } },
         { slug: { contains: filter, mode: "insensitive" } },
-        {
-          status: { equals: filter.toLocaleUpperCase() as OrganizationStatus },
-        },
       ],
     };
   }

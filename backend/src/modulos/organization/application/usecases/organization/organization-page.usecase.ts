@@ -1,16 +1,18 @@
-import { Either, right } from "@/common/domain/errors/handle-errors";
-
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
 
+import { Either, right } from "@/common/domain/errors/handle-errors";
 import {
   Page,
   PageInput,
 } from "@/common/domain/repositories/types/pagination.types";
-import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
+import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
+import { OrganizationSummaryDto } from "../../dto/organization.dto";
+
+// ─── Tipo de retorno ──────────────────────────────────────────────────────────
 
 export type OrganizationsPageUseCaseResponse = Either<
   null,
-  Page<OrganizationEntity>
+  Page<OrganizationSummaryDto> // ✅ DTO de saída, não entidade crua
 >;
 
 export class OrganizationPageUseCase {
@@ -19,15 +21,15 @@ export class OrganizationPageUseCase {
   ) {}
 
   async execute(input: PageInput): Promise<OrganizationsPageUseCaseResponse> {
-    // ─── Busca paginada no repositório ──────────────────────────────────
+    // ─── Busca paginada no repositório ────────────────────────────────────
     const result = await this.organizationRepository.page(input);
-    console.log("Page result:", result);
 
-    // ─── Reconstrói Page<T> substituindo apenas o content mapeado ───────
-    // Todos os metadados Spring (pageable, sort, totalPages, etc.)
-    // são preservados intactos — apenas content é transformado
-    // ✅ Mapper genérico — nenhum metadado se perde
+    // ─── Mapeia Entity → SummaryDto preservando metadados Spring ──────────
+    const page: Page<OrganizationSummaryDto> = {
+      ...result,
+      content: result.content.map(OrganizationMapper.toPage),
+    };
 
-    return right(result);
+    return right(page);
   }
 }

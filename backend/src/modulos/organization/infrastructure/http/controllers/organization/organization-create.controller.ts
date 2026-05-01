@@ -3,7 +3,6 @@ import {
   OrganizationCreateResponse,
 } from "@/modulos/organization/application/schemas/organization.shema";
 import { OrganizationCreateUseCase } from "@/modulos/organization/application/usecases/organization/organization-create.usecase";
-import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
@@ -27,11 +26,9 @@ export const organizationCreateController = (
           throw result.value;
         }
 
-        return reply.status(201).send({
-          organization: OrganizationMapper.toPresenter(
-            result.value.organization,
-          ),
-        });
+        console.log("Controller =>", result.value);
+
+        return reply.status(201).send(result.value);
       },
     });
   };

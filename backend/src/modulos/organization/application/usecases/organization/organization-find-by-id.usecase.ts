@@ -2,13 +2,14 @@ import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.
 import { Either, left, right } from "@/common/domain/errors/handle-errors";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 
-import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
+import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
+import { OrganizationPresentDto } from "../../dto/organization.dto";
 import { OrganizationParams } from "../../schemas/organization.shema";
 
 export type OrganizationFindByIdUseCaseResponse = Either<
   BadRequestError | NotFoundError,
-  { organization: OrganizationEntity }
+  OrganizationPresentDto
 >;
 
 export class OrganizationFindByIdUseCase {
@@ -42,8 +43,6 @@ export class OrganizationFindByIdUseCase {
       );
     }
 
-    return right({
-      organization,
-    });
+    return right(OrganizationMapper.toCreate(organization));
   }
 }

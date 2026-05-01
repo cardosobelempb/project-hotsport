@@ -1,99 +1,97 @@
-import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+// ============================================================
+// organization.mapper.ts
+// Mappers: Domain → DTO para cada tipo de resposta
+//
+// ┌─────────────────────────────────────────────────────┐
+// │  toCreate  → OrganizationPresentDto  (pós criação)  │
+// │  toUpdate  → OrganizationPresentDto  (pós update)   │
+// │  toPage    → OrganizationSummaryDto  (listagem)     │
+// └─────────────────────────────────────────────────────┘
+// ============================================================
 
-import { Page } from "@/common/domain/repositories/types/pagination.types";
-
-import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
-import { PagePresentDto } from "@/shared/dto/page-present.dto";
-import { OrganizationPresenterDto } from "../../application/dto/organization.dto";
-
-import { OrganizationPresenter } from "../../application/schemas/organization.shema";
+import { OrganizationStatus } from "@/shared/enums/organization-status.enum";
+import {
+  OrganizationPresentDto,
+  OrganizationSummaryDto,
+} from "../../application/dto/organization.dto";
 import { OrganizationEntity } from "../entities/organization.entity";
 
 export class OrganizationMapper {
-  static toDomain(raw: OrganizationPresenterDto): OrganizationEntity {
-    return OrganizationEntity.create(
-      {
-        name: raw.name,
-        slug: SlugVO.create(raw.slug),
-        logoUrl: raw.logoUrl,
-      },
-      UUIDVO.create(raw.id),
-    );
-  }
-
-  static toHttp(entity: OrganizationEntity): OrganizationPresenterDto {
-    return {
-      id: entity.id.getValue(),
-      name: entity.name,
-      slug: entity.slug.getValue(),
-      logoUrl: entity.logoUrl ?? null,
-      status: entity.status ?? "unknown",
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt ?? null,
-      deletedAt: entity.deletedAt ?? null,
-    };
-  }
-
-  static toPresenter(entity: OrganizationEntity): OrganizationPresenter {
-    return {
-      id: entity.id.getValue(),
-      name: entity.name,
-      slug: entity.slug.getValue(),
-      logoUrl: entity.logoUrl ?? null,
-      status: entity.status ?? "unknown",
-      createdAt: entity.createdAt.toISOString(),
-      updatedAt: entity.updatedAt?.toISOString() ?? null,
-      deletedAt: entity.deletedAt?.toISOString() ?? null,
-    };
-  }
-
-  static toCreate(entity: OrganizationEntity): OrganizationPresenterDto {
-    return {
-      // ✅ UUIDVO → string
-      id: entity.id.getValue(),
-
-      name: entity.name,
-
-      // ✅ SlugVO → string
-      slug:
-        entity.slug instanceof SlugVO ? entity.slug.getValue() : entity.slug,
-
-      logoUrl: entity.logoUrl ?? null,
-      status: entity.status ?? "unknown",
-
-      // ✅ Date → ISO string (Fastify serializa string, não Date)
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt ?? null,
-      deletedAt: entity.deletedAt ?? null,
-    };
-  }
+  // ─── Membro → DTO ─────────────────────────────────────────────────────
 
   /**
-   * Converte Page<TDomain> → PageResponseDto<TDto>
-   * preservando todos os metadados Spring intactos.
-   *
-   * @param page      - Página retornada pelo use case
-   * @param mapFn     - Função de transformação item a item
+   * Mapeia um membro de domínio para DTO de apresentação.
    */
-  static toHttpPage<OrganizationEntity, OrganizationPresenterDto>(
-    page: Page<OrganizationEntity>,
-    mapFn: (item: OrganizationEntity) => OrganizationPresenterDto,
-  ): PagePresentDto<OrganizationPresenterDto> {
-    return {
-      // ─── Metadados Spring preservados intactos ─────────────────────
-      pageable: page.pageable,
-      totalPages: page.totalPages,
-      totalElements: page.totalElements,
-      last: page.last,
-      size: page.size,
-      number: page.number,
-      sort: page.sort,
-      numberOfElements: page.numberOfElements,
-      first: page.first,
-      empty: page.empty,
+  // private static memberToDto(
+  //   member: OrganizationMember,
+  // ): OrganizationMemberPresentDto {
+  //   return {
+  //     id: member.id.toString(),
+  //     userId: member.userId.toString(),
+  //     role: member.role,
+  //     joinedAt: member.joinedAt.toISOString(),
+  //   };
+  // }
 
-      // ─── Único campo transformado ──────────────────────────────────
-      content: page.content.map(mapFn),
+  // ─── Resposta de criação ──────────────────────────────────────────────
+
+  /**
+   * Pós-criação: retorna entidade completa com membros.
+   *
+   * @example
+   * // No use case de criação:
+   * return right(OrganizationMapper.toCreate(organization));
+   */
+  static toCreate(entity: OrganizationEntity): OrganizationPresentDto {
+    // const members = entity.members.currentList.map((m) => this.memberToDto(m));
+    return {
+      id: entity.id.getValue(),
+      name: entity.name,
+      slug: entity.slug.getValue(),
+      status: entity.status as OrganizationStatus,
+      logoUrl: entity.logoUrl,
+      // members,
+      // totalMembers: members.length,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt?.toDateString() ?? null,
+      deletedAt: entity.deletedAt?.toDateString() ?? null,
+    };
+  }
+
+  // ─── Resposta de atualização ──────────────────────────────────────────
+
+  /**
+   * Pós-update: igual ao create, mas sinaliza quais membros
+   * foram adicionados/removidos (útil para auditoria/logs).
+   *
+   * @example
+   * // No use case de update:
+   * return right(OrganizationMapper.toUpdate(organization));
+   */
+  static toUpdate(entity: OrganizationEntity): OrganizationPresentDto {
+    // Reutiliza toCreate — mesma estrutura de resposta
+    // Aqui você pode enriquecer com campos de auditoria se necessário
+    return this.toCreate(entity);
+  }
+
+  // ─── Item resumido para page ──────────────────────────────────────────
+
+  /**
+   * Listagem paginada: versão compacta sem array de membros,
+   * apenas o total — evita over-fetching na listagem.
+   *
+   * @example
+   * // No use case de page:
+   * const page = PageResponseMapper.toDto(result, OrganizationMapper.toPage);
+   */
+  static toPage(entity: OrganizationEntity): OrganizationSummaryDto {
+    return {
+      id: entity.id.getValue(),
+      name: entity.name,
+      slug: entity.slug.getValue(),
+      status: entity.status as OrganizationStatus,
+      // totalMembers: entity.members.currentList.length,
+      createdAt: entity.createdAt.toISOString(),
     };
   }
 }

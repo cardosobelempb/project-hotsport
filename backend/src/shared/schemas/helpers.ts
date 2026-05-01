@@ -85,11 +85,22 @@ export const SortDirectionSchema = z.enum(["asc", "desc"]);
  * createdAt: IsoDateTimeInput           // obrigatório
  * updatedAt: IsoDateTimeInput.nullable() // opcional nulo
  */
-export const IsoDateTimeInput = z.coerce
-  .date()
-  .transform((d) => d.toISOString());
 
 /**
  * UUID string validado
  */
 export const UUIDSchema = z.string().uuid();
+
+/**
+ * INPUT — Aceita string ISO ou Date, converte para Date.
+ * Usar em: body, querystring, params.
+ */
+export const IsoDateTimeInput = z.coerce.date();
+
+/**
+ * OUTPUT — Fastify já recebe string ISO do mapper.
+ * Usar em: response schemas.
+ *
+ * Não usa transform — Fastify serializa o valor como está.
+ */
+// export const IsoDateTimeOutput = z.string().datetime({ offset: true });

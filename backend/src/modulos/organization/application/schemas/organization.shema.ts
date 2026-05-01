@@ -8,8 +8,7 @@ import { ValidatorMessage } from "@/common/domain/validations/validator-message"
 import { z } from "zod";
 
 import { OrganizationStatus } from "@/shared/enums/organization-status.enum";
-import { IsoDateTimeInput, UUIDSchema } from "@/shared/schemas/helpers";
-import { PageSchema } from "@/shared/schemas/pagination-schema";
+import { IsoDateTimeOutput, UUIDSchema } from "@/shared/schemas/helpers";
 import {
   actionResponseSchema,
   createResponseSchema,
@@ -28,6 +27,19 @@ export type OrganizationParams = z.infer<typeof OrganizationParamsSchema>;
 
 // ─── Schema base da entidade ──────────────────────────────────────────────────
 
+// ─── Schema resumido para listagem paginada ───────────────────────────────────
+export const OrganizationSummarySchema = z
+  .object({
+    id: UUIDSchema,
+    name: z.string(),
+    slug: z.string(),
+    status: z.string(),
+    // totalMembers: z.number().int().nonnegative(), // ✅ campo exclusivo da listagem
+    createdAt: IsoDateTimeOutput,
+    // updatedAt: IsoDateTimeOutput.nullable(),
+  })
+  .strict();
+
 /**
  * Representa o DTO de apresentação da Organization.
  * Usado como base para todos os schemas de resposta.
@@ -39,9 +51,9 @@ export const OrganizationSchema = z
     slug: z.string(),
     logoUrl: z.string().nullable(),
     status: z.string(),
-    createdAt: IsoDateTimeInput,
-    updatedAt: IsoDateTimeInput.nullable(),
-    deletedAt: IsoDateTimeInput.nullable(),
+    createdAt: IsoDateTimeOutput,
+    updatedAt: IsoDateTimeOutput.nullable(),
+    deletedAt: IsoDateTimeOutput.nullable(),
   })
   .strict();
 
@@ -68,11 +80,11 @@ export const UpdateOrganizationSchema =
 
 // ─── Response schemas (via factory — sem repetição) ──────────────────────────
 
-const OrganizationWrapper = z.object({ organization: OrganizationSchema });
-const OrganizationPageWrapper = OrganizationSchema; // item individual na listagem
+const OrganizationWrapper = z.object(OrganizationSchema);
+const OrganizationPageWrapper = OrganizationSummarySchema; // item individual na listagem
 
 export const OrganizationCreateResponse =
-  createResponseSchema(OrganizationWrapper);
+  createResponseSchema(OrganizationSchema);
 export const OrganizationFindByIdResponse =
   findResponseSchema(OrganizationWrapper);
 export const OrganizationUpdateResponse =
@@ -83,11 +95,7 @@ export const OrganizationPageResponse = pageResponseSchema(
   OrganizationPageWrapper,
 );
 
-export const OrganizationsResponseSchema = PageSchema(CreateOrganizationSchema);
-export type OrganizationsResponse = z.infer<typeof OrganizationsResponseSchema>;
-
 // ─── Tipos inferidos ──────────────────────────────────────────────────────────
-
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationSchema>;
 export type UpdateOrganizationInput = z.infer<typeof UpdateOrganizationSchema>;
 export type OrganizationPresenter = z.infer<typeof OrganizationSchema>;

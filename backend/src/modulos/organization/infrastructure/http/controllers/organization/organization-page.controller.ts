@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 
+import { OrganizationPageResponse } from "@/modulos/organization/application/schemas/organization.shema";
 import { OrganizationPageUseCase } from "@/modulos/organization/application/usecases/organization/organization-page.usecase";
-import { PageInputSchema } from "@/shared/schemas/pagination-schema";
+import { PageQuerySchema } from "@/shared/schemas/page-query.schema";
 
 export const organizationSearchController = (
   organizationSearchUseCase: OrganizationPageUseCase,
@@ -14,42 +15,29 @@ export const organizationSearchController = (
       schema: {
         tags: ["Organization"],
         summary: "Lista organizações com paginação e filtro",
-        querystring: PageInputSchema,
-        // response: OrganizationsResponseSchema,
+        querystring: PageQuerySchema,
+        response: OrganizationPageResponse,
       },
       handler: async (request, reply) => {
         const result = await organizationSearchUseCase.execute(request.query);
 
         if (result.isLeft()) {
-          throw result.value;
+          return reply.status(500).send({
+            statusCode: 500,
+            message: "Internal server error",
+            timestamp: new Date().toISOString(),
+          });
         }
 
-        // const page = result.value;
-        // console.log(page);
-        console.log("Page content:", result.value); // ✅ Conteúdo da página
+        // ✅ Mapeia content: Entity[] → DTO[]
+        // const page: Page<OrganizationPresenter> = {
+        //   ...result.value,
+        //   content: result.value.content.map(OrganizationMapper.toPage),
+        // };
 
-        return reply.status(200).send({
-          // ...page, // ✅ Todos os metadados da página
-          content: result.value.content.map((org) => ({
-            id: org.id.getValue(),
-            name: org.name,
-            slug: org.slug.getValue(),
-            logoUrl: org.logoUrl ?? null,
-            status: org.status ?? "unknown",
-            createdAt: org.createdAt.toISOString(),
-            updatedAt: org.updatedAt?.toISOString() ?? null,
-            deletedAt: org.deletedAt?.toISOString() ?? null,
-          })),
-          pageable: result.value.pageable,
-          totalPages: result.value.totalPages,
-          totalElements: result.value.totalElements,
-          last: result.value.last,
-          size: result.value.size,
-          number: result.value.number,
-          sort: result.value.sort,
-          first: result.value.first,
-          numberOfElements: result.value.numberOfElements,
-        });
+        console.log("Mapped Page result:", result); // ✅ Verifica o resultado mapeado da página
+
+        return reply.status(200).send(result.value);
       },
     });
   };
