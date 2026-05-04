@@ -29,14 +29,6 @@ export const organizationSearchController = (
           });
         }
 
-        // ✅ Mapeia content: Entity[] → DTO[]
-        // const page: Page<OrganizationPresenter> = {
-        //   ...result.value,
-        //   content: result.value.content.map(OrganizationMapper.toPage),
-        // };
-
-        console.log("Mapped Page result:", result); // ✅ Verifica o resultado mapeado da página
-
         return reply.status(200).send(result.value);
       },
     });

@@ -13,9 +13,10 @@ export class BaseParams {
     for (const key in schema) {
       const field = schema[key];
       if (!field) {
-        throw new BadRequestError(
-          `Schema definition for field "${key}" is missing`,
-        );
+        throw new BadRequestError({
+          fieldName: key,
+          message: `Field "${key}" is not defined in the schema`,
+        });
       }
       const definition = this.normalizeSchema(field);
 
@@ -27,7 +28,10 @@ export class BaseParams {
         definition.required &&
         definition.default === undefined
       ) {
-        throw new BadRequestError(`Missing required field: ${key}`);
+        throw new BadRequestError({
+          fieldName: key,
+          message: `Field "${key}" is required`,
+        });
       }
 
       if (isMissing && definition.default !== undefined) {
@@ -89,14 +93,18 @@ export class BaseParams {
         try {
           value = JSON.parse(value);
         } catch {
-          throw new BadRequestError(
-            `Field "${key}" must be a valid JSON array`,
-          );
+          throw new BadRequestError({
+            fieldName: key,
+            message: `Field "${key}" must be an array or a JSON string representing an array`,
+          });
         }
       }
 
       if (!Array.isArray(value)) {
-        throw new BadRequestError(`Field "${key}" must be an array`);
+        throw new BadRequestError({
+          fieldName: key,
+          message: `Field "${key}" must be an array`,
+        });
       }
 
       if (items) {
@@ -111,9 +119,11 @@ export class BaseParams {
     const casted = this.castPrimitive(value, type, key);
 
     if (type === "string" && regex && !regex.test(casted)) {
-      throw new BadRequestError(
-        `Field "${key}" does not match pattern: ${regex}`,
-      );
+      throw new BadRequestError({
+        fieldName: key,
+        value,
+        message: `Field "${key}" does not match the required format`,
+      });
     }
 
     return casted;
@@ -124,12 +134,20 @@ export class BaseParams {
       case "number":
         const num = Number(value);
         if (isNaN(num))
-          throw new BadRequestError(`Field "${key}" must be a number`);
+          throw new BadRequestError({
+            fieldName: key,
+            value,
+            message: `Field "${key}" must be a number`,
+          });
         return num;
       case "boolean":
         if (value === true || value === "true") return true;
         if (value === false || value === "false") return false;
-        throw new BadRequestError(`Field "${key}" must be a boolean`);
+        throw new BadRequestError({
+          fieldName: key,
+          value,
+          message: `Field "${key}" must be a boolean (true/false)`,
+        });
       case "string":
       default:
         return String(value);

@@ -1,8 +1,8 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { AccountProvider } from "@/shared/enums/account-provider.enum";
-import { AccountType } from "@/shared/enums/account-type.enum";
+import { AccountProvider } from "@/common/shared/enums/account-provider.enum";
+import { AccountType } from "@/common/shared/enums/account-type.enum";
 
 export interface AccountProps {
   userId: UUIDVO;

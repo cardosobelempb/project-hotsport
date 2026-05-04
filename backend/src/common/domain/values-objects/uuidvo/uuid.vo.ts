@@ -22,7 +22,11 @@ export class UUIDVO extends BaseVO<string> {
     const normalized = UUIDVO.normalize(uuid);
 
     if (!UUIDVO.isValid(normalized)) {
-      throw new BadRequestError(`Invalid UUIDv4 format: "${uuid}"`);
+      throw new BadRequestError({
+        fieldName: "uuid",
+        value: uuid,
+        message: `Invalid UUIDv4 format: "${uuid}". Must match regex ${UUIDVO.UUIDV4_REGEX}`,
+      });
     }
 
     return new UUIDVO(normalized);

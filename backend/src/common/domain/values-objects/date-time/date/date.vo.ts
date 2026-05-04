@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/core/domain/errors/controllers/BadRequestError";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { BaseDateVO } from "./base-date.vo";
 
 export class DateVO extends BaseDateVO {
@@ -12,13 +12,21 @@ export class DateVO extends BaseDateVO {
   protected validate(dateString: string): Date {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      throw new BadRequestError("Invalid date format. Use YYYY-MM-DD.");
+      throw new BadRequestError({
+        fieldName: "date",
+        value: dateString,
+        message: "Invalid date format. Use YYYY-MM-DD.",
+      });
     }
 
     const iso = dateString.split("T")[0] || "";
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(iso)) {
-      throw new BadRequestError("Date must be in format YYYY-MM-DD.");
+      throw new BadRequestError({
+        fieldName: "date",
+        value: dateString,
+        message: "Invalid date format. Use YYYY-MM-DD.",
+      });
     }
 
     return new Date(iso); // strips time

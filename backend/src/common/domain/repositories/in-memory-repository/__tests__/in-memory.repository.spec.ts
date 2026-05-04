@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { BaseEntityBuild } from "@/core/domain/domain/entities/entity-build.entity";
-import { NotFoundError } from "@/core/domain/errors/usecases/not-founde.rror";
-import { UUIDVO } from "@/core/domain/values-objects/uuidvo/uuid.vo";
+import { BaseEntityBuild } from "@/common/domain/entities/entity-build.entity";
+import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { BaseInMemoryRepository } from "../base-repository-in-memory";
 
 type StubEntityProsp = {
@@ -111,11 +111,11 @@ describe("InmemoryRepository unit tests", () => {
       */
 
       entity = await sut.save(props);
-      const result = await sut.search({ filter: "test name" });
+      const result = await sut.page({ filter: "test name" });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.name).toBe("test name");
-      expect(result.items[0]).toStrictEqual(entity);
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0]?.name).toBe("test name");
+      expect(result.content[0]).toStrictEqual(entity);
     });
   });
 
@@ -157,11 +157,11 @@ describe("InmemoryRepository unit tests", () => {
       });
       const data = (entity = await sut.save(entityUpdated));
 
-      const result = await sut.search({ filter: "updated name" });
+      const result = await sut.page({ filter: "updated name" });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.name).toBe("updated name");
-      expect(result.items[0]).toStrictEqual(data);
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0]?.name).toBe("updated name");
+      expect(result.content[0]).toStrictEqual(data);
     });
   });
 

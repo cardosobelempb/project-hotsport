@@ -14,7 +14,7 @@ import { organizationFindByIdController } from "../controllers/organization/orga
 import { organizationSearchController } from "../controllers/organization/organization-page.controller";
 import { organizationUpdateController } from "../controllers/organization/organization-update.controller";
 
-export async function oerganizationRoutes(app: FastifyInstance): Promise<void> {
+export async function organizationRoutes(app: FastifyInstance): Promise<void> {
   await app.register(organizationCreateController(organizationCreateUseCase));
   await app.register(
     organizationFindByIdController(organizationFindByIdUseCase),

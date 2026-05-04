@@ -57,17 +57,23 @@ export class PriceVO extends BaseVO<number> {
     const numericValue = this.parseValue(input, msg);
 
     if (numericValue < minValue) {
-      throw new BadRequestError(
-        msg.PRICE_NEGATIVE ??
-          `Price must be greater than or equal to ${minValue}.`,
-      );
+      throw new BadRequestError({
+        fieldName: "price",
+        value: numericValue.toString(),
+        message:
+          msg.TOO_LONG?.replace("{minValue}", minValue.toString()) ??
+          `Price must be at least ${minValue}.`,
+      });
     }
 
     if (!this.isCurrencySupported(currency)) {
-      throw new BadRequestError(
-        msg.PRICE_UNSUPPORTED_CURRENCY?.replace("{currency}", currency) ??
-          `Unsupported currency: ${currency}`,
-      );
+      throw new BadRequestError({
+        fieldName: "currency",
+        value: currency,
+        message:
+          msg.PRICE_UNSUPPORTED_CURRENCY?.replace("{currency}", currency) ??
+          `Currency '${currency}' is not supported.`,
+      });
     }
 
     return new PriceVO(numericValue, currency, lang);
@@ -161,9 +167,11 @@ export class PriceVO extends BaseVO<number> {
   /** Garante que duas moedas são iguais antes de somar/subtrair. */
   private ensureSameCurrency(other: PriceVO): void {
     if (this.currency !== other.currency) {
-      throw new BadRequestError(
-        `Currency mismatch: cannot operate ${this.currency} with ${other.currency}.`,
-      );
+      throw new BadRequestError({
+        fieldName: "currency",
+        value: `${this.currency} vs ${other.currency}`,
+        message: `Currency mismatch: cannot operate ${this.currency} with ${other.currency}.`,
+      });
     }
   }
 
@@ -173,7 +181,11 @@ export class PriceVO extends BaseVO<number> {
     msg: Record<string, string>,
   ): number {
     if (input === null || input === undefined || input === "") {
-      throw new BadRequestError(msg.EMPTY ?? "Price cannot be empty.");
+      throw new BadRequestError({
+        fieldName: "price",
+        value: String(input),
+        message: msg.PRICE_EMPTY ?? "Price cannot be empty.",
+      });
     }
 
     let numericValue: number;
@@ -190,7 +202,11 @@ export class PriceVO extends BaseVO<number> {
     }
 
     if (isNaN(numericValue)) {
-      throw new BadRequestError(msg.PRICE_INVALID ?? "Invalid price value.");
+      throw new BadRequestError({
+        fieldName: "price",
+        value: String(input),
+        message: msg.PRICE_INVALID ?? "Price must be a valid number.",
+      });
     }
 
     return numericValue;

@@ -8,15 +8,19 @@ export class CnpjVO {
     const onlyDigits = CnpjVO.clean(cnpj);
 
     if (!/^\d{14}$/.test(onlyDigits)) {
-      throw new BadRequestError(
-        `Formato inválido: CNPJ deve conter apenas 14 dígitos numéricos. Valor recebido: "${cnpj}"`,
-      );
+      throw new BadRequestError({
+        fieldName: "cnpj",
+        value: cnpj,
+        message: `CNPJ deve conter exatamente 14 dígitos (após limpeza). Valor fornecido: ${onlyDigits}`,
+      });
     }
 
     if (!CnpjVO.isValid(onlyDigits)) {
-      throw new BadRequestError(
-        `CNPJ inválido: ${cnpj} (limpo: ${onlyDigits})`,
-      );
+      throw new BadRequestError({
+        fieldName: "cnpj",
+        value: cnpj,
+        message: `CNPJ inválido. Valor fornecido: ${onlyDigits}`,
+      });
     }
 
     this.value = onlyDigits;

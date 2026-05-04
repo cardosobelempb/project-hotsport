@@ -6,7 +6,7 @@ export class DuplicateError extends StandardError implements BaseUseCaseError {
   constructor(path: string) {
     super({
       error: "DuplicateError",
-      message: CodeError.DUPLICATE_ERROR,
+      message: CodeError.DUPLICATE_RECORD,
       statusCode: 409,
       path,
     });

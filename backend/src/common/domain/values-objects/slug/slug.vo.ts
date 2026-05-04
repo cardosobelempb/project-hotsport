@@ -27,7 +27,11 @@ export class SlugVO extends BaseVO<string> {
     const normalized = value?.trim().toLowerCase();
 
     if (!SlugVO.isValid(normalized)) {
-      throw new BadRequestError(`Invalid slug format: "${value}"`);
+      throw new BadRequestError({
+        fieldName: "slug",
+        value,
+        message: `Invalid slug: "${value}". Must be ${this.MIN_LENGTH}-${this.MAX_LENGTH} chars, lowercase, and can include hyphens.`,
+      });
     }
 
     return new SlugVO(normalized);
@@ -40,7 +44,11 @@ export class SlugVO extends BaseVO<string> {
    */
   public static createFromText(text: string): SlugVO {
     if (!text || text.trim().length === 0) {
-      throw new BadRequestError("Slug source text cannot be empty.");
+      throw new BadRequestError({
+        fieldName: "slug",
+        value: text,
+        message: "Text for slug cannot be empty.",
+      });
     }
 
     // 🧹 Normalização Unicode (remove acentos e diacríticos)
@@ -55,7 +63,11 @@ export class SlugVO extends BaseVO<string> {
       .replace(/^-+|-+$/g, ""); // remove hífens nas bordas
 
     if (!SlugVO.isValid(slugText)) {
-      throw new BadRequestError(`Invalid slug generated: "${slugText}"`);
+      throw new BadRequestError({
+        fieldName: "slug",
+        value: slugText,
+        message: `Generated slug "${slugText}" is invalid. Must be ${this.MIN_LENGTH}-${this.MAX_LENGTH} chars, lowercase, and can include hyphens.`,
+      });
     }
 
     return new SlugVO(slugText);

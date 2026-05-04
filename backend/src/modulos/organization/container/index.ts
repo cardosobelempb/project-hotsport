@@ -1,14 +1,17 @@
+import { MemberCreateUseCase } from "../application/usecases/member/member-create.usecase";
 import { OrganizationActivateUseCase } from "../application/usecases/organization/organization-activate.usecase";
 import { OrganizationCreateUseCase } from "../application/usecases/organization/organization-create.usecase";
 import { OrganizationDeactivateUseCase } from "../application/usecases/organization/organization-deactivate.usecase";
 import { OrganizationFindByIdUseCase } from "../application/usecases/organization/organization-find-by-id.usecase";
 import { OrganizationPageUseCase } from "../application/usecases/organization/organization-page.usecase";
 import { OrganizationUpdateUseCase } from "../application/usecases/organization/organization-update.usecase";
-import { OrganizationPrismaRepository } from "../infrastructure/http/repositories/prisma/organization-prisma.repository";
+import { PrismaMemberRepository } from "../infrastructure/http/repositories/prisma/prisma-member.repository";
+import { PrismaOrganizationRepository } from "../infrastructure/http/repositories/prisma/prisma-organization.repository";
 
 // ── Repositories ──────────────────────────────────────────────────────────────
 
-const organizationRepository = new OrganizationPrismaRepository();
+const organizationRepository = new PrismaOrganizationRepository();
+const memberRepository = new PrismaMemberRepository();
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -33,3 +36,6 @@ export const organizationActivateUseCase = new OrganizationActivateUseCase(
 export const organizationDeactivateUseCase = new OrganizationDeactivateUseCase(
   organizationRepository,
 );
+
+// ── Member ─────────────────────────────────────────────────────────────
+export const memberCreateUseCase = new MemberCreateUseCase(memberRepository);

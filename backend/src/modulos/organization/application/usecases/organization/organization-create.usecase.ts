@@ -1,4 +1,8 @@
-import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
 
 import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
 import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
@@ -44,9 +48,7 @@ export class OrganizationCreateUseCase {
 
     const createdOrganization =
       await this.organizationRepository.create(organization);
-    const organizationDto = OrganizationMapper.toCreate(createdOrganization);
-    // console.log("User case =>", organizationDto);
 
-    return right(organizationDto);
+    return right(OrganizationMapper.toCreate(createdOrganization));
   }
 }

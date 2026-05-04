@@ -1,6 +1,6 @@
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
 
-import { Either, right } from "@/common/domain/errors/handle-errors";
+import { Either, right } from "@/common/domain/errors/handle-errors/either";
 import {
   Page,
   PageInput,
@@ -24,12 +24,9 @@ export class OrganizationPageUseCase {
     // ─── Busca paginada no repositório ────────────────────────────────────
     const result = await this.organizationRepository.page(input);
 
-    // ─── Mapeia Entity → SummaryDto preservando metadados Spring ──────────
-    const page: Page<OrganizationSummaryDto> = {
+    return right({
       ...result,
       content: result.content.map(OrganizationMapper.toPage),
-    };
-
-    return right(page);
+    });
   }
 }

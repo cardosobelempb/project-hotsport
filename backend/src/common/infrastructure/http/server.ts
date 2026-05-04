@@ -13,26 +13,8 @@ const isProd = env.NODE_ENV === "production";
 // Em produção, por padrão, usa o próprio HOST (ou você pode omitir logs de URL).
 const PUBLIC_HOST = !isProd ? (env.PUBLIC_HOST ?? "localhost") : HOST;
 
-function printStartupBanner({
-  publicHost,
-  port,
-}: {
-  publicHost: string;
-  port: number;
-}) {
-  const logger = buildLogger();
-  const baseUrl = `http://${publicHost}:${port}`;
-  logger.info({}, "");
-  logger.info({}, "Hotspot API");
-  logger.info({}, `- API:  ${baseUrl}`);
-  logger.info({}, `- Docs: ${baseUrl}/docs`);
-  // console.log(`- JSON: ${baseUrl}/swagger.json`);
-  logger.info({}, "");
-  // URLs “puras” tendem a ser clicáveis em mais terminais
-  // console.log(`${baseUrl}/docs`);
-  // console.log(`${baseUrl}/swagger.json`);
-  // console.log("");
-}
+const logger = buildLogger();
+const baseUrl = `http://${PUBLIC_HOST}:${PORT}`;
 
 export async function startServer() {
   const app = await buildApp({
@@ -49,18 +31,39 @@ export async function startServer() {
     await app.listen({ port: PORT, host: HOST });
 
     // Banner mais amigável (principalmente em dev)
-    printStartupBanner({ publicHost: PUBLIC_HOST, port: PORT });
+    logger.info({ publicHost: PUBLIC_HOST, port: PORT });
 
-    app.log.info({ host: HOST, port: PORT }, "Server started");
+    // app.log.info({ host: HOST, port: PORT }, "Server started");
 
     // Em produção, se HOST for 0.0.0.0, isso não é um link útil.
     // Você pode condicionar para logar links só em dev:
     if (!isProd) {
-      app.log.info(`Server running at http://${PUBLIC_HOST}:${PORT}`);
-      app.log.info(`Docs available at http://${PUBLIC_HOST}:${PORT}/docs`);
+      logger.info(
+        {
+          event: "SERVER_START",
+          context: "bootstrap",
+          host: PUBLIC_HOST,
+          port: PORT,
+          url: baseUrl,
+        },
+        "Server started successfully",
+      );
+
+      logger.info(
+        {
+          event: "DOCS_AVAILABLE",
+          context: "bootstrap",
+          url: `${baseUrl}/docs`,
+        },
+        "API documentation available",
+      );
     }
   } catch (err) {
-    app.log.error(err);
+    logger.error({
+      event: "SERVER_START_ERROR",
+      context: "bootstrap",
+      error: err,
+    });
     process.exit(1);
   }
 }

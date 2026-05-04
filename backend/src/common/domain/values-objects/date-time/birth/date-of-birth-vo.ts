@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/core/domain/errors/controllers/BadRequestError";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { BaseDateOfBirth } from "./base-date-of-birth";
 
 let dayjs: any;
@@ -18,20 +18,30 @@ export class DateOfBirthVO extends BaseDateOfBirth {
     if (dayjs) {
       parsed = dayjs(input);
       if (!parsed.isValid()) {
-        throw new BadRequestError("Invalid date.");
+        throw new BadRequestError({
+          fieldName: "dateOfBirth",
+          value: input instanceof Date ? input.toISOString() : input,
+          message: "Data de nascimento inválida.",
+        });
       }
     } else {
       parsed = input instanceof Date ? input : new Date(input);
       if (isNaN(parsed.getTime())) {
-        throw new BadRequestError("Invalid date.");
+        throw new BadRequestError({
+          fieldName: "dateOfBirth",
+          value: input instanceof Date ? input.toISOString() : input,
+          message: "Data de nascimento inválida.",
+        });
       }
     }
 
     const age = this.calculateAge(parsed);
     if (!this.isValidAge(age)) {
-      throw new BadRequestError(
-        "Age outside the permitted range (0-130 years).",
-      );
+      throw new BadRequestError({
+        fieldName: "dateOfBirth",
+        value: input instanceof Date ? input.toISOString() : input,
+        message: `Idade inválida: ${age} anos. A idade deve ser entre 0 e 130 anos.`,
+      });
     }
 
     this.date = parsed;

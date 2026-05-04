@@ -120,70 +120,56 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.OrganizationScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  logoUrl: 'logoUrl',
-  status: 'status',
-  deletedAt: 'deletedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.MemberScalarFieldEnum = {
-  id: 'id',
-  organizationId: 'organizationId',
-  userId: 'userId',
-  role: 'role',
-  status: 'status',
-  email: 'email',
-  invitationStatus: 'invitationStatus',
-  joinedAt: 'joinedAt',
-  invitedBy: 'invitedBy',
-  expiresAt: 'expiresAt',
-  deletedAt: 'deletedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
+  name: 'name',
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  passwordHash: 'passwordHash',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.AuthAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  refreshToken: 'refreshToken',
+  accessToken: 'accessToken',
+  expiresAt: 'expiresAt',
+  tokenType: 'tokenType',
+  scope: 'scope',
+  idToken: 'idToken',
+  sessionState: 'sessionState'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  expires: 'expires'
+};
+
+exports.Prisma.VerificationTokenScalarFieldEnum = {
+  identifier: 'identifier',
+  token: 'token',
+  expires: 'expires'
+};
+
+exports.Prisma.UserProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
   firstName: 'firstName',
   lastName: 'lastName',
-  email: 'email',
-  cpf: 'cpf',
-  phoneNumber: 'phoneNumber',
-  status: 'status',
-  deletedAt: 'deletedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.AddressScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  type: 'type',
-  isPrimary: 'isPrimary',
-  street: 'street',
-  number: 'number',
-  complement: 'complement',
-  neighborhood: 'neighborhood',
-  city: 'city',
-  state: 'state',
-  country: 'country',
-  zipCode: 'zipCode',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.AccountScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  provider: 'provider',
-  type: 'type',
-  providerAccountId: 'providerAccountId',
-  passwordHash: 'passwordHash',
+  birthDate: 'birthDate',
+  documentType: 'documentType',
+  documentNumber: 'documentNumber',
+  phone: 'phone',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -191,10 +177,13 @@ exports.Prisma.AccountScalarFieldEnum = {
 exports.Prisma.TokenScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  token: 'token',
+  type: 'type',
+  valueHash: 'valueHash',
   expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.OtpScalarFieldEnum = {
@@ -206,7 +195,90 @@ exports.Prisma.OtpScalarFieldEnum = {
   attempts: 'attempts',
   usedAt: 'usedAt',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.OrganizationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  documentType: 'documentType',
+  documentNumber: 'documentNumber',
+  contactEmail: 'contactEmail',
+  phone: 'phone',
+  logoUrl: 'logoUrl',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.MembershipScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  userId: 'userId',
+  role: 'role',
+  status: 'status',
+  invitedEmail: 'invitedEmail',
+  invitedById: 'invitedById',
+  joinedAt: 'joinedAt',
+  expiresAt: 'expiresAt',
+  removedAt: 'removedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.AddressScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  type: 'type',
+  isPrimary: 'isPrimary',
+  street: 'street',
+  number: 'number',
+  complement: 'complement',
+  neighborhood: 'neighborhood',
+  stateId: 'stateId',
+  cityId: 'cityId',
+  country: 'country',
+  zipCode: 'zipCode',
+  reference: 'reference',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.StateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  uf: 'uf'
+};
+
+exports.Prisma.CityScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  stateId: 'stateId',
+  subdomain: 'subdomain'
+};
+
+exports.Prisma.OrganizationConfigScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  configType: 'configType',
+  configJson: 'configJson',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrganizationVpnPeerScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  wgClientId: 'wgClientId',
+  name: 'name',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.MercadoPagoConfigScalarFieldEnum = {
@@ -256,6 +328,8 @@ exports.Prisma.HotspotPlanScalarFieldEnum = {
   type: 'type',
   durationSecs: 'durationSecs',
   dataLimitMb: 'dataLimitMb',
+  price: 'price',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -284,24 +358,6 @@ exports.Prisma.VoucherScalarFieldEnum = {
   usedAt: 'usedAt',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.LgpdConsentScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  organizationId: 'organizationId',
-  consentTerms: 'consentTerms',
-  consentMarketing: 'consentMarketing',
-  consentDataSharing: 'consentDataSharing',
-  consentAnalytics: 'consentAnalytics',
-  ipAddress: 'ipAddress',
-  macAddress: 'macAddress',
-  userAgent: 'userAgent',
-  consentVersion: 'consentVersion',
-  status: 'status',
-  withdrawnAt: 'withdrawnAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -364,45 +420,14 @@ exports.Prisma.PaymentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.CampaignScalarFieldEnum = {
+exports.Prisma.PortalTemplateScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
   name: 'name',
   description: 'description',
-  isActive: 'isActive',
-  views: 'views',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.CampaignItemScalarFieldEnum = {
-  id: 'id',
-  campaignId: 'campaignId',
-  organizationId: 'organizationId',
+  thumbnailUrl: 'thumbnailUrl',
+  htmlTemplate: 'htmlTemplate',
+  cssTemplate: 'cssTemplate',
   type: 'type',
-  order: 'order',
-  fileUrl: 'fileUrl',
-  durationSeconds: 'durationSeconds',
-  title: 'title',
-  destinationLink: 'destinationLink',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.OrganizationConfigScalarFieldEnum = {
-  id: 'id',
-  organizationId: 'organizationId',
-  configType: 'configType',
-  configJson: 'configJson',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.OrganizationVpnPeerScalarFieldEnum = {
-  id: 'id',
-  organizationId: 'organizationId',
-  wgClientId: 'wgClientId',
-  name: 'name',
   createdAt: 'createdAt'
 };
 
@@ -428,17 +453,31 @@ exports.Prisma.PortalScalarFieldEnum = {
   settings: 'settings',
   whatsappEnabled: 'whatsappEnabled',
   whatsappTemplate: 'whatsappTemplate',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
-exports.Prisma.PortalTemplateScalarFieldEnum = {
+exports.Prisma.CampaignScalarFieldEnum = {
   id: 'id',
+  organizationId: 'organizationId',
   name: 'name',
   description: 'description',
-  thumbnailUrl: 'thumbnailUrl',
-  htmlTemplate: 'htmlTemplate',
-  cssTemplate: 'cssTemplate',
+  isActive: 'isActive',
+  views: 'views',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CampaignItemScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  organizationId: 'organizationId',
   type: 'type',
+  order: 'order',
+  fileUrl: 'fileUrl',
+  durationSeconds: 'durationSeconds',
+  title: 'title',
+  destinationLink: 'destinationLink',
   createdAt: 'createdAt'
 };
 
@@ -456,6 +495,24 @@ exports.Prisma.LeadScalarFieldEnum = {
   observations: 'observations',
   lgpdAccepted: 'lgpdAccepted',
   lgpdAcceptedAt: 'lgpdAcceptedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LgpdConsentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  consentTerms: 'consentTerms',
+  consentMarketing: 'consentMarketing',
+  consentDataSharing: 'consentDataSharing',
+  consentAnalytics: 'consentAnalytics',
+  ipAddress: 'ipAddress',
+  macAddress: 'macAddress',
+  userAgent: 'userAgent',
+  consentVersion: 'consentVersion',
+  status: 'status',
+  withdrawnAt: 'withdrawnAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -582,65 +639,63 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
-  ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  SUSPENDED: 'SUSPENDED'
-};
-
-exports.MemberRole = exports.$Enums.MemberRole = {
-  OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
-  MEMBER: 'MEMBER',
-  OPERATOR: 'OPERATOR',
-  HOTSPOT_USER: 'HOTSPOT_USER'
-};
-
-exports.MemberStatus = exports.$Enums.MemberStatus = {
-  ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  BLOCKED: 'BLOCKED'
-};
-
-exports.MemberInvitationStatus = exports.$Enums.MemberInvitationStatus = {
-  ACTIVE: 'ACTIVE',
-  ACCEPTED: 'ACCEPTED',
-  DECLINED: 'DECLINED',
-  EXPIRED: 'EXPIRED',
-  INVITED: 'INVITED',
-  PENDING: 'PENDING',
-  REMOVED: 'REMOVED'
-};
-
 exports.UserStatus = exports.$Enums.UserStatus = {
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
   BLOCKED: 'BLOCKED'
 };
 
-exports.AddressType = exports.$Enums.AddressType = {
-  HOME: 'HOME',
-  WORK: 'WORK',
-  BILLING: 'BILLING',
+exports.DocumentType = exports.$Enums.DocumentType = {
+  CPF: 'CPF',
+  CNPJ: 'CNPJ',
+  RG: 'RG',
   OTHER: 'OTHER'
-};
-
-exports.AccountProvider = exports.$Enums.AccountProvider = {
-  EMAIL: 'EMAIL',
-  GOOGLE: 'GOOGLE',
-  FACEBOOK: 'FACEBOOK',
-  APPLE: 'APPLE'
-};
-
-exports.AccountType = exports.$Enums.AccountType = {
-  PASSWORD: 'PASSWORD',
-  OAUTH: 'OAUTH',
-  OTP: 'OTP'
 };
 
 exports.TokenType = exports.$Enums.TokenType = {
   REFRESH: 'REFRESH',
-  ACCESS: 'ACCESS'
+  ACCESS: 'ACCESS',
+  RESET_PASSWORD: 'RESET_PASSWORD',
+  API_KEY: 'API_KEY'
+};
+
+exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BLOCKED: 'BLOCKED',
+  DELETED: 'DELETED'
+};
+
+exports.MemberRole = exports.$Enums.MemberRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  SUPPORT: 'SUPPORT',
+  FINANCE: 'FINANCE',
+  MEMBER: 'MEMBER'
+};
+
+exports.MemberStatus = exports.$Enums.MemberStatus = {
+  ACTIVE: 'ACTIVE',
+  INVITED: 'INVITED',
+  SUSPENDED: 'SUSPENDED',
+  REMOVED: 'REMOVED'
+};
+
+exports.AddressType = exports.$Enums.AddressType = {
+  HOME: 'HOME',
+  WORK: 'WORK',
+  BILLING: 'BILLING',
+  ORGANIZATION: 'ORGANIZATION',
+  OTHER: 'OTHER'
+};
+
+exports.OrganizationConfigType = exports.$Enums.OrganizationConfigType = {
+  MERCADOPAGO: 'MERCADOPAGO',
+  EFI: 'EFI',
+  WHATSAPP: 'WHATSAPP',
+  PORTAL: 'PORTAL',
+  HOTSPOT: 'HOTSPOT'
 };
 
 exports.Environment = exports.$Enums.Environment = {
@@ -672,12 +727,6 @@ exports.VoucherStatus = exports.$Enums.VoucherStatus = {
   ACTIVE: 'ACTIVE',
   EXPIRED: 'EXPIRED',
   REVOKED: 'REVOKED'
-};
-
-exports.ConsentStatus = exports.$Enums.ConsentStatus = {
-  ACTIVE: 'ACTIVE',
-  REVOKED: 'REVOKED',
-  WITHDRAWN: 'WITHDRAWN'
 };
 
 exports.PlanStatus = exports.$Enums.PlanStatus = {
@@ -715,12 +764,6 @@ exports.CampaignItemType = exports.$Enums.CampaignItemType = {
   VIDEO: 'VIDEO'
 };
 
-exports.OrganizationConfigType = exports.$Enums.OrganizationConfigType = {
-  MERCADOPAGO: 'MERCADOPAGO',
-  EFI: 'EFI',
-  WHATSAPP: 'WHATSAPP'
-};
-
 exports.LeadStatus = exports.$Enums.LeadStatus = {
   NEW: 'NEW',
   CONTACTED: 'CONTACTED',
@@ -728,7 +771,14 @@ exports.LeadStatus = exports.$Enums.LeadStatus = {
   DISCARDED: 'DISCARDED'
 };
 
+exports.ConsentStatus = exports.$Enums.ConsentStatus = {
+  ACTIVE: 'ACTIVE',
+  REVOKED: 'REVOKED',
+  WITHDRAWN: 'WITHDRAWN'
+};
+
 exports.WhatsappLogStatus = exports.$Enums.WhatsappLogStatus = {
+  INFO: 'INFO',
   OK: 'OK',
   ERROR: 'ERROR',
   SKIPPED: 'SKIPPED'
@@ -743,7 +793,8 @@ exports.UpdateFileAction = exports.$Enums.UpdateFileAction = {
 exports.UpdateApplyLogStatus = exports.$Enums.UpdateApplyLogStatus = {
   INFO: 'INFO',
   OK: 'OK',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
+  SKIPPED: 'SKIPPED'
 };
 
 exports.SystemBackupType = exports.$Enums.SystemBackupType = {
@@ -752,30 +803,35 @@ exports.SystemBackupType = exports.$Enums.SystemBackupType = {
 };
 
 exports.Prisma.ModelName = {
-  Organization: 'Organization',
-  Member: 'Member',
   User: 'User',
-  Address: 'Address',
-  Account: 'Account',
+  AuthAccount: 'AuthAccount',
+  Session: 'Session',
+  VerificationToken: 'VerificationToken',
+  UserProfile: 'UserProfile',
   Token: 'Token',
   Otp: 'Otp',
+  Organization: 'Organization',
+  Membership: 'Membership',
+  Address: 'Address',
+  State: 'State',
+  City: 'City',
+  OrganizationConfig: 'OrganizationConfig',
+  OrganizationVpnPeer: 'OrganizationVpnPeer',
   MercadoPagoConfig: 'MercadoPagoConfig',
   EfiConfig: 'EfiConfig',
   Mikrotik: 'Mikrotik',
   HotspotPlan: 'HotspotPlan',
   HotspotUser: 'HotspotUser',
   Voucher: 'Voucher',
-  LgpdConsent: 'LgpdConsent',
   SubscriptionPlan: 'SubscriptionPlan',
   Subscription: 'Subscription',
   Payment: 'Payment',
+  PortalTemplate: 'PortalTemplate',
+  Portal: 'Portal',
   Campaign: 'Campaign',
   CampaignItem: 'CampaignItem',
-  OrganizationConfig: 'OrganizationConfig',
-  OrganizationVpnPeer: 'OrganizationVpnPeer',
-  Portal: 'Portal',
-  PortalTemplate: 'PortalTemplate',
   Lead: 'Lead',
+  LgpdConsent: 'LgpdConsent',
   ConnectionLog: 'ConnectionLog',
   WhatsappLog: 'WhatsappLog',
   Update: 'Update',

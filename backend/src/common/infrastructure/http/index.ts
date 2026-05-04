@@ -18,12 +18,25 @@ async function bootstrap(): Promise<void> {
   const logger = buildLogger();
   try {
     // Inicializa conexão com o banco
-    logger.info({}, "Data Source inicializado com sucesso! 🚀");
+    logger.info(
+      {
+        event: "DB_INIT",
+        context: "bootstrap",
+      },
+      "Data source initialized successfully",
+    );
 
     // Inicia servidor HTTP
     await startServer();
   } catch (error) {
-    logger.error({ error }, "[Bootstrap] Erro ao inicializar a aplicação:");
+    logger.error(
+      {
+        event: "APP_INIT_ERROR",
+        context: "bootstrap",
+        err: error,
+      },
+      "Error while initializing application",
+    );
 
     // Fail fast: encerra o processo com erro
     process.exit(1);

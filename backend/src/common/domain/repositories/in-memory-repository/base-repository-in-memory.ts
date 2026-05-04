@@ -1,9 +1,10 @@
-import { SearchInput, SearchOutput } from "../search.repository";
+import { SearchInput } from "../search.repository";
 
 import { NotFoundError } from "../../errors/usecases/not-founde.rror";
 
 import { UUIDVO } from "../../values-objects/uuidvo/uuid.vo";
-import { BaseSearchableRepository } from "../base-searchable.repository";
+import { PageRepository } from "../page-repository";
+import { Page } from "../types/pagination.types";
 
 /**
  * Tipos de propriedades genéricas de uma entidade
@@ -29,7 +30,7 @@ export type CreateProps<Entity> = Partial<
  */
 export abstract class BaseInMemoryRepository<
   Entity extends ModelProps,
-> implements BaseSearchableRepository<Entity> {
+> implements PageRepository<Entity> {
   /** Armazena todas as entidades em memória */
   protected items: Entity[] = [];
 
@@ -102,7 +103,7 @@ export abstract class BaseInMemoryRepository<
   /**
    * Busca paginada com filtro e ordenação
    */
-  async search(params: SearchInput): Promise<SearchOutput<Entity>> {
+  async page(params: SearchInput): Promise<Page<Entity>> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 15;
     const sortBy = params.sortBy ?? "";
@@ -119,14 +120,32 @@ export abstract class BaseInMemoryRepository<
     );
 
     return {
-      items: paginatedItems,
-      total: filteredItems.length,
+      content: paginatedItems,
+      pageable: {
+        offset: (page - 1) * perPage,
+        pageNumber: page,
+        pageSize: perPage,
+        paged: true,
+        unpaged: false,
+        sort: {
+          sorted: !!sortBy,
+          unsorted: !sortBy,
+          empty: !sortBy,
+        },
+      },
       totalPages: Math.ceil(filteredItems.length / perPage),
-      currentPage: page,
-      perPage,
-      sortBy, // sempre string
-      sortDirection,
-      filter, // sempre string
+      totalElements: filteredItems.length,
+      last: page * perPage >= filteredItems.length,
+      size: perPage,
+      number: page,
+      sort: {
+        sorted: !!sortBy,
+        unsorted: !sortBy,
+        empty: !sortBy,
+      },
+      numberOfElements: paginatedItems.length,
+      first: page === 1,
+      empty: paginatedItems.length === 0,
     };
   }
 
@@ -137,7 +156,11 @@ export abstract class BaseInMemoryRepository<
     const entity = this.items.find(
       (item) => item.id?.getValue() === id && !item.deletedAt,
     );
-    if (!entity) throw new NotFoundError(`Entity not found using id ${id}`);
+    if (!entity)
+      throw new NotFoundError({
+        fieldName: "id",
+        message: `Entity not found using id ${id}`,
+      });
     return entity;
   }
 
@@ -187,5 +210,18 @@ export abstract class BaseInMemoryRepository<
 
     // Retorna uma cópia paginada do array
     return items.slice(start, end);
+  }
+
+  async findManyByIds(ids: string[]): Promise<Entity[]> {
+    const foundItems = this.items.filter(
+      (item) => item.id && ids.includes(item.id.getValue()) && !item.deletedAt,
+    );
+    return foundItems;
+  }
+  async exists(id: string): Promise<boolean> {
+    const entity = this.items.find(
+      (item) => item.id?.getValue() === id && !item.deletedAt,
+    );
+    return !!entity;
   }
 }

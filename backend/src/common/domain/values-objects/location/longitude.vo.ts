@@ -7,9 +7,10 @@ export class LongitudeVO extends BaseVO<number> {
   constructor(value: number) {
     super(value);
     if (!LongitudeVO.isValid(value)) {
-      throw new BadRequestError(
-        `Invalid longitude: ${value}. Must be between -180 and 180.`,
-      );
+      throw new BadRequestError({
+        fieldName: "longitude",
+        message: "Longitude must be a number between -180 and 180",
+      });
     }
     this.value = value;
   }

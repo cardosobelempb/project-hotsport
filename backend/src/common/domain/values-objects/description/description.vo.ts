@@ -25,19 +25,24 @@ export class DescriptionVO {
     const { required = true, maxLength = 500, minLength = 0 } = options;
 
     if (required && value.length === 0) {
-      throw new BadRequestError(msg.EMPTY);
+      throw new BadRequestError({
+        fieldName: "description",
+        message: msg.EMPTY ?? "Description cannot be empty.",
+      });
     }
 
     if (value.length < minLength) {
-      throw new BadRequestError(
-        msg.TOO_SHORT ?? `Minimum length is ${minLength}`,
-      );
+      throw new BadRequestError({
+        fieldName: "description",
+        message: msg.TOO_SHORT ?? `Minimum length is ${minLength}`,
+      });
     }
 
     if (value.length > maxLength) {
-      throw new BadRequestError(
-        msg.TOO_LONG ?? `Maximum length is ${maxLength}`,
-      );
+      throw new BadRequestError({
+        fieldName: "description",
+        message: msg.TOO_LONG ?? `Maximum length is ${maxLength}`,
+      });
     }
 
     return new DescriptionVO(value);

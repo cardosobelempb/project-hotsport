@@ -2,7 +2,7 @@ import { BcryptHasher } from "@/shared/cryptography/bcrypt-hasher";
 
 import { CreateAccountUseCase } from "../application/usecases/account/create-account.use-case";
 import { AccountPrismaRepository } from "../infrastructure/http/repositories/prisma/account-prisma.repository";
-import { UserPrismaRepository } from "../infrastructure/http/repositories/prisma/user-prisma.repository";
+import { UserPrismaRepository } from "../infrastructure/http/repositories/prisma/prisma-user.repository";
 
 // ── Repositories ──────────────────────────────────────────────────────────────
 

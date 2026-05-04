@@ -8,6 +8,13 @@ export abstract class BaseRepository<TEntity> {
   abstract findById(id: string): Promise<TEntity | null>;
 
   /**
+   * Busca múltiplas entidades pelos IDs.
+   * @param ids
+   *
+   */
+  abstract findManyByIds(ids: string[]): Promise<TEntity[]>;
+
+  /**
    * Cria uma nova entidade.
    */
   abstract create(entity: TEntity): Promise<TEntity>;

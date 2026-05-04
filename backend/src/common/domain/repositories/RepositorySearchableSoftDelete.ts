@@ -1,6 +1,6 @@
-import { SearchInput, SearchOutput } from './RespositorySearch'
-import { IRepositorySoftDeletable } from './IRepositorySoftDeletable'
-import { RepositorySoftDelete } from './RepositorySoftDeletable'
+import { IRepositorySoftDeletable } from "./IRepositorySoftDeletable";
+import { RepositorySoftDelete } from "./RepositorySoftDeletable";
+import { SearchInput, SearchOutput } from "./search.repository";
 
 /**
  * Repositório com busca paginada e soft delete.
@@ -13,5 +13,5 @@ export abstract class RepositorySearchableSoftDelete<
    *
    * ⚠️ Não deve retornar registros com deletedAt != null
    */
-  abstract search(params: SearchInput): Promise<SearchOutput<TEntity>>
+  abstract search(params: SearchInput): Promise<SearchOutput<TEntity>>;
 }

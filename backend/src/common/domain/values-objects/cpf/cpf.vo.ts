@@ -6,18 +6,22 @@ export class CpfVO {
   constructor(cpf: string) {
     // Verifica se o CPF contém exatamente 11 dígitos numéricos
     if (!/^\d{11}$/.test(cpf)) {
-      throw new BadRequestError(
-        `Formato inválido de CPF: "${cpf}". Deve conter apenas 11 dígitos numéricos.`,
-      );
+      throw new BadRequestError({
+        fieldName: "cpf",
+        value: cpf,
+        message: `CPF deve conter exatamente 11 dígitos numéricos. Valor fornecido: "${cpf}"`,
+      });
     }
 
     // Limpa o CPF (remove pontuações) e valida
     const sanitizedCpf = CpfVO.sanitize(cpf);
 
     if (!CpfVO.isValid(sanitizedCpf)) {
-      throw new BadRequestError(
-        `CPF inválido: ${cpf} (limpo: ${sanitizedCpf})`,
-      );
+      throw new BadRequestError({
+        fieldName: "cpf",
+        value: cpf,
+        message: `CPF inválido. Valor fornecido: ${sanitizedCpf}`,
+      });
     }
 
     this.value = sanitizedCpf;

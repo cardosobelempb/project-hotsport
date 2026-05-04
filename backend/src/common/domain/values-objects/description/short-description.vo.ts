@@ -19,13 +19,19 @@ export class ShortDescriptionVO extends BaseVO<string> {
     const value = ShortDescriptionVO.normalize(rawValue);
 
     if (value.length === 0) {
-      throw new BadRequestError(msg.EMPTY);
+      throw new BadRequestError({
+        fieldName: "description",
+        message: msg.EMPTY ?? "Description cannot be empty.",
+      });
     }
 
     if (value.length > maxLength) {
-      throw new BadRequestError(
-        msg.TOO_LONG ?? `Maximum length is ${maxLength}`,
-      );
+      throw new BadRequestError({
+        fieldName: "description",
+        message:
+          msg.TOO_LONG ??
+          `Description exceeds the maximum allowed length of ${maxLength} characters.`,
+      });
     }
 
     return new ShortDescriptionVO(value);

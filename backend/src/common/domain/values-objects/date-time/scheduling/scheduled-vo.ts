@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/core/domain/errors/controllers/BadRequestError";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { BaseScheduled } from "./base-scheduled";
 
 let Dayjs: any;
@@ -23,9 +23,12 @@ export class ScheduledVO extends BaseScheduled {
     // Verifica se a data está dentro do intervalo permitido
     const now = dayjs();
     if (!this.isValidSchedule(parsed.valueOf(), now.valueOf())) {
-      throw new BadRequestError(
-        "Appointments must be in the future, up to 1 year from today.",
-      );
+      throw new BadRequestError({
+        fieldName: "scheduledDate",
+        value: input instanceof Date ? input.toISOString() : input,
+        message:
+          "Data de agendamento deve ser futura e não mais de um ano no futuro.",
+      });
     }
 
     this.date = parsed;

@@ -1,9 +1,9 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
-import { PrismaClient } from "../../../../generated/prisma";
 
 export type PrismaTransaction = Omit<PrismaClient, "$on" | "$use" | "$extends">;
 
+import { PrismaClient } from "../../../../generated/prisma";
 import { Logger } from "../observability/logger";
 
 declare global {

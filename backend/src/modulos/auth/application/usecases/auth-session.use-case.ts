@@ -4,7 +4,7 @@ import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.
 import { env } from "@/common/infrastructure/env";
 
 import { UserMapper } from "@/modulos/identity/domain/mappers/user-mapper";
-import { UserPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/user-prisma.repository";
+import { UserPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/prisma-user.repository";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { AuthSessionResponseType } from "../../infrastructure/http/schemas/session-auth.schema";
 

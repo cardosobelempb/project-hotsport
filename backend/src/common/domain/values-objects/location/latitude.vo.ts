@@ -1,4 +1,4 @@
-import { BaseI18n } from "../../common/shared/base-I18n";
+import { BaseI18n } from "@/common/shared/utils/base-I18n";
 import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 
@@ -20,7 +20,10 @@ export class LatitudeVO extends BaseVO<number> {
       const message =
         i18n?.t("errors.latitude.invalid", { args: { value } }) ??
         `Invalid latitude: ${value}. Must be between -90 and 90.`;
-      throw new BadRequestError(message);
+      throw new BadRequestError({
+        fieldName: "latitude",
+        message,
+      });
     }
     return new LatitudeVO(value);
   }

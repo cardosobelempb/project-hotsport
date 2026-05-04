@@ -1,0 +1,7 @@
+export enum PaymentGateway {
+  MERCADO_PAGO = "MERCADO_PAGO",
+  PAGSEGURO = "PAGSEGURO",
+  GETNET = "GETNET",
+  PIX_MANUAL = "PIX_MANUAL",
+  OTHER = "OTHER",
+}

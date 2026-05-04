@@ -1,4 +1,4 @@
-import { parseEnvArray } from "@/shared/schemas/helpers";
+import { parseEnvArray } from "@/common/shared/schemas/helpers";
 import "dotenv/config";
 import { z } from "zod";
 import { EnvValidationError } from "./env-validation.error";
@@ -34,11 +34,9 @@ export const envSchema = z.object({
   //   .default("hotspot"),
 
   // JWT
-  JWT_SECRET_KEY: z.string().min(1, "JWT_SECRET_KEY é obrigatória"),
+  JWT_ACCESS_SECRET: z.string().min(1, "JWT_ACCESS_SECRET é obrigatória"),
   JWT_EXPIRES_IN: z.string().default("1h"),
-  ACCESS_TOKEN_SECRET_KEY: z
-    .string()
-    .min(1, "ACCESS_TOKEN_SECRET_KEY é obrigatória"),
+  JWT_REFRESH_SECRET: z.string().min(1, "JWT_REFRESH_SECRET é obrigatória"),
   REFRESH_TOKEN_SECRET_KEY: z
     .string()
     .min(1, "REFRESH_TOKEN_SECRET_KEY é obrigatória"),

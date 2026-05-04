@@ -4,19 +4,23 @@ import { Optional } from "@/common/domain/types/Optional";
 import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { OrganizationStatus } from "../enums/organization.enum";
+import { OrganizationStatus } from "@/common/shared/enums/organization-status.enum";
 
 interface OrganizationProps {
+  accountId: UUIDVO;
   name: string;
   slug: SlugVO;
   logoUrl: string | null;
-  status: OrganizationStatus | null;
+  status: OrganizationStatus;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
 }
 
 export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
+  get accountId() {
+    return this.props.accountId;
+  }
   get name() {
     return this.props.name;
   }

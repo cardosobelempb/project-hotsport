@@ -1,5 +1,5 @@
-import { RepositoryDomain } from './RepositoryDomain'
-import { SearchInput, SearchOutput } from './RespositorySearch'
+import { RepositoryDomain } from "./RepositoryDomain";
+import { SearchInput, SearchOutput } from "./search.repository";
 
 /**
  * Extensão opcional para repositórios que suportam busca paginada.
@@ -12,5 +12,5 @@ export abstract class RepositorySearchable<
    *
    * @param params Parâmetros de busca
    */
-  abstract search(params: SearchInput): Promise<SearchOutput<TEntity>>
+  abstract search(params: SearchInput): Promise<SearchOutput<TEntity>>;
 }

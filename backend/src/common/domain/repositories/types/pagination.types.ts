@@ -82,8 +82,8 @@ export interface Page<T> {
  * @example GET /organizations?page=0&size=10&sort=name,asc&filter=acme
  */
 export interface PageInput {
-  page?: number; // Zero-based — padrão Spring: 0
-  size?: number; // Itens por página — padrão Spring: 20
+  page?: number | undefined; // Zero-based — padrão Spring: 0
+  size?: number | undefined; // Itens por página — padrão Spring: 20
   sort?: string | undefined; // Formato: 'campo,direção' → ex: 'name,asc' | 'createdAt,desc'
-  filter?: string; // Filtro textual livre (extensão customizada)
+  filter?: string | undefined; // Filtro textual livre (extensão customizada)
 }

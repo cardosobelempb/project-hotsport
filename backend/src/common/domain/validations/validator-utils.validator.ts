@@ -1,8 +1,7 @@
 import { MethodNotAllowedError } from "../errors/usecases/method-not-allowed.error";
 import { ValidErrors } from "./valid-errors.validator";
-import { ValidFieldMessage } from "./valid-field-message.validator";
 import { ValidationErrors } from "./validation-errors.validator";
-import { ValidatorMessage } from "./validator-message";
+import { ValidatorMessage } from "./ValidatorMessage";
 
 export class ValidatorUtils {
   private constructor() {}
@@ -31,13 +30,12 @@ export class ValidatorUtils {
   static validMaxLength(
     fieldName: string,
     maxLength: number,
-    validFieldMessages: ValidFieldMessage[],
+    validErrors: ValidErrors,
   ): boolean {
     if (fieldName?.trim().length > maxLength) {
-      validFieldMessages.push(
-        new ValidFieldMessage(
-          `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
-        ),
+      validErrors.addErrors(
+        fieldName,
+        `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
       );
       return false;
     }

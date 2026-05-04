@@ -1,5 +1,9 @@
 import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
-import { Either, left, right } from "@/common/domain/errors/handle-errors";
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
 import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
 import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";

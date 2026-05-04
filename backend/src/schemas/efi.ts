@@ -1,7 +1,5 @@
 import { z } from "zod";
-
-import { Environment } from "@/generated/prisma";
-
+import { Environment } from "../../generated/prisma";
 import { UUIDString } from "./helpers";
 
 export const EfiConfigSchema = z.object({

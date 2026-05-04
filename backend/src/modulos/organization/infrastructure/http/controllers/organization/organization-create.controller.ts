@@ -26,8 +26,6 @@ export const organizationCreateController = (
           throw result.value;
         }
 
-        console.log("Controller =>", result.value);
-
         return reply.status(201).send(result.value);
       },
     });

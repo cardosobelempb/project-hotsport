@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/core/domain/errors/controllers/BadRequestError";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { AbstractTimeVO } from "./base-time.vo";
 
 export class TimeVO extends AbstractTimeVO {
@@ -12,7 +12,10 @@ export class TimeVO extends AbstractTimeVO {
   protected validate(time: string): string {
     const regex = /^([01]\d|2[0-3]):[0-5]\d$/;
     if (!regex.test(time)) {
-      throw new BadRequestError("Time must be in 24h format HH:mm.");
+      throw new BadRequestError({
+        fieldName: "time",
+        message: "Time must be in the format HH:mm (24-hour format)",
+      });
     }
     return time;
   }

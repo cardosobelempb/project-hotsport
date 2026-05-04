@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 
 import { CreateUserUseCase } from "@/modulos/identity/application/usecases/users/create-user.usecase";
 import { userRegisterController } from "../controllers/user/user-register.controller";
-import { UserPrismaRepository } from "../repositories/prisma/user-prisma.repository";
+import { UserPrismaRepository } from "../repositories/prisma/prisma-user.repository";
 
 export async function userRoutes(app: FastifyInstance): Promise<void> {
   const userRepository = new UserPrismaRepository();

@@ -1,4 +1,4 @@
-import { BaseHash } from "../../common/shared/base-Hash";
+import { BaseHash } from "@/common/shared/utils/base-Hash";
 import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 
@@ -33,7 +33,10 @@ export class PasswordVO extends BaseVO<string> {
     super(password);
 
     if (!password || password.trim().length === 0) {
-      throw new BadRequestError("Password cannot be empty.");
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Password cannot be empty.",
+      });
     }
 
     this.value = password;
@@ -71,40 +74,54 @@ export class PasswordVO extends BaseVO<string> {
     } = this.options;
 
     if (password.length < minLength) {
-      throw new BadRequestError(
-        `Password must be at least ${minLength} characters.`,
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: `Password must be at least ${minLength} characters.`,
+      });
     }
 
     if (password.length > maxLength) {
-      throw new BadRequestError(
-        `Password must be at most ${maxLength} characters.`,
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: `Password must be no more than ${maxLength} characters.`,
+      });
     }
 
     if (requireUppercase && !/[A-Z]/.test(password)) {
-      throw new BadRequestError(
-        "Password must include at least one uppercase letter.",
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: "Password must include at least one uppercase letter.",
+      });
     }
 
     if (requireLowercase && !/[a-z]/.test(password)) {
-      throw new BadRequestError(
-        "Password must include at least one lowercase letter.",
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: "Password must include at least one lowercase letter.",
+      });
     }
 
     if (requireDigit && !/\d/.test(password)) {
-      throw new BadRequestError("Password must include at least one digit.");
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: "Password must include at least one digit.",
+      });
     }
 
     if (
       requireSpecialChar &&
       !/[!@#$%^&*(),.?":{}|<>_\-\\[\];'/+=~`]/.test(password)
     ) {
-      throw new BadRequestError(
-        "Password must include at least one special character.",
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        value: password,
+        message: "Password must include at least one special character.",
+      });
     }
   }
 
@@ -113,10 +130,16 @@ export class PasswordVO extends BaseVO<string> {
    */
   public static confirm(password?: string, confirmPassword?: string): void {
     if (!password || !confirmPassword) {
-      throw new BadRequestError("Password and confirmation cannot be empty.");
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Password and confirmation are required.",
+      });
     }
     if (password !== confirmPassword) {
-      throw new BadRequestError("Password and confirmation do not match.");
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Password and confirmation do not match.",
+      });
     }
   }
 
@@ -137,9 +160,17 @@ export class PasswordVO extends BaseVO<string> {
     oldHash: string,
     hasher: BaseHash,
   ): Promise<void> {
-    if (!hasher) throw new BadRequestError("Hasher not provided.");
+    if (!hasher)
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Hasher not provided. Cannot validate old password.",
+      });
     const match = await hasher.compare(oldPassword, oldHash);
-    if (!match) throw new BadRequestError("Old password is incorrect.");
+    if (!match)
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Old password is incorrect.",
+      });
   }
 
   /**
@@ -175,7 +206,10 @@ export class PasswordVO extends BaseVO<string> {
    */
   public async hash(saltRounds = 10): Promise<string> {
     if (!this.hasher) {
-      throw new BadRequestError("Hasher not provided. Cannot hash password.");
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Hasher not provided. Cannot hash password.",
+      });
     }
     return this.hasher.hash(this.value, saltRounds);
   }
@@ -185,7 +219,10 @@ export class PasswordVO extends BaseVO<string> {
    */
   public async verify(password: string, hash: string): Promise<boolean> {
     if (!this.hasher) {
-      throw new BadRequestError("Hasher not provided. Cannot verify password.");
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Hasher not provided. Cannot verify password.",
+      });
     }
     return this.hasher.compare(password, hash);
   }
@@ -195,9 +232,10 @@ export class PasswordVO extends BaseVO<string> {
    */
   public async matchesHash(hash: string): Promise<boolean> {
     if (!this.hasher) {
-      throw new BadRequestError(
-        "Hasher not provided. Cannot check hash validity.",
-      );
+      throw new BadRequestError({
+        fieldName: "password",
+        message: "Hasher not provided. Cannot compare password with hash.",
+      });
     }
     return this.hasher.compare(this.value, hash);
   }

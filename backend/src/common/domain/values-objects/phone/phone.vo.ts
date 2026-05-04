@@ -102,7 +102,10 @@ export class PhoneVO extends BaseVO<string> {
     options: PhoneValidationOptions = {},
   ): PhoneVO {
     if (phone == null || phone.trim() === "") {
-      throw new BadRequestError("Telefone é obrigatório.");
+      throw new BadRequestError({
+        fieldName: "phone",
+        message: "Phone number cannot be empty.",
+      });
     }
 
     const cleaned = PhoneVO.clean(phone);
@@ -155,34 +158,56 @@ export class PhoneVO extends BaseVO<string> {
 
   private static validate(cleaned: string, min: number, max: number): void {
     if (!/^\d+$/.test(cleaned)) {
-      throw new BadRequestError(
-        `Telefone contém caracteres inválidos: ${cleaned}`,
-      );
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: "Phone number must contain only digits.",
+      });
     }
 
     if (cleaned.length < min) {
-      throw new BadRequestError(`Telefone deve ter ao menos ${min} dígitos.`);
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: `Phone number must have at least ${min} digits.`,
+      });
     }
 
     if (cleaned.length > max) {
-      throw new BadRequestError(`Telefone deve ter no máximo ${max} dígitos.`);
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: `Phone number must have at most ${max} digits.`,
+      });
     }
 
     const ddd = cleaned.slice(0, 2);
     const number = cleaned.slice(2);
 
     if (!PhoneVO.VALID_DDDS.includes(ddd)) {
-      throw new BadRequestError(`DDD inválido: ${ddd}`);
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: `Invalid DDD: ${ddd}. Must be one of ${PhoneVO.VALID_DDDS.join(
+          ", ",
+        )}.`,
+      });
     }
 
     if (number.length === 9 && number[0] !== "9") {
-      throw new BadRequestError(`Celular inválido: deve começar com 9.`);
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: `Invalid mobile phone number: 9-digit numbers must start with 9.`,
+      });
     }
 
     if (number.length === 8 && !["2", "3", "4", "5"].includes(number[0]!)) {
-      throw new BadRequestError(
-        `Telefone fixo inválido: deve começar com 2–5.`,
-      );
+      throw new BadRequestError({
+        fieldName: "phone",
+        value: cleaned,
+        message: `Invalid landline phone number: 8-digit numbers must start with 2, 3, 4 or 5.`,
+      });
     }
   }
 

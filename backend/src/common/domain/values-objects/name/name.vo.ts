@@ -1,4 +1,4 @@
-import { BaseI18n } from "../../common/shared/base-I18n";
+import { BaseI18n } from "@/common/shared/utils/base-I18n";
 import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 
@@ -27,7 +27,10 @@ export class NameVO extends BaseVO<string> {
     i18n?: BaseI18n,
   ): NameVO {
     if (!name) {
-      throw new BadRequestError(NameVO.translate("errors.name.empty", i18n));
+      throw new BadRequestError({
+        fieldName: "name",
+        message: NameVO.translate("errors.name.empty", i18n),
+      });
     }
 
     const min = options.minLength ?? 2;
@@ -78,21 +81,37 @@ export class NameVO extends BaseVO<string> {
       i18n?.t(key, { args }) ?? NameVO.defaultMessages(key, args);
 
     if (name.length < min) {
-      throw new BadRequestError(t("errors.name.tooShort", { min }));
+      throw new BadRequestError({
+        fieldName: "name",
+        value: name,
+        message: t("errors.name.tooShort", { args: { min } }),
+      });
     }
 
     if (name.length > max) {
-      throw new BadRequestError(t("errors.name.tooLong", { max }));
+      throw new BadRequestError({
+        fieldName: "name",
+        value: name,
+        message: t("errors.name.tooLong", { args: { max } }),
+      });
     }
 
     const parts = name.split(" ");
     if (parts.length < 2) {
-      throw new BadRequestError(t("errors.name.surnameMissing"));
+      throw new BadRequestError({
+        fieldName: "name",
+        value: name,
+        message: t("errors.name.surnameMissing"),
+      });
     }
 
     const nameRegex = /^[\p{L}\s'-]+$/u;
     if (!nameRegex.test(name)) {
-      throw new BadRequestError(t("errors.name.invalidChars"));
+      throw new BadRequestError({
+        fieldName: "name",
+        value: name,
+        message: t("errors.name.invalidChars"),
+      });
     }
   }
 

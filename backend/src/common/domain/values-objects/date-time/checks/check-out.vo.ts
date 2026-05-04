@@ -1,4 +1,4 @@
-import { BadRequestError } from "@/core/domain/errors/controllers/BadRequestError";
+import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
 import { BaseChecks } from "./base-checks.vo";
 import { CheckInVO } from "./check-in.vo";
 
@@ -14,9 +14,11 @@ export class CheckOutVO extends BaseChecks {
     const instance = new CheckOutVO(input);
 
     if (checkIn && instance.isBefore(checkIn)) {
-      throw new BadRequestError(
-        "Check-out date cannot be earlier than check-in date.",
-      );
+      throw new BadRequestError({
+        fieldName: "checkOut",
+        value: input instanceof Date ? input.toISOString() : input,
+        message: "Data de check-out deve ser posterior à data de check-in.",
+      });
     }
 
     return instance;

@@ -1,4 +1,4 @@
-import { BaseI18n } from "../../common/shared/base-I18n";
+import { BaseI18n } from "@/common/shared/utils/base-I18n";
 import { BadRequestError } from "../../errors/controllers/bad-request.error";
 import { BaseVO } from "../base.vo";
 
@@ -16,9 +16,11 @@ export class EmailVO extends BaseVO<{ value: string; label?: string }> {
     const t = options?.i18n?.t.bind(options.i18n) ?? EmailVO.defaultMessages;
 
     if (!EmailVO.isValid(normalized)) {
-      throw new BadRequestError(
-        t("errors.email.invalid", { args: { email: value } }),
-      );
+      throw new BadRequestError({
+        fieldName: "email",
+        value,
+        message: t("errors.email.invalid", { args: { email: value } }),
+      });
     }
 
     // ✅ super() recebe o valor já normalizado — sem mutação depois
