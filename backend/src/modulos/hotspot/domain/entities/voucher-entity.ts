@@ -2,7 +2,7 @@ import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { UnprocessableEntityError } from "@/common/domain/errors/usecases/unprocessable-entity.error";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { VoucherStatus } from "@/shared/enums/voucher-status.enum";
+import { VoucherStatus } from "@/common/shared/enums/voucher-status.enum";
 
 export interface VoucherProps {
   organizationId: UUIDVO;
@@ -66,41 +66,41 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
     return !!this.props.usedAt;
   }
 
-  get isActive() {
-    return this.props.status === VoucherStatus.ACTIVE;
-  }
-
-  get isRevoked() {
-    return this.props.status === VoucherStatus.REVOKED;
-  }
-
-  activate() {
-    if (this.props.status !== VoucherStatus.ACTIVE) {
-      throw new UnprocessableEntityError(
-        "Voucher is not active and cannot be activated",
-      );
+  used() {
+    if (this.props.status !== VoucherStatus.USED) {
+      throw new UnprocessableEntityError({
+        fieldName: "status",
+        value: this.props.status,
+        message: "Voucher must be active to be used",
+      });
     }
 
     if (this.props.expiresAt && this.props.expiresAt < new Date()) {
-      throw new UnprocessableEntityError(
-        "Voucher is expired and cannot be activated",
-      );
+      throw new UnprocessableEntityError({
+        fieldName: "expiresAt",
+        value: this.props.expiresAt.toISOString(),
+        message: "Voucher has expired and cannot be used",
+      });
     }
 
-    this.props.status = VoucherStatus.ACTIVE;
+    this.props.status = VoucherStatus.USED;
     this.touch();
   }
 
-  used() {
-    if (this.props.status !== VoucherStatus.ACTIVE) {
-      throw new UnprocessableEntityError("Voucher must be active to be used");
+  unused() {
+    if (this.props.status !== VoucherStatus.UNUSED) {
+      throw new UnprocessableEntityError({
+        fieldName: "status",
+        value: this.props.status,
+        message: "Voucher must be used to be unused",
+      });
     }
 
     this.props.usedAt = new Date();
     this.touch();
   }
 
-  revoke() {
+  revoked() {
     if (this.props.status === VoucherStatus.REVOKED) return;
     this.props.status = VoucherStatus.REVOKED;
     this.touch();
@@ -109,6 +109,12 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
   expire() {
     if (this.props.status === VoucherStatus.EXPIRED) return;
     this.props.status = VoucherStatus.EXPIRED;
+    this.touch();
+  }
+
+  canceled() {
+    if (this.props.status === VoucherStatus.CANCELED) return;
+    this.props.status = VoucherStatus.CANCELED;
     this.touch();
   }
 

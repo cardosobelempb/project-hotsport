@@ -1,10 +1,15 @@
-import { Either, left, right } from "@/common/domain/errors/handle-errors";
 import { CodeError } from "@/common/domain/errors/usecases/code.error";
 import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
 import { env } from "@/common/infrastructure/env";
 
 import { UserMapper } from "@/modulos/identity/domain/mappers/user-mapper";
-import { UserPrismaRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/prisma-user.repository";
+
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
+import { PrismaUserRepository } from "@/modulos/identity/infrastructure/http/repositories/prisma/prisma-user.repository";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { AuthSessionResponseType } from "../../infrastructure/http/schemas/session-auth.schema";
 
@@ -31,7 +36,7 @@ const verifyToken = (
 };
 
 export class AuthSessionUseCase {
-  constructor(private readonly userPrismaRepository: UserPrismaRepository) {}
+  constructor(private readonly userPrismaRepository: PrismaUserRepository) {}
   async execute({
     accessToken,
   }: AuthSessionUseCaseInput): Promise<AuthSessionUseCaseResult> {
@@ -45,7 +50,7 @@ export class AuthSessionUseCase {
       );
     }
 
-    const decoded = verifyToken(accessToken, env.ACCESS_TOKEN_SECRET_KEY || "");
+    const decoded = verifyToken(accessToken, env.ACCESS_TOKEN_SECRET || "");
 
     if (
       !decoded ||

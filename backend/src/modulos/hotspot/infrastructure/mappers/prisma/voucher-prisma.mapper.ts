@@ -1,12 +1,10 @@
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { VoucherStatus } from "@/common/shared/enums/voucher-status.enum";
+import { VoucherEntity } from "@/modulos/hotspot/domain/entities/voucher-entity";
 import {
   Prisma,
   Voucher as PrismaVoucher,
-  VoucherStatus as PrismaVoucherStatus,
 } from "../../../../../../generated/prisma";
-
-import { VoucherStatus } from "@/modulos/voucher/domain/emuns/voucher-status.enum";
-import { VoucherEntity } from "@/modulos/voucher/domain/entities/voucher-entity";
 
 export class VoucherPrismaMapper {
   static toDomain(raw: PrismaVoucher): VoucherEntity {
@@ -18,9 +16,10 @@ export class VoucherPrismaMapper {
         expiresAt: raw.expiresAt,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
-        mikrotikId: UUIDVO.create(raw.mikrotikId),
-        organizationId: UUIDVO.create(raw.organizationId),
-        planId: UUIDVO.create(raw.planId),
+        deletedAt: raw.deletedAt,
+        mikrotikId: UUIDVO.create(raw.mikrotikId || ""),
+        organizationId: UUIDVO.create(raw.organizationId || ""),
+        planId: UUIDVO.create(raw.hotspotPlanId || ""),
       },
       UUIDVO.create(raw.id),
     );
@@ -37,9 +36,10 @@ export class VoucherPrismaMapper {
       expiresAt: entity.expiresAt ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
       mikrotikId: entity.mikrotikId.toString(),
       organizationId: entity.organizationId.toString(),
-      planId: entity.planId.toString(),
+      hotspotPlanId: entity.planId.toString(),
     };
   }
 
@@ -48,7 +48,7 @@ export class VoucherPrismaMapper {
   ): Prisma.VoucherUncheckedUpdateInput {
     return {
       code: entity.code,
-      status: entity.status as PrismaVoucherStatus,
+      status: entity.status as VoucherStatus,
       usedAt: entity.usedAt ?? null,
       expiresAt: entity.expiresAt ?? null,
       updatedAt: entity.updatedAt,

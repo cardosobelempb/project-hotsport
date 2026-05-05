@@ -1,79 +1,85 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { PaymentStatusDto } from "../../application/dto/payments/playment-status.dto";
+import { PaymentStatus } from "@/common/shared/enums/payment-status.enum";
 
 export interface PaymentProps {
-  id: UUIDVO;
-  planId: string;
-  email: string | null;
-  planName: string | null;
-  amountCents: number;
-  status: PaymentStatusDto | null;
-  mercadoPagoId: string | null;
-  macAddress: string | null;
-  cpf: string | null;
-  ipAddress: string | null;
+  status: PaymentStatus;
+  organizationId: UUIDVO;
+  subscriptionId: UUIDVO | null;
+  amount: number;
+  currency: string;
+  provider: string | null;
+  providerTransactionId: string | null;
+  description: string | null;
+  dueAt: Date | null;
+  paidAt: Date | null;
+  failedAt: Date | null;
+  refundedAt: Date | null;
   createdAt: Date;
-  expiresAt: Date | null;
-  updatedAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
 export class PaymentEntity extends BaseEntity<PaymentProps> {
-  /* =======================
-   * Getters
-   * ======================= */
-
-  get id(): UUIDVO {
-    return this.props.id;
-  }
-
-  get planId(): string {
-    return this.props.planId;
-  }
-
-  get amountCents(): number {
-    return this.props.amountCents;
-  }
-
-  get email(): string | null {
-    return this.props.email;
-  }
-
-  get planName(): string | null {
-    return this.props.planName;
-  }
-
-  get status(): string | null {
+  get status(): PaymentStatus {
     return this.props.status;
   }
 
-  get mercadoPagoId(): string | null {
-    return this.props.mercadoPagoId;
+  get organizationId(): UUIDVO {
+    return this.props.organizationId;
   }
 
-  get macAddress(): string | null {
-    return this.props.macAddress;
+  get subscriptionId(): UUIDVO | null {
+    return this.props.subscriptionId;
   }
 
-  get cpf(): string | null {
-    return this.props.cpf;
+  get amount(): number {
+    return this.props.amount;
   }
 
-  get ipAddress(): string | null {
-    return this.props.ipAddress;
+  get currency(): string {
+    return this.props.currency;
+  }
+
+  get provider(): string | null {
+    return this.props.provider;
+  }
+
+  get providerTransactionId(): string | null {
+    return this.props.providerTransactionId;
+  }
+
+  get description(): string | null {
+    return this.props.description;
+  }
+
+  get dueAt(): Date | null {
+    return this.props.dueAt;
+  }
+
+  get paidAt(): Date | null {
+    return this.props.paidAt;
+  }
+
+  get failedAt(): Date | null {
+    return this.props.failedAt;
+  }
+
+  get refundedAt(): Date | null {
+    return this.props.refundedAt;
   }
 
   get createdAt(): Date {
     return this.props.createdAt;
   }
 
-  get expiresAt(): Date | null {
-    return this.props.expiresAt;
+  get updatedAt(): Date | null {
+    return this.props.updatedAt;
   }
 
-  get updatedAt(): Date {
-    return this.props.updatedAt;
+  get deletedAt(): Date | null {
+    return this.props.deletedAt;
   }
 
   /* =======================
@@ -85,7 +91,7 @@ export class PaymentEntity extends BaseEntity<PaymentProps> {
       throw new Error("Preço não pode ser negativo");
     }
 
-    this.props.amountCents = amountCents;
+    this.props.amount = amountCents;
     this.touch();
   }
 
@@ -102,14 +108,15 @@ export class PaymentEntity extends BaseEntity<PaymentProps> {
    * ======================= */
 
   static create(
-    props: Optional<PaymentProps, "createdAt" | "updatedAt">,
+    props: Optional<PaymentProps, "createdAt" | "updatedAt" | "deletedAt">,
     id?: UUIDVO,
   ) {
     const payment = new PaymentEntity(
       {
         ...props,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: props.updatedAt ?? new Date(),
+        updatedAt: props.updatedAt ?? null,
+        deletedAt: props.deletedAt ?? null,
       },
       id,
     );

@@ -1,8 +1,12 @@
-import { Either, left, right } from "@/common/domain/errors/handle-errors";
 import { CodeError } from "@/common/domain/errors/usecases/code.error";
 import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
 import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
 
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
 import { UserRepository } from "@/modulos/identity/domain/repositories/user.repository";
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 import { AccountRepository } from "../../domain/repositories/AccountRepository";
@@ -51,20 +55,6 @@ export class AuthLoginUseCase {
           message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
         }),
       );
-
-    const isPasswordValid = await this.hashCompare.compare(
-      password,
-      account.passwordHash ?? "",
-    );
-
-    if (!isPasswordValid) {
-      return left(
-        new UnauthorizedError({
-          fieldName: "account",
-          message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
-        }),
-      );
-    }
 
     // const organization = await this.organizarionRepository.findById(
     //   user.id.toString(),

@@ -1,12 +1,13 @@
 // ============================================================
-// address.schema.ts
-// Schemas exclusivos da entidade Address.
+// voucher.schema.ts
+// Schemas exclusivos da entidade Voucher.
 // Importa dos shared — zero duplicação de erros/paginação.
 // ============================================================
 
 import { z } from "zod";
 
-import { AddressType } from "@/common/shared/enums/address-type.enum";
+import { EntityStatus } from "@/common/shared/enums/entity-status.enum";
+
 import { IsoDateTimeInput, UUIDString } from "@/common/shared/schemas/helpers";
 import {
   actionResponseSchema,
@@ -18,11 +19,11 @@ import {
 
 // ─── Params ───────────────────────────────────────────────────────────────────
 
-export const AddressParamsSchema = z.object({
-  addressId: UUIDString,
+export const VoucherParamsSchema = z.object({
+  voucherId: UUIDString,
 });
 
-export type AddressParams = z.infer<typeof AddressParamsSchema>;
+export type VoucherParams = z.infer<typeof VoucherParamsSchema>;
 
 // ─── Schema base da entidade ──────────────────────────────────────────────────
 //
@@ -32,30 +33,17 @@ export type AddressParams = z.infer<typeof AddressParamsSchema>;
 //     z.enum() só aceita tuplas de string literal ["A","B"],
 //     não enums compilados. Usar z.enum(EnumTS) quebra em runtime.
 
-export const AddressSchema = z
+export const VoucherSchema = z
   .object({
-    id: UUIDString.nullable(),
-    userId: UUIDString.nullable(),
-    tenantId: UUIDString.nullable(),
-    organizationId: UUIDString.nullable(),
-
-    addressType: z.enum(AddressType).default(AddressType.HOME),
-
-    street: z.string().max(255).nullable(),
-    addressNumber: z.string().max(255).nullable(),
-    complement: z.string().max(255).nullable(),
-    neighborhood: z.string().max(255).nullable(),
-    reference: z.string().max(255).nullable(),
-
-    cityId: UUIDString.nullable(),
-    stateId: UUIDString.nullable(),
-
-    zipCode: z.string().max(255).nullable(),
-    country: z.string().max(255).nullable(),
-
-    isPrimary: z.boolean().default(false),
-
-    createdAt: IsoDateTimeInput.nullable(),
+    id: UUIDString,
+    organizationId: UUIDString,
+    mikrotikId: UUIDString.nullable(),
+    hotspotPlanId: UUIDString.nullable(),
+    code: z.string().max(50),
+    status: z.enum(EntityStatus).default(EntityStatus.ACTIVE),
+    usedAt: IsoDateTimeInput.nullable(),
+    expiresAt: IsoDateTimeInput.nullable(),
+    createdAt: IsoDateTimeInput,
     updatedAt: IsoDateTimeInput.nullable(),
     deletedAt: IsoDateTimeInput.nullable(),
   })
@@ -64,59 +52,50 @@ export const AddressSchema = z
 // ─── Body schemas (entrada) ───────────────────────────────────────────────────
 
 // Payload de criação: sem campos gerados pelo servidor
-export const CreateAddressSchema = AddressSchema.omit({
+export const CreateVoucherSchema = VoucherSchema.omit({
   id: true,
-  userId: true,
-  tenantId: true,
-  organizationId: true,
-  addressType: true, // Deixa o cliente usar o enum, mas o servidor tem um default
-  isPrimary: true, // O cliente não decide se é primário — o servidor define isso
-  country: true, // O país é opcional — o cliente pode omitir, mas não pode enviar null ou string vazia
-  cityId: true,
-  stateId: true,
+  status: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
 });
 
 // Payload de atualização: todos os campos opcionais
-// Não precisa de .strict() extra — já herdado do AddressSchema base
-export const UpdateAddressSchema = AddressSchema.partial();
+// Não precisa de .strict() extra — já herdado do VoucherSchema base
+export const UpdateVoucherSchema = VoucherSchema.partial();
 
 // ─── Response schemas (saída) ─────────────────────────────────────────────────
 
 // Resposta completa: expõe tudo exceto campos de soft-delete
-export const AddressResponseSchema = AddressSchema.omit({
+export const VoucherResponseSchema = VoucherSchema.omit({
   deletedAt: true,
   updatedAt: true,
 });
 
 // Resumo para listagem: versão compacta — evita over-fetching
-export const AddressSummarySchema = AddressSchema.pick({
+export const VoucherSummarySchema = VoucherSchema.pick({
   id: true,
-  street: true,
-  neighborhood: true,
-  complement: true,
-  addressType: true,
-  addressNumber: true,
+  code: true,
+  status: true,
+  expiresAt: true,
 });
 
 // ─── Response wrappers via factory ───────────────────────────────────────────
 //
-// Cada wrapper envelopa AddressResponseSchema (entidade completa),
+// Cada wrapper envelopa VoucherResponseSchema (entidade completa),
 // não o schema de input — a resposta de create/update devolve a entidade
 // persistida, não o payload que o cliente enviou.
 
-export const AddressCreateResponseSchema = createResponseSchema(
-  AddressResponseSchema,
+export const VoucherCreateResponseSchema = createResponseSchema(
+  VoucherResponseSchema,
 );
-export const AddressFindByIdResponseSchema = findResponseSchema(
-  AddressResponseSchema,
+export const VoucherFindByIdResponseSchema = findResponseSchema(
+  VoucherResponseSchema,
 );
-export const AddressUpdateResponseSchema = updateResponseSchema(
-  AddressResponseSchema,
+export const VoucherUpdateResponseSchema = updateResponseSchema(
+  VoucherResponseSchema,
 );
-export const AddressActivateResponseSchema = actionResponseSchema();
-export const AddressDeactivateResponseSchema = actionResponseSchema();
-export const AddressPageResponseSchema =
-  pageResponseSchema(AddressSummarySchema);
+export const VoucherActivateResponseSchema = actionResponseSchema();
+export const VoucherDeactivateResponseSchema = actionResponseSchema();
+export const VoucherPageResponseSchema =
+  pageResponseSchema(VoucherSummarySchema);

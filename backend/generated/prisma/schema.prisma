@@ -18,6 +18,9 @@ datasource db {
   provider = "postgresql"
 }
 
+// ============================================================
+// MODULE: IDENTITY_ACCESS
+// ============================================================
 // -----------------------------------------------------------------------------
 // Autenticação no padrão NextAuth
 // -----------------------------------------------------------------------------
@@ -37,14 +40,15 @@ model User {
   updatedAt DateTime   @updatedAt @map("updated_at")
   deletedAt DateTime?  @map("deleted_at")
 
-  accounts     AuthAccount[]
-  sessions     Session[]
   profile      UserProfile?
+  accounts     Account[]
+  sessions     Session[]
   memberships  Membership[]
   addresses    Address[]
   lgpdConsents LgpdConsent[]
   otps         Otp[]
   tokens       Token[]
+  leads        Lead[]
 
   @@index([email])
   @@index([status])
@@ -52,25 +56,30 @@ model User {
   @@map("users")
 }
 
-model AuthAccount {
-  id                String  @id @default(uuid()) @db.Uuid
-  userId            String  @map("user_id") @db.Uuid
-  type              String  @db.VarChar(50)
-  provider          String  @db.VarChar(100)
-  providerAccountId String  @map("provider_account_id") @db.VarChar(255)
-  refreshToken      String? @map("refresh_token") @db.Text
-  accessToken       String? @map("access_token") @db.Text
-  expiresAt         Int?    @map("expires_at")
-  tokenType         String? @map("token_type") @db.VarChar(50)
-  scope             String? @db.Text
-  idToken           String? @map("id_token") @db.Text
-  sessionState      String? @map("session_state") @db.Text
+model Account {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String       @map("user_id") @db.Uuid
+  provider          String       @db.VarChar(100)
+  providerType      ProviderType @default(CREDENTIALS) @map("provider_type")
+  providerAccountId String       @map("provider_account_id") @db.VarChar(255)
+
+  refreshToken String?   @map("refresh_token") @db.Text
+  accessToken  String?   @map("access_token") @db.Text
+  expiresAt    Int?      @map("expires_at")
+  tokenType    TokenType @default(ACCESS) @map("token_type")
+  scope        String?   @db.Text
+  idToken      String?   @map("id_token") @db.Text
+  sessionState String?   @map("session_state") @db.Text
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
-  @@map("auth_accounts")
+  @@map("accounts")
 }
 
 model Session {
@@ -95,20 +104,25 @@ model VerificationToken {
 }
 
 model UserProfile {
-  id             String        @id @default(uuid()) @db.Uuid
-  userId         String        @unique @map("user_id") @db.Uuid
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
   firstName      String?       @map("first_name") @db.VarChar(100)
   lastName       String?       @map("last_name") @db.VarChar(100)
-  birthDate      DateTime?     @map("birth_date") @db.Date
+  displayName    String?       @map("display_name") @db.VarChar(150)
   documentType   DocumentType? @map("document_type")
   documentNumber String?       @unique @map("document_number") @db.VarChar(30)
   phone          String?       @db.VarChar(20)
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  birthDate      DateTime?     @map("birth_date") @db.Date
+  avatarUrl      String?       @map("avatar_url") @db.VarChar(500)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([documentNumber])
+  @@index([phone])
   @@map("user_profiles")
 }
 
@@ -157,9 +171,34 @@ model Otp {
 // -----------------------------------------------------------------------------
 // SaaS / Multi-tenant
 // -----------------------------------------------------------------------------
+model Tenant {
+  id             String        @id @default(uuid()) @db.Uuid
+  name           String        @db.VarChar(150)
+  slug           String        @unique @db.VarChar(150)
+  documentType   DocumentType? @map("document_type")
+  documentNumber String?       @unique @map("document_number") @db.VarChar(30)
+  contactEmail   String?       @map("contact_email") @db.VarChar(255)
+  phone          String?       @db.VarChar(20)
+  status         TenantStatus  @default(TRIALING)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  memberships   Membership[]
+  organizations Organization[]
+  lgpdConsents  LgpdConsent[]
+  addresses     Address[]
+  leads         Lead[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("tenants")
+}
 
 model Organization {
   id             String             @id @default(uuid()) @db.Uuid
+  tenantId       String?            @db.Uuid
   name           String             @db.VarChar(150)
   slug           String             @unique @db.VarChar(150)
   documentType   DocumentType?      @map("document_type")
@@ -171,6 +210,8 @@ model Organization {
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")
   deletedAt      DateTime?          @map("deleted_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
 
   memberships         Membership[]
   addresses           Address[]
@@ -188,10 +229,10 @@ model Organization {
   portals             Portal[]
   campaigns           Campaign[]
   campaignItems       CampaignItem[]
-  leads               Lead[]
   lgpdConsents        LgpdConsent[]
   connectionLogs      ConnectionLog[]
   whatsappLogs        WhatsappLog[]
+  leads               Lead[]
 
   @@index([status])
   @@index([deletedAt])
@@ -199,62 +240,76 @@ model Organization {
 }
 
 model Membership {
-  id             String       @id @default(uuid()) @db.Uuid
-  organizationId String       @map("organization_id") @db.Uuid
-  userId         String       @map("user_id") @db.Uuid
-  role           MemberRole   @default(MEMBER)
-  status         MemberStatus @default(ACTIVE)
-  invitedEmail   String?      @map("invited_email") @db.VarChar(255)
-  invitedById    String?      @map("invited_by_id") @db.Uuid
-  joinedAt       DateTime?    @map("joined_at")
-  expiresAt      DateTime?    @map("expires_at")
-  removedAt      DateTime?    @map("removed_at")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
-  deletedAt      DateTime?    @map("deleted_at")
+  id       String @id @default(uuid()) @db.Uuid
+  userId   String @map("user_id") @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   MemberRole   @default(MEMBER)
+  status MemberStatus @default(ACTIVE)
 
-  @@unique([organizationId, userId])
-  @@index([organizationId])
+  joinedAt     DateTime? @map("joined_at")
+  invitedEmail String?   @map("invited_email") @db.VarChar(255)
+  invitedById  String?   @map("invited_by_id") @db.Uuid
+  expiresAt    DateTime? @map("expires_at")
+  removedAt    DateTime? @map("removed_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?       @db.Uuid
+
+  @@unique([userId, tenantId])
   @@index([userId])
-  @@index([organizationId, role])
-  @@index([organizationId, status])
+  @@index([tenantId])
+  @@index([tenantId, role])
+  @@index([tenantId, status])
   @@index([invitedEmail])
   @@index([deletedAt])
   @@map("memberships")
 }
 
 model Address {
-  id             String      @id @default(uuid()) @db.Uuid
-  userId         String?     @map("user_id") @db.Uuid
-  organizationId String?     @map("organization_id") @db.Uuid
-  type           AddressType @default(HOME)
-  isPrimary      Boolean     @default(false) @map("is_primary")
-  street         String?     @db.VarChar(255)
-  number         String?     @db.VarChar(20)
-  complement     String?     @db.VarChar(100)
-  neighborhood   String?     @db.VarChar(100)
-  stateId        String?     @map("state_id") @db.Uuid
-  cityId         String?     @map("city_id") @db.Uuid
-  country        String      @default("BR") @db.Char(2)
-  zipCode        String?     @map("zip_code") @db.VarChar(10)
-  reference      String?     @db.VarChar(255)
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
-  deletedAt      DateTime?   @map("deleted_at")
+  id             String  @id @default(uuid()) @db.Uuid
+  userId         String? @map("user_id") @db.Uuid
+  tenantId       String? @map("tenant_id") @db.Uuid
+  organizationId String? @map("organization_id") @db.Uuid
+
+  AddressType AddressType? @default(HOME) @map("address_type")
+
+  street        String? @map("street") @db.VarChar(255)
+  addressNumber String? @map("address_number") @db.VarChar(255)
+  complement    String? @map("complement") @db.VarChar(255)
+  neighborhood  String? @map("neighborhood") @db.VarChar(255)
+  reference     String? @map("reference") @db.VarChar(255)
+
+  cityId  String? @map("city_id") @db.Uuid
+  stateId String? @map("state_id") @db.Uuid
+
+  zipCode String? @map("zip_code") @db.VarChar(255)
+  country String? @map("country") @db.VarChar(255)
+
+  isPrimary Boolean @default(false) @map("is_primary")
+
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant       Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  city         City?         @relation(fields: [cityId], references: [id], onDelete: SetNull)
-  state        State?        @relation(fields: [stateId], references: [id], onDelete: SetNull)
+
+  city  City?  @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  state State? @relation(fields: [stateId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([tenantId])
   @@index([organizationId])
   @@index([stateId])
   @@index([cityId])
-  @@index([deletedAt])
   @@map("addresses")
 }
 
@@ -393,7 +448,8 @@ model HotspotPlan {
   updatedAt      DateTime        @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  vouchers     Voucher[]
+
+  vouchers Voucher[]
 
   @@index([organizationId])
   @@index([organizationId, isActive])
@@ -425,23 +481,23 @@ model HotspotUser {
 
 model Voucher {
   id             String        @id @default(uuid()) @db.Uuid
-  organizationId String        @map("organization_id") @db.Uuid
+  organizationId String?       @map("organization_id") @db.Uuid
   mikrotikId     String?       @map("mikrotik_id") @db.Uuid
-  planId         String        @map("plan_id") @db.Uuid
+  hotspotPlanId  String?       @map("plan_id") @db.Uuid
   code           String        @unique @db.VarChar(50)
   status         VoucherStatus @default(UNUSED)
   usedAt         DateTime?     @map("used_at")
   expiresAt      DateTime?     @map("expires_at")
-  deletedAt      DateTime?     @map("deleted_at")
   createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  updatedAt      DateTime?     @updatedAt @map("updated_at")
+  deletedAt      DateTime?     @map("deleted_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  mikrotik     Mikrotik?    @relation(fields: [mikrotikId], references: [id], onDelete: SetNull)
-  plan         HotspotPlan  @relation(fields: [planId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  mikrotik     Mikrotik?     @relation(fields: [mikrotikId], references: [id], onDelete: SetNull)
+  hotspotPlan  HotspotPlan?  @relation(fields: [hotspotPlanId], references: [id])
 
   @@index([organizationId, status])
-  @@index([planId])
+  @@index([hotspotPlanId])
   @@index([expiresAt])
   @@index([deletedAt])
   @@map("vouchers")
@@ -526,9 +582,9 @@ model Payment {
   paidAt                DateTime?     @map("paid_at")
   failedAt              DateTime?     @map("failed_at")
   refundedAt            DateTime?     @map("refunded_at")
-  deletedAt             DateTime?     @map("deleted_at")
   createdAt             DateTime      @default(now()) @map("created_at")
-  updatedAt             DateTime      @updatedAt @map("updated_at")
+  updatedAt             DateTime?     @updatedAt @map("updated_at")
+  deletedAt             DateTime?     @map("deleted_at")
 
   organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
@@ -636,8 +692,11 @@ model CampaignItem {
 }
 
 model Lead {
-  id             String     @id @default(uuid()) @db.Uuid
-  organizationId String     @map("organization_id") @db.Uuid
+  id             String  @id @default(uuid()) @db.Uuid
+  userId         String? @map("user_id") @db.Uuid
+  organizationId String? @map("organization_id") @db.Uuid
+  tenantId       String? @map("tenant_id") @db.Uuid
+
   name           String?    @db.VarChar(255)
   email          String?    @db.VarChar(255)
   phone          String?    @db.VarChar(50)
@@ -652,9 +711,11 @@ model Lead {
   createdAt      DateTime   @default(now()) @map("created_at")
   updatedAt      DateTime   @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tenant       Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId])
+  @@index([tenantId])
   @@index([email])
   @@index([phone])
   @@map("leads")
@@ -665,28 +726,33 @@ model Lead {
 // -----------------------------------------------------------------------------
 
 model LgpdConsent {
-  id                 String        @id @default(uuid()) @db.Uuid
-  userId             String        @map("user_id") @db.Uuid
-  organizationId     String        @map("organization_id") @db.Uuid
-  consentTerms       Boolean       @map("consent_terms")
-  consentMarketing   Boolean       @map("consent_marketing")
-  consentDataSharing Boolean       @map("consent_data_sharing")
-  consentAnalytics   Boolean       @map("consent_analytics")
-  ipAddress          String        @map("ip_address") @db.VarChar(45)
-  macAddress         String?       @map("mac_address") @db.VarChar(20)
-  userAgent          String        @map("user_agent") @db.VarChar(500)
-  consentVersion     String        @map("consent_version") @db.VarChar(10)
-  status             ConsentStatus @default(ACTIVE)
-  withdrawnAt        DateTime?     @map("withdrawn_at")
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @updatedAt @map("updated_at")
+  id       String @id @default(uuid()) @db.Uuid
+  userId   String @map("user_id") @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  consentTerms       Boolean @map("consent_terms")
+  consentMarketing   Boolean @map("consent_marketing")
+  consentDataSharing Boolean @map("consent_data_sharing")
+  consentAnalytics   Boolean @map("consent_analytics")
 
-  @@unique([userId, organizationId, consentVersion])
+  ipAddress      String        @map("ip_address") @db.VarChar(45)
+  macAddress     String?       @map("mac_address") @db.VarChar(20)
+  userAgent      String        @map("user_agent") @db.VarChar(500)
+  consentVersion String        @map("consent_version") @db.VarChar(10)
+  status         ConsentStatus @default(ACTIVE)
+  withdrawnAt    DateTime?     @map("withdrawn_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?       @db.Uuid
+
+  @@unique([userId, tenantId, consentVersion])
   @@index([userId])
-  @@index([organizationId])
+  @@index([tenantId])
   @@index([status])
   @@map("lgpd_consents")
 }
@@ -838,164 +904,182 @@ model SystemBackup {
 // -----------------------------------------------------------------------------
 
 enum UserStatus {
-  ACTIVE   @map("active")
-  INACTIVE @map("inactive")
-  BLOCKED  @map("blocked")
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }
 
 enum MemberRole {
-  OWNER   @map("owner")
-  ADMIN   @map("admin")
-  MANAGER @map("manager")
-  SUPPORT @map("support")
-  FINANCE @map("finance")
-  MEMBER  @map("member")
+  OWNER
+  ADMIN
+  MANAGER
+  SUPPORT
+  FINANCE
+  MEMBER
 }
 
 enum MemberStatus {
-  ACTIVE    @map("active")
-  INVITED   @map("invited")
-  SUSPENDED @map("suspended")
-  REMOVED   @map("removed")
+  ACTIVE
+  INVITED
+  SUSPENDED
+  REMOVED
 }
 
 enum OrganizationStatus {
-  ACTIVE   @map("active")
-  INACTIVE @map("inactive")
-  BLOCKED  @map("blocked")
-  DELETED  @map("deleted")
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
 }
 
 enum TokenType {
-  REFRESH        @map("refresh")
-  ACCESS         @map("access")
-  RESET_PASSWORD @map("reset_password")
-  API_KEY        @map("api_key")
+  REFRESH
+  ACCESS
+  RESET_PASSWORD
+  API_KEY
+}
+
+enum ProviderType {
+  GOOGLE
+  FACEBOOK
+  APPLE
+  CREDENTIALS
+  OTHER
 }
 
 enum AddressType {
-  HOME         @map("home")
-  WORK         @map("work")
-  BILLING      @map("billing")
-  ORGANIZATION @map("organization")
-  OTHER        @map("other")
+  HOME
+  WORK
+  BILLING
+  ORGANIZATION
+  OTHER
 }
 
 enum DocumentType {
-  CPF   @map("cpf")
-  CNPJ  @map("cnpj")
-  RG    @map("rg")
-  OTHER @map("other")
+  CPF
+  CNPJ
+  RG
+  OTHER
 }
 
 enum Environment {
-  SANDBOX    @map("sandbox")
-  PRODUCTION @map("production")
+  SANDBOX
+  PRODUCTION
 }
 
 enum MikrotikStatus {
-  ONLINE  @map("online")
-  OFFLINE @map("offline")
-  ERROR   @map("error")
+  ONLINE
+  OFFLINE
+  ERROR
 }
 
 enum HotspotPlanType {
-  TIME      @map("time")
-  DATA      @map("data")
-  UNLIMITED @map("unlimited")
+  TIME
+  DATA
+  UNLIMITED
 }
 
 enum HotspotUserStatus {
-  ACTIVE  @map("active")
-  EXPIRED @map("expired")
-  BLOCKED @map("blocked")
-  PENDING @map("pending")
+  ACTIVE
+  EXPIRED
+  BLOCKED
+  PENDING
 }
 
 enum VoucherStatus {
-  UNUSED  @map("unused")
-  ACTIVE  @map("active")
-  EXPIRED @map("expired")
-  REVOKED @map("revoked")
+  USED
+  UNUSED
+  EXPIRED
+  REVOKED
+  CANCELED
 }
 
 enum ConsentStatus {
-  ACTIVE    @map("active")
-  REVOKED   @map("revoked")
-  WITHDRAWN @map("withdrawn")
+  ACTIVE
+  REVOKED
+  WITHDRAWN
 }
 
 enum PlanStatus {
-  ACTIVE   @map("active")
-  INACTIVE @map("inactive")
-  ARCHIVED @map("archived")
+  ACTIVE
+  INACTIVE
+  ARCHIVED
 }
 
 enum SubscriptionStatus {
-  TRIALING  @map("trialing")
-  ACTIVE    @map("active")
-  PAST_DUE  @map("past_due")
-  SUSPENDED @map("suspended")
-  CANCELED  @map("canceled")
-  EXPIRED   @map("expired")
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+  EXPIRED
 }
 
 enum BillingCycle {
-  MONTHLY    @map("mensal")
-  QUARTERLY  @map("trimestral")
-  SEMIANNUAL @map("semestral")
-  YEARLY     @map("anual")
+  MONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  YEARLY
 }
 
 enum PaymentStatus {
-  PENDING  @map("pendente")
-  PAID     @map("pago")
-  FAILED   @map("falhou")
-  CANCELED @map("cancelado")
-  REFUNDED @map("reembolsado")
+  PENDING
+  PAID
+  FAILED
+  APPROVED
+  REJECTED
+  CANCELED
+  REFUNDED
 }
 
 enum CampaignItemType {
-  IMAGE @map("imagem")
-  VIDEO @map("video")
+  IMAGE
+  VIDEO
 }
 
 enum OrganizationConfigType {
-  MERCADOPAGO @map("mercadopago")
-  EFI         @map("efi")
-  WHATSAPP    @map("whatsapp")
-  PORTAL      @map("portal")
-  HOTSPOT     @map("hotspot")
+  MERCADOPAGO
+  EFI
+  WHATSAPP
+  PORTAL
+  HOTSPOT
 }
 
 enum LeadStatus {
-  NEW       @map("novo")
-  CONTACTED @map("contactado")
-  CONVERTED @map("convertido")
-  DISCARDED @map("descartado")
+  NEW
+  CONTACTED
+  CONVERTED
+  DISCARDED
 }
 
 enum UpdateFileAction {
-  CREATE @map("create")
-  UPDATE @map("update")
-  DELETE @map("delete")
+  CREATE
+  UPDATE
+  DELETE
 }
 
 enum UpdateApplyLogStatus {
-  INFO    @map("info")
-  OK      @map("ok")
-  ERROR   @map("error")
-  SKIPPED @map("skipped")
+  INFO
+  OK
+  ERROR
+  SKIPPED
 }
 
 enum SystemBackupType {
-  PRE_UPDATE @map("pre_update")
-  MANUAL     @map("manual")
+  PRE_UPDATE
+  MANUAL
 }
 
 enum WhatsappLogStatus {
-  INFO    @map("info")
-  OK      @map("ok")
-  ERROR   @map("error")
-  SKIPPED @map("skipped")
+  INFO
+  OK
+  ERROR
+  SKIPPED
+}
+
+enum TenantStatus {
+  TRIALING
+  ACTIVE
+  SUSPENDED
+  CANCELED
 }

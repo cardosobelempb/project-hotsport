@@ -1,9 +1,13 @@
 import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
 
-import { Either, left, right } from "@/common/domain/errors/handle-errors";
 import { CodeError } from "@/common/domain/errors/usecases/code.error";
 import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
 
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
 import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
 import { AccountEntity } from "@/modulos/identity/domain/entities/account.entity";
 import { UserEntity } from "@/modulos/identity/domain/entities/user.entity";
@@ -52,20 +56,6 @@ export class AuthUserUseCase {
           message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
         }),
       );
-
-    const isPasswordValid = await this.hashCompare.compare(
-      password,
-      auth.passwordHash || "",
-    );
-
-    if (!isPasswordValid) {
-      return left(
-        new UnauthorizedError({
-          fieldName: "password",
-          message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
-        }),
-      );
-    }
 
     if (auth.userId.equals(user.id)) {
       return left(

@@ -1,4 +1,4 @@
-import { EmailString } from "@/shared/schemas/helpers";
+import { EmailString } from "@/common/shared/schemas/helpers";
 import z from "zod";
 
 export const AuthForgotPasswordSchema = z.object({

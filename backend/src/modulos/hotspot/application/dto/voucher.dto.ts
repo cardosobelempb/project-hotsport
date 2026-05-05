@@ -1,56 +1,41 @@
-interface VoucherDto {
-  organizationId: string;
-  planId: string;
-  code: string;
-  status: string;
-  mikrotikId: string;
-  usedAt: string | null;
-  expiresAt: string | null;
-  createdAt: string;
-  updatedAt: string | null;
-  deletedAt: string | null;
-}
+// ─── Tipos inferidos ──────────────────────────────────────────────────────────
+//
+// Nunca escreva tipos manualmente — inferidos diretamente dos schemas.
+// Se o schema mudar, o tipo muda junto automaticamente.
 
-export interface VoucherRawDto extends Omit<
-  VoucherDto,
-  "createdAt" | "updatedAt" | "status" | "usedAt" | "expiresAt" | "deletedAt"
-> {
-  id: string;
-  organizationId: string;
-  planId: string;
-  code: string;
-  mikrotikId: string;
-}
+import z from "zod";
+import {
+  CreateVoucherSchema,
+  UpdateVoucherSchema,
+  VoucherActivateResponseSchema,
+  VoucherCreateResponseSchema,
+  VoucherDeactivateResponseSchema,
+  VoucherFindByIdResponseSchema,
+  VoucherPageResponseSchema,
+  VoucherResponseSchema,
+  VoucherSchema,
+  VoucherSummarySchema,
+  VoucherUpdateResponseSchema,
+} from "../schemas/voucher.shema";
 
-export interface VoucherInputDto extends Omit<
-  VoucherDto,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "status"
-  | "usedAt"
-  | "expiresAt"
-  | "deletedAt"
-> {
-  organizationId: string;
-  planId: string;
-  code: string;
-  mikrotikId: string;
-}
-
-export interface VoucherOutputDto extends Omit<
-  VoucherDto,
-  "updatedAt" | "deletedAt"
-> {
-  id: string;
-  organizationId: string;
-  planId: string;
-  code: string;
-  status: string;
-  mikrotikId: string;
-  usedAt: string | null;
-  expiresAt: string | null;
-  createdAt: string;
-}
-
-export interface VoucherOptionalDto extends Partial<VoucherDto> {}
+export type VoucherDto = z.infer<typeof VoucherSchema>;
+export type CreateVoucherDto = z.infer<typeof CreateVoucherSchema>;
+export type UpdateVoucherDto = z.infer<typeof UpdateVoucherSchema>;
+export type VoucherSummaryDto = z.infer<typeof VoucherSummarySchema>;
+export type VoucherResponseDto = z.infer<typeof VoucherResponseSchema>;
+export type VoucherCreateResponseDto = z.infer<
+  typeof VoucherCreateResponseSchema
+>;
+export type VoucherFindByIdResponseDto = z.infer<
+  typeof VoucherFindByIdResponseSchema
+>;
+export type VoucherUpdateResponseDto = z.infer<
+  typeof VoucherUpdateResponseSchema
+>;
+export type VoucherActivateResponseDto = z.infer<
+  typeof VoucherActivateResponseSchema
+>;
+export type VoucherDeactivateResponseDto = z.infer<
+  typeof VoucherDeactivateResponseSchema
+>;
+export type VoucherPageResponseDto = z.infer<typeof VoucherPageResponseSchema>;

@@ -1,10 +1,12 @@
-import { ErrorCode, IServiceError, StandardError } from "@/common";
+import { BaseUseCaseError } from "@/common/application/errors/base-usecase.error";
+import { StandardError } from "@/common/domain/errors/standard.errror";
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
 
-export class WhatsappError extends StandardError implements IServiceError {
+export class WhatsappError extends StandardError implements BaseUseCaseError {
   constructor(path: string) {
     super({
       error: "WhatsappError",
-      message: ErrorCode.WHATSAPP_ERROR,
+      message: CodeError.CONFLICT,
       statusCode: 409,
       path,
     });

@@ -1,17 +1,17 @@
 import { StandardError } from "../standard.errror";
 import { BaseUseCaseError } from "./base-usecase.error.ts";
-import { CodeError } from "./code.error";
 
 export class UnprocessableEntityError
   extends StandardError
   implements BaseUseCaseError
 {
-  constructor(path: string) {
+  constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
       error: "UnprocessableEntityError",
-      message: CodeError.UNPROCESSABLE_ENTITY,
       statusCode: 422,
-      path,
+      message:
+        params.message ?? `${params.fieldName} "${params.value}" já existe`,
+      fieldName: params.fieldName,
     });
   }
 }

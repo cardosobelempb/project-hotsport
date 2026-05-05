@@ -1,5 +1,4 @@
-import { RepositorySearchable } from "@/common";
+import { PageRepository } from "@/common/domain/repositories/page-repository";
+import { PaymentEntity } from "../entities/payment.entity";
 
-import { PaymentEntity } from "../../../domain/entities/payment.entity";
-
-export abstract class PaymentRepository extends RepositorySearchable<PaymentEntity> {}
+export abstract class PaymentRepository extends PageRepository<PaymentEntity> {}

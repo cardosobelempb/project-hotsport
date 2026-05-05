@@ -5,7 +5,7 @@ import { z } from "zod";
 import { ErrorSchema } from "@/schemas/error";
 
 import { GetPayments } from "../../../../application/usecases/payments";
-import { PaymentListSchema } from "../schemas/payment.schema";
+import { PaymentListSchema } from "../../schemas/payment.schema";
 
 const GetPaymentsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional(),

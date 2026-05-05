@@ -3,10 +3,10 @@ import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
 import { MemberDto } from "@/modulos/organization/application/schemas/member.schema";
 import { MemberEntity } from "@/modulos/organization/domain/entities/member.entity";
-import { MemberInvitationStatus } from "@/shared/enums/member-invitation-status.enum";
-import { MemberRole } from "@/shared/enums/member-role.enum";
-import { MemberStatus } from "@/shared/enums/member-status.enum";
-import { Member as PrismaMember } from "../../../../../../generated/prisma";
+
+import { Membership as PrismaMember } from "../../../../../../generated/prisma";
+import { MemberInvitationStatus } from "@/common/shared/enums/member-invitation-status.enum";
+import { MemberStatus } from "@/common/shared/enums/member-status.enum";
 
 export class PrismaMemberMapper {
   static toDomain(raw: PrismaMember): MemberEntity {
@@ -14,8 +14,8 @@ export class PrismaMemberMapper {
       {
         organizationId: UUIDVO.create(raw.organizationId),
         userId: UUIDVO.create(raw.userId),
-        email: EmailVO.create(raw.email),
-        invitationStatus: raw.invitationStatus as MemberInvitationStatus,
+
+        invitationStatus: raw. as MemberInvitationStatus,
         invitedBy: UUIDVO.create(raw.invitedBy || ""), // UUID nulo para convidados sem remetente
         role: raw.role as MemberRole,
         status: raw.status as MemberStatus,

@@ -1,26 +1,21 @@
-import { prisma } from "@/shared/lib/db";
-
-import {
-  SearchInput,
-  SearchOutput,
-} from "@/common/domain/repositories/search.repository";
+import { SearchInput } from "@/common/domain/repositories/search.repository";
+import { Page } from "@/common/domain/repositories/types/pagination.types";
 import { UserEntity } from "@/modulos/identity/domain/entities/user.entity";
 import { UserRepository } from "@/modulos/identity/domain/repositories/user.repository";
-import { Prisma } from "../../../../../../../generated/prisma";
+import { Prisma, PrismaClient } from "../../../../../../../generated/prisma";
 import { UserPrismaMapper } from "../../../mappers/user-prisma.mapper";
 
 export class PrismaUserRepository implements UserRepository {
-  async search(params: SearchInput): Promise<SearchOutput<UserEntity>> {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async page(params: SearchInput): Promise<Page<UserEntity>> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 15;
     const filter = params.filter?.trim() ?? "";
     const sortDirection = params.sortDirection ?? "desc";
     const allowedSortBy = new Set<keyof Prisma.UserOrderByWithRelationInput>([
-      "firstName",
-      "lastName",
-      "cpf",
-      "phoneNumber",
-      "status",
+      "name",
+      "email",
       "createdAt",
       "updatedAt",
     ]);
@@ -35,17 +30,15 @@ export class PrismaUserRepository implements UserRepository {
     const where: Prisma.UserWhereInput = filter
       ? {
           OR: [
-            { firstName: { contains: filter, mode: "insensitive" } },
-            { lastName: { contains: filter, mode: "insensitive" } },
-            { cpf: { contains: filter, mode: "insensitive" } },
-            { phoneNumber: { contains: filter, mode: "insensitive" } },
+            { name: { contains: filter, mode: "insensitive" } },
+            { email: { contains: filter, mode: "insensitive" } },
           ],
         }
       : {};
 
-    const [total, users] = await prisma.$transaction([
-      prisma.user.count({ where }),
-      prisma.user.findMany({
+    const [total, users] = await this.prisma.$transaction([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
         where,
         orderBy: { [sortBy]: sortDirection },
         skip: (page - 1) * perPage,
@@ -54,49 +47,56 @@ export class PrismaUserRepository implements UserRepository {
     ]);
 
     return {
-      items: users.map(UserPrismaMapper.toDomain),
-      total,
+      content: users.map(UserPrismaMapper.toDomain),
+      pageable: {
+        offset: (page - 1) * perPage,
+        pageNumber: page,
+        pageSize: perPage,
+        sort: {
+          sorted: !!params.sortBy,
+          unsorted: !params.sortBy,
+          empty: !params.sortBy,
+        },
+
+        paged: true,
+        unpaged: false,
+      },
       totalPages: Math.ceil(total / perPage),
-      currentPage: page,
-      perPage,
-      sortBy,
-      sortDirection,
-      filter,
+      totalElements: total,
+      last: page * perPage >= total,
+      size: perPage,
+      number: page,
+      sort: {
+        sorted: !!params.sortBy,
+        unsorted: !params.sortBy,
+        empty: !params.sortBy,
+      },
+      numberOfElements: users.length,
+      first: page === 1,
+      empty: users.length === 0,
     };
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) return null;
     return UserPrismaMapper.toDomain(user);
   }
 
   async exists(id: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) return false;
-    return true;
-  }
-
-  async findByCpf(cpf: string): Promise<UserEntity | null> {
-    const user = await prisma.user.findUnique({ where: { cpf } });
-    if (!user) return null;
-    return UserPrismaMapper.toDomain(user);
-  }
-
-  async existsByCpf(cpf: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({ where: { cpf } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) return false;
     return true;
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return null;
     return UserPrismaMapper.toDomain(user);
   }
 
   async existsByEmail(email: string): Promise<boolean> {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return false;
     return true;
   }
@@ -104,7 +104,7 @@ export class PrismaUserRepository implements UserRepository {
   async create(entity: UserEntity): Promise<UserEntity> {
     const data = UserPrismaMapper.toPersistence(entity);
 
-    const user = await prisma.user.create({ data });
+    const user = await this.prisma.user.create({ data });
 
     return UserPrismaMapper.toDomain(user);
   }
@@ -119,7 +119,7 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async save(entity: UserEntity): Promise<UserEntity> {
-    const user = await prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: entity.id.toString() },
       data: {
         firstName: entity.firstName,
@@ -132,13 +132,13 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async delete(entity: UserEntity): Promise<void> {
-    await prisma.user.delete({
+    await this.prisma.user.delete({
       where: { id: entity.id.toString() },
     });
   }
 
   async findManyByIds(ids: string[]): Promise<UserEntity[]> {
-    const users = await prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       where: { id: { in: ids } },
     });
 

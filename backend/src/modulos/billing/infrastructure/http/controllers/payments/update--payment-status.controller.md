@@ -5,9 +5,9 @@ import { z } from "zod";
 import { ErrorSchema } from "@/schemas/error";
 import { ParamsIdStringSchema } from "@/schemas/generic";
 
-import { NotFoundError } from "@/core/domain/errors/usecases/not-founde.rror";
+import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { UpdatePaymentStatus } from "../../../../application/usecases/payments";
-import { PaymentSchema } from "../schemas/payment.schema";
+import { PaymentSchema } from "../../schemas/payment.schema";
 
 export const updatePaymentStatusController = (
   updatePaymentStatus: UpdatePaymentStatus,
@@ -39,7 +39,7 @@ export const updatePaymentStatusController = (
           if (error instanceof NotFoundError) {
             return reply
               .status(404)
-              .send({ error: error.message, code: error.statusCode });
+              .send({ error: error.message, code: "NOT_FOUND" });
           }
           return reply
             .status(500)
