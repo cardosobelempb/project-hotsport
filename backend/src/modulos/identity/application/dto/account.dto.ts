@@ -1,41 +1,36 @@
-import { DeepPartial } from "@/common/domain/types/DeepPartial";
+import z from "zod";
+import {
+  AccountActivateResponseSchema,
+  AccountCreateResponseSchema,
+  AccountDeactivateResponseSchema,
+  AccountFindByIdResponseSchema,
+  AccountPageResponseSchema,
+  AccountResponseSchema,
+  AccountSchema,
+  AccountSummarySchema,
+  AccountUpdateResponseSchema,
+  CreateAccountSchema,
+  UpdateAccountSchema,
+} from "../schemas/account.shema";
 
-export interface CreateAccountDto {
-  id: string;
-  accountId: string;
-  provider: string;
-  providerAccountId: string;
-  passwordHash: string;
-  createdAt: string;
-  updatedAt: string | null;
-}
-
-export interface UpdateAccountDto extends DeepPartial<CreateAccountDto> {}
-
-export interface AccountPresenterDto {
-  id: string;
-  accountId: string;
-  provider: string;
-  providerAccountId: string;
-  passwordHash: string;
-  createdAt: string;
-}
-
-export const createAccountRawExample: CreateAccountDto = {
-  id: "00000000-0000-4000-8000-000000000000",
-  accountId: "00000000-0000-4000-8000-000000000000",
-  providerAccountId: "00000000-0000-4000-8000-000000000000",
-  provider: "example",
-  createdAt: new Date().toISOString(),
-  passwordHash: "example",
-  updatedAt: null,
-};
-
-export const accountPresenterRawExample: AccountPresenterDto = {
-  id: "00000000-0000-4000-8000-000000000000",
-  accountId: "00000000-0000-4000-8000-000000000000",
-  providerAccountId: "00000000-0000-4000-8000-000000000000",
-  provider: "example",
-  createdAt: new Date().toISOString(),
-  passwordHash: "example",
-};
+export type AccountDto = z.infer<typeof AccountSchema>;
+export type CreateAccountDto = z.infer<typeof CreateAccountSchema>;
+export type UpdateAccountDto = z.infer<typeof UpdateAccountSchema>;
+export type AccountSummaryDto = z.infer<typeof AccountSummarySchema>;
+export type AccountResponseDto = z.infer<typeof AccountResponseSchema>;
+export type AccountCreateResponseDto = z.infer<
+  typeof AccountCreateResponseSchema
+>;
+export type AccountFindByIdResponseDto = z.infer<
+  typeof AccountFindByIdResponseSchema
+>;
+export type AccountUpdateResponseDto = z.infer<
+  typeof AccountUpdateResponseSchema
+>;
+export type AccountActivateResponseDto = z.infer<
+  typeof AccountActivateResponseSchema
+>;
+export type AccountDeactivateResponseDto = z.infer<
+  typeof AccountDeactivateResponseSchema
+>;
+export type AccountPageResponseDto = z.infer<typeof AccountPageResponseSchema>;

@@ -1,10 +1,10 @@
+import {
+  AccountCreateResponseSchema,
+  CreateAccountSchema,
+} from "@/modulos/identity/application/schemas/account.shema";
 import { CreateAccountUseCase } from "@/modulos/identity/application/usecases/account/create-account.use-case";
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
-import {
-  CreateAccountBodySchema,
-  CreateAccountResponseSchema,
-} from "../../schemas/account/create-account.schema";
 
 export const createAccountController = (
   createAccountUseCase: CreateAccountUseCase,
@@ -16,8 +16,8 @@ export const createAccountController = (
       schema: {
         tags: ["Account"],
         summary: "Registrar um novo usuário",
-        body: CreateAccountBodySchema,
-        response: CreateAccountResponseSchema,
+        body: CreateAccountSchema,
+        response: AccountCreateResponseSchema,
       },
       handler: async (request, reply) => {
         const result = await createAccountUseCase.execute(request.body);

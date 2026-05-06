@@ -1,12 +1,22 @@
 import { SearchInput } from "@/common/domain/repositories/search.repository";
 import { Page } from "@/common/domain/repositories/types/pagination.types";
+import { PrismaRepository } from "@/common/infrastructure/db/prisma-transaction";
+import { PrismaDatabase } from "@/common/infrastructure/db/prisma.client";
+import { TOKENS } from "@/common/shared/container/tokens";
 import { UserEntity } from "@/modulos/identity/domain/entities/user.entity";
 import { UserRepository } from "@/modulos/identity/domain/repositories/user.repository";
-import { Prisma, PrismaClient } from "../../../../../../../generated/prisma";
-import { UserPrismaMapper } from "../../../mappers/user-prisma.mapper";
+import { Prisma } from "../../../../../../../generated/prisma";
+import { PrismaUserMapper } from "../../../mappers/user-prisma.mapper";
 
-export class PrismaUserRepository implements UserRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+export class PrismaUserRepository
+  extends PrismaRepository
+  implements UserRepository
+{
+  static inject = [TOKENS.PRISMA_CLIENT];
+
+  constructor(prisma: PrismaDatabase) {
+    super(prisma);
+  }
 
   async page(params: SearchInput): Promise<Page<UserEntity>> {
     const page = params.page ?? 1;
@@ -14,7 +24,6 @@ export class PrismaUserRepository implements UserRepository {
     const filter = params.filter?.trim() ?? "";
     const sortDirection = params.sortDirection ?? "desc";
     const allowedSortBy = new Set<keyof Prisma.UserOrderByWithRelationInput>([
-      "name",
       "email",
       "createdAt",
       "updatedAt",
@@ -29,10 +38,7 @@ export class PrismaUserRepository implements UserRepository {
 
     const where: Prisma.UserWhereInput = filter
       ? {
-          OR: [
-            { name: { contains: filter, mode: "insensitive" } },
-            { email: { contains: filter, mode: "insensitive" } },
-          ],
+          OR: [{ email: { contains: filter, mode: "insensitive" } }],
         }
       : {};
 
@@ -47,7 +53,7 @@ export class PrismaUserRepository implements UserRepository {
     ]);
 
     return {
-      content: users.map(UserPrismaMapper.toDomain),
+      content: users.map(PrismaUserMapper.toDomain),
       pageable: {
         offset: (page - 1) * perPage,
         pageNumber: page,
@@ -80,7 +86,7 @@ export class PrismaUserRepository implements UserRepository {
   async findById(id: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) return null;
-    return UserPrismaMapper.toDomain(user);
+    return PrismaUserMapper.toDomain(user);
   }
 
   async exists(id: string): Promise<boolean> {
@@ -92,7 +98,7 @@ export class PrismaUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return null;
-    return UserPrismaMapper.toDomain(user);
+    return PrismaUserMapper.toDomain(user);
   }
 
   async existsByEmail(email: string): Promise<boolean> {
@@ -102,33 +108,32 @@ export class PrismaUserRepository implements UserRepository {
   }
 
   async create(entity: UserEntity): Promise<UserEntity> {
-    const data = UserPrismaMapper.toPersistence(entity);
+    const data = PrismaUserMapper.toPrisma(entity);
+    console.log("data", data);
 
     const user = await this.prisma.user.create({ data });
 
-    return UserPrismaMapper.toDomain(user);
+    return PrismaUserMapper.toDomain(user);
   }
 
   async createWithTx(
     entity: UserEntity,
     tx: Prisma.TransactionClient,
   ): Promise<UserEntity> {
-    const data = UserPrismaMapper.toPersistence(entity);
+    const data = PrismaUserMapper.toPrisma(entity);
     const user = await tx.user.create({ data });
-    return UserPrismaMapper.toDomain(user);
+    return PrismaUserMapper.toDomain(user);
   }
 
   async save(entity: UserEntity): Promise<UserEntity> {
     const user = await this.prisma.user.update({
       where: { id: entity.id.toString() },
       data: {
-        firstName: entity.firstName,
-        lastName: entity.lastName,
-        cpf: entity.cpf.getValue(),
+        ...PrismaUserMapper.toPrisma(entity),
       },
     });
 
-    return UserPrismaMapper.toDomain(user);
+    return PrismaUserMapper.toDomain(user);
   }
 
   async delete(entity: UserEntity): Promise<void> {
@@ -142,6 +147,6 @@ export class PrismaUserRepository implements UserRepository {
       where: { id: { in: ids } },
     });
 
-    return users.map(UserPrismaMapper.toDomain);
+    return users.map(PrismaUserMapper.toDomain);
   }
 }

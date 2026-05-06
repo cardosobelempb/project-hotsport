@@ -1,45 +1,29 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { CpfVO } from "@/common/domain/values-objects/cpf/cpf.vo";
 import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
-import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
-import { UserStatus } from "@/shared/enums/user-status.enum";
-
 export interface UserProps {
-  firstName: string;
-  lastName: string;
   email: EmailVO;
-  cpf: CpfVO;
-  phoneNumber?: PhoneVO | null;
-  status: UserStatus;
+  emailVerified: Date | null;
+  passwordHash: PasswordVO | null;
   createdAt: Date;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
 export class UserEntity extends BaseAggregate<UserProps> {
-  get firstName() {
-    return this.props.firstName;
-  }
-  get lastName() {
-    return this.props.lastName;
-  }
-
-  get phoneNumber() {
-    return this.props.phoneNumber;
-  }
-
   get email() {
     return this.props.email;
   }
 
-  get cpf() {
-    return this.props.cpf;
+  get emailVerified() {
+    return this.props.emailVerified;
   }
 
-  get status() {
-    return this.props.status;
+  get passwordHash() {
+    return this.props.passwordHash;
   }
 
   get createdAt() {
@@ -50,34 +34,8 @@ export class UserEntity extends BaseAggregate<UserProps> {
     return this.props.updatedAt;
   }
 
-  updateProfile(params: {
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: PhoneVO | null;
-  }) {
-    if (params.firstName !== undefined) this.props.firstName = params.firstName;
-    if (params.lastName !== undefined) this.props.lastName = params.lastName;
-    if (params.phoneNumber !== undefined)
-      this.props.phoneNumber?.equals(params.phoneNumber);
-    this.touch();
-  }
-
-  activate() {
-    if (this.props.status === UserStatus.ACTIVE) return;
-    this.props.status = UserStatus.ACTIVE;
-    this.touch();
-  }
-
-  deactivate() {
-    if (this.props.status === UserStatus.INACTIVE) return;
-    this.props.status = UserStatus.INACTIVE;
-    this.touch();
-  }
-
-  block() {
-    if (this.props.status === UserStatus.BLOCKED) return;
-    this.props.status = UserStatus.BLOCKED;
-    this.touch();
+  get deletedAt() {
+    return this.props.deletedAt;
   }
 
   private touch() {
@@ -87,17 +45,18 @@ export class UserEntity extends BaseAggregate<UserProps> {
   static create(
     props: Optional<
       UserProps,
-      "phoneNumber" | "status" | "createdAt" | "updatedAt"
+      "createdAt" | "updatedAt" | "deletedAt" | "emailVerified" | "passwordHash"
     >,
     id?: UUIDVO,
   ) {
     return new UserEntity(
       {
         ...props,
-        phoneNumber: props.phoneNumber ?? null,
-        status: props.status ?? UserStatus.ACTIVE,
+        emailVerified: props.emailVerified ?? new Date(),
+        passwordHash: props.passwordHash ?? null,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
+        deletedAt: props.deletedAt ?? null,
       },
       id,
     );

@@ -1,14 +1,18 @@
+// shared/database/prisma.ts
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
-export type PrismaTransaction = Omit<PrismaClient, "$on" | "$use" | "$extends">;
-
-import { PrismaClient } from "../../../../generated/prisma";
+import { Prisma, PrismaClient } from "../../../../generated/prisma";
 import { Logger } from "../observability/logger";
+
+export type PrismaTransaction = Prisma.TransactionClient;
+
+export type PrismaDatabase = PrismaClient | PrismaTransaction;
 
 declare global {
   // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | PrismaTransaction | undefined;
+  var __prisma: PrismaClient | undefined;
 }
 
 type PrismaFactoryOptions = {
@@ -19,10 +23,9 @@ function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    throw new Error("DATABASE_URL não está definida.");
+    throw new Error("DATABASE_URL nao esta definida");
   }
 
-  // ✅ ADAPTER (obrigatório no Prisma 7 com engine "client")
   const adapter = new PrismaPg({
     connectionString,
   });
@@ -38,23 +41,45 @@ function buildPrismaClient(options: PrismaFactoryOptions = {}): PrismaClient {
 
   const logger = options.logger;
 
-  prisma.$on("warn", (e) => logger?.warn({ prisma: e }, "Prisma warn"));
-  prisma.$on("error", (e) => logger?.error({ prisma: e }, "Prisma error"));
-  prisma.$on("info", (e) => logger?.info({ prisma: e }, "Prisma info"));
+  prisma.$on("warn", (event) =>
+    logger?.warn(
+      { event: "PRISMA_WARN", context: "database", prisma: event },
+      "Prisma warning",
+    ),
+  );
+
+  prisma.$on("error", (event) =>
+    logger?.error(
+      { event: "PRISMA_ERROR", context: "database", prisma: event },
+      "Prisma error",
+    ),
+  );
+
+  prisma.$on("info", (event) =>
+    logger?.info(
+      { event: "PRISMA_INFO", context: "database", prisma: event },
+      "Prisma info",
+    ),
+  );
 
   return prisma;
 }
 
 /**
- * Singleton: evita múltiplas conexões em dev
+ * Singleton do Prisma raiz.
+ *
+ * Importante:
+ * - Apenas PrismaClient raiz deve ficar no global.
+ * - TransactionClient nunca deve ficar no global.
  */
 export function getPrismaClient(
   options: PrismaFactoryOptions = {},
-): PrismaClient | PrismaTransaction {
+): PrismaClient {
   if (process.env.NODE_ENV !== "production") {
     if (!globalThis.__prisma) {
       globalThis.__prisma = buildPrismaClient(options);
     }
+
     return globalThis.__prisma;
   }
 

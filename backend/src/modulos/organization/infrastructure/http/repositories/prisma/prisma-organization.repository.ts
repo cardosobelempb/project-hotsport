@@ -1,5 +1,3 @@
-import { getPrismaClient } from "@/common/infrastructure/db/prisma.client";
-
 import { OrganizationEntity } from "@/modulos/organization/domain/entities/organization.entity";
 import { OrganizationRepository } from "@/modulos/organization/domain/repositories/organization.repository";
 
@@ -9,11 +7,21 @@ import {
   Sort,
 } from "@/common/domain/repositories/types/pagination.types";
 
+import { PrismaRepository } from "@/common/infrastructure/db/prisma-transaction";
+import { PrismaDatabase } from "@/common/infrastructure/db/prisma.client";
+import { TOKENS } from "@/common/shared/container/tokens";
 import { Prisma } from "../../../../../../../generated/prisma";
 import { OrganizationPrismaMapper } from "../../mappers/organization-prisma.mapper";
 
-export class PrismaOrganizationRepository implements OrganizationRepository {
-  private prisma = getPrismaClient();
+export class PrismaOrganizationRepository
+  extends PrismaRepository
+  implements OrganizationRepository
+{
+  static inject = [TOKENS.PRISMA_CLIENT];
+
+  constructor(prisma: PrismaDatabase) {
+    super(prisma);
+  }
 
   async findBySlug(slug: string): Promise<OrganizationEntity | null> {
     const organization = await this.prisma.organization.findUnique({
@@ -161,16 +169,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   }
 
   async countByAccountId(accountId: string): Promise<number> {
-    const accounts = await this.prisma.account.findMany({
-      where: { id: accountId },
-    });
-
-    if (!accounts) {
-      throw new Error("Account not found");
-    }
-
     const count = await this.prisma.organization.count({
-      where: { accountId },
+      where: { memberships: { some: { user: { profile: {} } } } },
     });
 
     return count;
@@ -178,8 +178,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   async findByDocument(document: string): Promise<OrganizationEntity | null> {
     const organization = await this.prisma.organization.findFirst({
-      where: { account: { documentNumber: document } },
-      include: { account: true },
+      where: { documentNumber: document },
     });
 
     if (!organization) return null;
@@ -226,7 +225,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   }
   async existsByDocument(document: string): Promise<boolean> {
     const organization = await this.prisma.organization.findFirst({
-      where: { account: { documentNumber: document } },
+      where: { documentNumber: document },
       select: { id: true },
     });
 

@@ -89,7 +89,7 @@ export async function buildApp(
     credentials: options.cors?.credentials ?? true,
   });
 
-  const cookieSecret = env.COOKIE_SECRET_KEY;
+  const cookieSecret = env.COOKIE_SECRET;
 
   if (!cookieSecret) {
     logger.error({}, "Missing required environment variable: COOKIE_SECRET");

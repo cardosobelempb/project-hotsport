@@ -1,9 +1,11 @@
-import { PrismaClient } from "../../../../generated/prisma";
+import { Prisma, PrismaClient } from "../../../../generated/prisma";
 
-export type PrismaTransaction = Omit<PrismaClient, "$on" | "$use" | "$extends">;
+export type PrismaTransaction = Parameters<
+  Parameters<PrismaClient["$transaction"]>[0]
+>[0];
 
 export abstract class PrismaRepository {
-  protected readonly prisma: PrismaClient | PrismaTransaction;
+  protected readonly prisma: PrismaClient | Prisma.TransactionClient;
 
   constructor(prisma: PrismaClient | PrismaTransaction) {
     this.prisma = prisma;

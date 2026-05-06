@@ -122,12 +122,9 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  name: 'name',
   email: 'email',
   emailVerified: 'emailVerified',
-  image: 'image',
   passwordHash: 'passwordHash',
-  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -136,8 +133,8 @@ exports.Prisma.UserScalarFieldEnum = {
 exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  provider: 'provider',
   providerType: 'providerType',
+  provider: 'provider',
   providerAccountId: 'providerAccountId',
   refreshToken: 'refreshToken',
   accessToken: 'accessToken',
@@ -170,13 +167,16 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   displayName: 'displayName',
+  fullName: 'fullName',
   documentType: 'documentType',
   documentNumber: 'documentNumber',
   phone: 'phone',
   birthDate: 'birthDate',
   avatarUrl: 'avatarUrl',
+  status: 'status',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.TokenScalarFieldEnum = {
@@ -275,14 +275,20 @@ exports.Prisma.AddressScalarFieldEnum = {
 exports.Prisma.StateScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  uf: 'uf'
+  uf: 'uf',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.CityScalarFieldEnum = {
   id: 'id',
   name: 'name',
   stateId: 'stateId',
-  subdomain: 'subdomain'
+  subdomain: 'subdomain',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.OrganizationConfigScalarFieldEnum = {
@@ -338,9 +344,9 @@ exports.Prisma.MikrotikScalarFieldEnum = {
   passwordHash: 'passwordHash',
   activeUser: 'activeUser',
   status: 'status',
-  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.HotspotPlanScalarFieldEnum = {
@@ -664,12 +670,6 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
-exports.UserStatus = exports.$Enums.UserStatus = {
-  ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  BLOCKED: 'BLOCKED'
-};
-
 exports.ProviderType = exports.$Enums.ProviderType = {
   GOOGLE: 'GOOGLE',
   FACEBOOK: 'FACEBOOK',
@@ -690,6 +690,12 @@ exports.DocumentType = exports.$Enums.DocumentType = {
   CNPJ: 'CNPJ',
   RG: 'RG',
   OTHER: 'OTHER'
+};
+
+exports.UserProfileStatus = exports.$Enums.UserProfileStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BLOCKED: 'BLOCKED'
 };
 
 exports.TenantStatus = exports.$Enums.TenantStatus = {

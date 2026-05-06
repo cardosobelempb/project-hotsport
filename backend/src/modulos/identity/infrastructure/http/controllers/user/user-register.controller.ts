@@ -1,55 +1,39 @@
-import type { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { Controller } from "@/common/shared/http/decorators/controller.decorator";
+import { Post } from "@/common/shared/http/decorators/route.decorator";
+import { Validate } from "@/common/shared/http/decorators/validate.decorator";
+import { CreateUserDto } from "@/modulos/identity/application/dto/user.dto";
+import {
+  CreateUserSchema,
+  UserResponseSchema,
+} from "@/modulos/identity/application/schemas/user.schema";
+import { UserCreateUseCase } from "@/modulos/identity/application/usecases/users/user-create.usecase";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
-import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
-import { CreateUserUseCase } from "@/modulos/identity/application/usecases/users/create-user.usecase";
-import { createUserSchema } from "../../schemas/user.schema";
+@Controller("/users")
+export class UserCreateController {
+  static inject = [UserCreateUseCase];
 
-export const userRegisterController = (
-  createUserUseCase: CreateUserUseCase,
-) => {
-  return async (app: FastifyInstance): Promise<void> => {
-    app.withTypeProvider<ZodTypeProvider>().route({
-      method: "POST",
-      url: "/register",
-      schema: {
-        tags: ["Register User"],
-        summary: "Registra um novo usuário",
-        body: createUserSchema,
-        // response: userPresenterSchema,
-      },
-      handler: async (request, reply) => {
-        const result = await createUserUseCase.execute(request.body);
+  constructor(private readonly userCreateUseCase: UserCreateUseCase) {}
 
-        if (result.isLeft()) {
-          const error = result.value;
+  @Validate({ body: CreateUserSchema })
+  @Post("/", {
+    tags: ["User"],
+    summary: "Cria um novo usuário",
+    description: "Endpoint para criar um novo usuário no sistema.",
+    body: CreateUserSchema,
+    responses: {
+      201: { description: "Usuário criado", schema: UserResponseSchema },
+      400: { description: "Dados inválidos" },
+    },
+  })
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const body = request.body as CreateUserDto;
+    const result = await this.userCreateUseCase.execute(body);
 
-          switch (error.constructor) {
-            case AlreadyExistsError:
-              return reply.status(409).send({
-                message: error.message,
-                statusCode: 409,
-                timestamp: new Date().toISOString(),
-                path: request.url,
-                fieldName: error.path?.includes("email") ? "email" : "cpf",
-                error: error.error,
-              });
+    if (result.isLeft()) {
+      throw result.value;
+    }
 
-            default:
-              return reply.status(422).send({
-                message: error.message,
-                statusCode: 422,
-                timestamp: new Date().toISOString(),
-                path: request.url,
-                error: error.error,
-              });
-          }
-        }
-
-        return reply.status(201).send({
-          user: result.value.user,
-        });
-      },
-    });
-  };
-};
+    return reply.status(201).send(result.value);
+  }
+}

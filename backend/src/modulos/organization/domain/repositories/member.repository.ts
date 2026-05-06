@@ -2,7 +2,7 @@ import { PageRepository } from "@/common/domain/repositories/page-repository";
 import { MemberEntity } from "../entities/member.entity";
 
 export abstract class MemberRepository extends PageRepository<MemberEntity> {
-  abstract findByEmail(email: string): Promise<MemberEntity | null>;
+  // abstract findByEmail(email: string): Promise<MemberEntity | null>;
   abstract findByUserIdAndAccountId(
     userId: string,
     accountId: string,
