@@ -2,6 +2,7 @@ import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { User as PrismaUser } from "../../../../../generated/prisma";
 
 import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo";
 import { UserDto } from "../../application/dto/user.dto";
 import { UserEntity } from "../../domain/entities/user.entity";
 
@@ -10,6 +11,7 @@ export class PrismaUserMapper {
     return UserEntity.create(
       {
         email: EmailVO.create(raw.email || ""),
+        passwordHash: new PasswordVO(raw.passwordHash || ""),
       },
       UUIDVO.create(raw.id),
     );

@@ -6,8 +6,8 @@ import { TokenType } from "@/common/shared/enums/token-type.enum";
 
 export interface AccountProps {
   userId: UUIDVO;
-  providerAccountId: UUIDVO;
   provider: string;
+  providerAccountId: UUIDVO;
   providerType: ProviderType;
   refreshToken: string | null;
   accessToken: string | null;
@@ -26,16 +26,16 @@ export class AccountEntity extends BaseEntity<AccountProps> {
     return this.props.userId;
   }
 
+  get providerType(): ProviderType {
+    return this.props.providerType;
+  }
+
   get providerAccountId(): UUIDVO {
     return this.props.providerAccountId;
   }
 
   get provider(): string {
     return this.props.provider;
-  }
-
-  get providerType(): string {
-    return this.props.providerType;
   }
 
   get refreshToken(): string | null {
@@ -85,19 +85,34 @@ export class AccountEntity extends BaseEntity<AccountProps> {
   static create(
     props: Optional<
       AccountProps,
-      "refreshToken" | "accessToken" | "createdAt" | "updatedAt" | "tokenType"
+      | "accessToken"
+      | "refreshToken"
+      | "expiresAt"
+      | "tokenType"
+      | "providerType"
+      | "scope"
+      | "idToken"
+      | "sessionState"
+      | "createdAt"
+      | "updatedAt"
+      | "deletedAt"
     >,
     id?: UUIDVO,
   ): AccountEntity {
     return new AccountEntity(
       {
         ...props,
-        accessToken: props.accessToken ?? "",
-        refreshToken: props.refreshToken ?? "",
+        accessToken: props.accessToken ?? null,
+        refreshToken: props.refreshToken ?? null,
+        expiresAt: props.expiresAt ?? null,
         tokenType: props.tokenType ?? TokenType.ACCESS,
         providerType: props.providerType ?? ProviderType.CREDENTIALS,
+        scope: props.scope ?? null,
+        idToken: props.idToken ?? null,
+        sessionState: props.sessionState ?? null,
         createdAt: props.createdAt ?? new Date(),
-        updatedAt: null,
+        updatedAt: props.updatedAt ?? null,
+        deletedAt: props.deletedAt ?? null,
       },
       id,
     );

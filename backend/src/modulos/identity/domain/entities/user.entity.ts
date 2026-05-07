@@ -6,8 +6,8 @@ import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface UserProps {
   email: EmailVO;
+  passwordHash: PasswordVO;
   emailVerified: Date | null;
-  passwordHash: PasswordVO | null;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
@@ -45,7 +45,7 @@ export class UserEntity extends BaseAggregate<UserProps> {
   static create(
     props: Optional<
       UserProps,
-      "createdAt" | "updatedAt" | "deletedAt" | "emailVerified" | "passwordHash"
+      "createdAt" | "updatedAt" | "deletedAt" | "emailVerified"
     >,
     id?: UUIDVO,
   ) {
@@ -53,7 +53,7 @@ export class UserEntity extends BaseAggregate<UserProps> {
       {
         ...props,
         emailVerified: props.emailVerified ?? new Date(),
-        passwordHash: props.passwordHash ?? null,
+
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

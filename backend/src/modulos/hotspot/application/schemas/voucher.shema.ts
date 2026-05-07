@@ -8,14 +8,17 @@ import { z } from "zod";
 
 import { EntityStatus } from "@/common/shared/enums/entity-status.enum";
 
-import { IsoDateTimeInput, UUIDString } from "@/common/shared/schemas/helpers";
+import {
+  IsoDateTimeInput,
+  UUIDString,
+} from "@/common/shared/lib/schemas/helpers";
 import {
   actionResponseSchema,
   createResponseSchema,
   findResponseSchema,
   pageResponseSchema,
   updateResponseSchema,
-} from "@/common/shared/schemas/response.factory";
+} from "@/common/shared/lib/schemas/response.factory";
 
 // ─── Params ───────────────────────────────────────────────────────────────────
 

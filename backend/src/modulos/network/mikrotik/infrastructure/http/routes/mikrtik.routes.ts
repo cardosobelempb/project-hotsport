@@ -1,12 +1,14 @@
-import { FastifyInstance } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-import { createMikrotikUseCase } from "../../../container";
-import { mikrotikRegisterController } from "../controllers/create-mikrotik.controller";
+import { registerModule } from "@/common/shared/module/register-module";
+import { mikrotikModule } from "../../../mikrotik.module";
 
 export async function mikrotikRoutes(app: FastifyInstance): Promise<void> {
-  await app.register(mikrotikRegisterController(createMikrotikUseCase));
-  // await app.register(updatePaymentStatusController(mikrotikRegisterUseCase), {
-  //   prefix: "/:id/status",
-  // });
-  // await app.register(getPaymentsController(mikrotikRegisterUseCase), { prefix: "/" });
+  // ✅ prefix aqui — envolve tudo que o registerModule registrar
+  await app.register(
+    async (router) => {
+      await registerModule(router, mikrotikModule);
+    },
+    { prefix: "api/v1" },
+  );
 }

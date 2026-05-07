@@ -1,22 +1,27 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { AddressType } from "../enums/address-type.enum";
+import { AddressType } from "@/common/shared/enums/address-type.enum";
 
 export interface AddressProps {
-  userId: UUIDVO;
-  type: AddressType;
+  userId: UUIDVO | null;
+  tenantId: UUIDVO | null;
+  organizationId: UUIDVO | null;
+  membershipId: UUIDVO | null;
+  addressType: AddressType | null;
+  street: string | null;
+  addressNumber: string | null;
+  complement: string | null;
+  neighborhood: string | null;
+  reference: string | null;
+  cityId: string | null;
+  stateId: string | null;
+  zipCode: string | null;
+  country: string | null;
   isPrimary: boolean;
-  street: string;
-  number: string;
-  complement?: string | null;
-  neighborhood: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
   createdAt: Date;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
 export class AddressEntity extends BaseAggregate<AddressProps> {

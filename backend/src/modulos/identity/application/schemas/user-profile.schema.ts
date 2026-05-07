@@ -9,14 +9,17 @@ import { z } from "zod";
 import { ValidatorMessage } from "@/common/domain/validations/ValidatorMessage";
 
 import { DocumentType } from "@/common/shared/enums/document-type.enum";
-import { IsoDateTimeInput, UUIDString } from "@/common/shared/schemas/helpers";
+import {
+  IsoDateTimeInput,
+  UUIDString,
+} from "@/common/shared/lib/schemas/helpers";
 import {
   actionResponseSchema,
   createResponseSchema,
   findResponseSchema,
   pageResponseSchema,
   updateResponseSchema,
-} from "@/common/shared/schemas/response.factory";
+} from "@/common/shared/lib/schemas/response.factory";
 
 // ─── Params ───────────────────────────────────────────────────────────────────
 

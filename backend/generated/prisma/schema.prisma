@@ -34,14 +34,14 @@ model User {
   updatedAt     DateTime? @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at")
 
-  profile      UserProfile?
   accounts     Account[]
   sessions     Session[]
+  tokens       Token[]
+  otps         Otp[]
   memberships  Membership[]
   addresses    Address[]
   lgpdConsents LgpdConsent[]
-  otps         Otp[]
-  tokens       Token[]
+  profile      UserProfile?
   leads        Lead[]
 
   @@index([email])
@@ -72,6 +72,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+  @@index([deletedAt])
   @@map("accounts")
 }
 
@@ -203,7 +204,7 @@ model Organization {
   logoUrl        String?            @map("logo_url") @db.VarChar(500)
   status         OrganizationStatus @default(ACTIVE)
   createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  updatedAt      DateTime?          @updatedAt @map("updated_at")
   deletedAt      DateTime?          @map("deleted_at")
 
   tenant Tenant? @relation(fields: [tenantId], references: [id])
@@ -235,12 +236,13 @@ model Organization {
 }
 
 model Membership {
-  id       String @id @default(uuid()) @db.Uuid
-  userId   String @map("user_id") @db.Uuid
-  tenantId String @map("tenant_id") @db.Uuid
+  id             String  @id @default(uuid()) @db.Uuid
+  userId         String  @map("user_id") @db.Uuid
+  tenantId       String  @map("tenant_id") @db.Uuid
+  organizationId String? @db.Uuid
 
-  role   MemberRole   @default(MEMBER)
-  status MemberStatus @default(ACTIVE)
+  role   MemberShipRole   @default(MEMBER)
+  status MemberShipStatus @default(ACTIVE)
 
   joinedAt     DateTime? @map("joined_at")
   invitedEmail String?   @map("invited_email") @db.VarChar(255)
@@ -252,10 +254,10 @@ model Membership {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?       @db.Uuid
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  addresses    Address[]
 
   @@unique([userId, tenantId])
   @@index([userId])
@@ -272,6 +274,7 @@ model Address {
   userId         String? @map("user_id") @db.Uuid
   tenantId       String? @map("tenant_id") @db.Uuid
   organizationId String? @map("organization_id") @db.Uuid
+  membershipId   String? @map("membership_id") @db.Uuid
 
   AddressType AddressType? @default(HOME) @map("address_type")
 
@@ -287,15 +290,16 @@ model Address {
   zipCode String? @map("zip_code") @db.VarChar(255)
   country String? @map("country") @db.VarChar(255)
 
-  isPrimary Boolean @default(false) @map("is_primary")
+  isPrimary Boolean? @default(false) @map("is_primary")
 
-  createdAt DateTime? @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant       Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  membership   Membership?   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
   city  City?  @relation(fields: [cityId], references: [id], onDelete: SetNull)
   state State? @relation(fields: [stateId], references: [id], onDelete: SetNull)
@@ -422,8 +426,8 @@ model Mikrotik {
   name           String         @db.VarChar(150)
   host           String         @db.VarChar(255)
   port           Int            @default(8728)
-  macAddress     String?        @map("mac_address") @db.VarChar(20)
-  ipAddress      String?        @map("ip_address") @db.VarChar(45)
+  macAddress     String         @map("mac_address") @db.VarChar(20)
+  ipAddress      String         @map("ip_address") @db.VarChar(45)
   username       String         @db.VarChar(100)
   passwordHash   String         @map("password_hash") @db.VarChar(255)
   activeUser     Boolean        @default(false) @map("active_user")
@@ -453,6 +457,7 @@ model HotspotPlan {
   isActive       Boolean         @default(true) @map("is_active")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime?       @updatedAt @map("updated_at")
+  deletedAt      DateTime?       @map("deleted_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -460,6 +465,7 @@ model HotspotPlan {
 
   @@index([organizationId])
   @@index([organizationId, isActive])
+  @@index([deletedAt])
   @@map("hotspot_plans")
 }
 
@@ -717,6 +723,7 @@ model Lead {
   lgpdAcceptedAt DateTime?  @map("lgpd_accepted_at")
   createdAt      DateTime   @default(now()) @map("created_at")
   updatedAt      DateTime?  @updatedAt @map("updated_at")
+  deletedAt      DateTime?  @map("deleted_at")
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -916,20 +923,24 @@ enum UserProfileStatus {
   BLOCKED
 }
 
-enum MemberRole {
+enum MemberShipRole {
   OWNER
   ADMIN
+  AFFILIATE
+  OPERATOR
+  CUSTOMER
   MANAGER
   SUPPORT
   FINANCE
   MEMBER
 }
 
-enum MemberStatus {
+enum MemberShipStatus {
   ACTIVE
   INVITED
   SUSPENDED
   REMOVED
+  DELETED
 }
 
 enum OrganizationStatus {
@@ -1054,6 +1065,9 @@ enum OrganizationConfigType {
 
 enum LeadStatus {
   NEW
+  ACTIVE
+  INACTIVE
+  BANNED
   CONTACTED
   CONVERTED
   DISCARDED

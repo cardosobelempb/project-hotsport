@@ -1,58 +1,64 @@
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import {
-  Prisma,
-  Mikrotik as PrismaMikrotik,
-} from "../../../../../generated/prisma";
+import { Mikrotik as PrismaMikrotik } from "../../../../../../generated/prisma";
 
-import { CreatMikrotikOutputDto } from "../../application/dto/create-mikrotik.output";
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo";
+import { MikrotikDto } from "../../application/dto/mikrotik.dto";
 import { MikrotikEntity } from "../../domain/entities/mikrotik-entity";
 
-export class MikrotikMapper {
-  // 🔁 Prisma → Domain
+export class PrismaMikrotikMapper {
   static toDomain(raw: PrismaMikrotik): MikrotikEntity {
     return MikrotikEntity.create(
       {
+        organizationId: UUIDVO.create(raw.organizationId),
         name: raw.name,
         host: raw.host,
         port: raw.port,
         username: raw.username,
-        passwordHash: raw.passwordHash,
+        passwordHash: new PasswordVO(raw.passwordHash),
         ipAddress: raw.ipAddress,
         macAddress: raw.macAddress,
-        organizationId: UUIDVO.create(raw.organizationId),
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
       },
       UUIDVO.create(raw.id),
     );
   }
 
-  // 🔁 Domain → Prisma
-  static toPersistence(
-    entity: MikrotikEntity,
-  ): Prisma.MikrotikUncheckedCreateInput {
+  static toDTO(entity: MikrotikEntity): MikrotikDto {
     return {
-      name: entity.name,
-      host: entity.host,
-      port: entity.port,
-      username: entity.username,
-      passwordHash: entity.passwordHash,
-      ipAddress: entity.ipAddress,
-      macAddress: entity.macAddress,
+      id: entity.id.getValue(),
       organizationId: entity.organizationId.toString(),
-    };
-  }
-
-  static toOutput(entity: MikrotikEntity): CreatMikrotikOutputDto {
-    return {
-      id: entity.id.toString(),
       name: entity.name,
       host: entity.host,
       port: entity.port,
       username: entity.username,
+      passwordHash: entity.passwordHash?.getValue(),
       ipAddress: entity.ipAddress,
       macAddress: entity.macAddress,
       status: entity.status,
-      createdAt: entity.createdAt.toISOString(),
+      activeUser: entity.activeUser,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
+
+  static toPersistence(entity: MikrotikEntity): PrismaMikrotik {
+    return {
+      id: entity.id.getValue(),
       organizationId: entity.organizationId.toString(),
+      name: entity.name,
+      host: entity.host,
+      port: entity.port,
+      username: entity.username,
+      passwordHash: entity.passwordHash.getValue(),
+      ipAddress: entity.ipAddress,
+      macAddress: entity.macAddress,
+      activeUser: entity.activeUser,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
     };
   }
 }

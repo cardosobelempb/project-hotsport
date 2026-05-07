@@ -1,7 +1,7 @@
-import { BaseSearchableRepository } from "@/common/domain/repositories/base-searchable.repository";
+import { PageRepository } from "@/common/domain/repositories/page-repository";
 import { MikrotikEntity } from "../entities/mikrotik-entity";
 
-export abstract class MikrotikRepository extends BaseSearchableRepository<MikrotikEntity> {
+export abstract class MikrotikRepository extends PageRepository<MikrotikEntity> {
   abstract listByOrganization(
     organizationId: string,
   ): Promise<MikrotikEntity[]>;

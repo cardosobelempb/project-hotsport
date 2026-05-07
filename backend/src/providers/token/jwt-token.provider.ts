@@ -27,22 +27,22 @@ export class JwtTokenProvider {
   }
 
   private async generateAccessToken(payload: AccessTokenPayload) {
-    return sign(payload, this.config.ACCESS_TOKEN_SECRET_KEY, {
+    return sign(payload, this.config.ACCESS_TOKEN_SECRET, {
       expiresIn: Number(this.config.ACCESS_TOKEN_EXPIRES_IN) || "15m",
     });
   }
 
   private async generateRefreshToken(payload: RefreshTokenPayload) {
-    return sign(payload, this.config.REFRESH_TOKEN_SECRET_KEY, {
+    return sign(payload, this.config.REFRESH_TOKEN_SECRET, {
       expiresIn: Number(this.config.REFRESH_TOKEN_EXPIRES_IN) || "7d",
     });
   }
 
   private validateConfig() {
-    if (!this.config.ACCESS_TOKEN_SECRET_KEY) {
+    if (!this.config.ACCESS_TOKEN_SECRET) {
       throw new Error("ACCESS_TOKEN_SECRET_KEY não definido");
     }
-    if (!this.config.REFRESH_TOKEN_SECRET_KEY) {
+    if (!this.config.REFRESH_TOKEN_SECRET) {
       throw new Error("REFRESH_TOKEN_SECRET_KEY não definido");
     }
   }

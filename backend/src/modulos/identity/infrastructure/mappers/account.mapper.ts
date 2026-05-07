@@ -1,19 +1,16 @@
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { Account as PrismaAccount } from "../../../../../generated/prisma";
 
+import { ProviderType } from "@/common/shared/enums/provider-type.enum";
 import { AccountEntity } from "../../domain/entities/account.entity";
-import { AccountProvider } from "@/common/shared/enums/provider-type.enum";
 
 export class AccountMapper {
   static toDomain(raw: PrismaAccount): AccountEntity {
     return AccountEntity.create(
       {
         userId: UUIDVO.create(raw.userId),
-        provider: raw.provider as AccountProvider,
+        provider: raw.provider as ProviderType,
         providerAccountId: UUIDVO.create(raw.providerAccountId),
-    passwordHash
-        createdAt: raw.createdAt,
-
       },
       UUIDVO.create(raw.id),
     );
@@ -24,7 +21,6 @@ export class AccountMapper {
       userId: entity.userId.getValue(),
       provider: entity.provider,
       providerAccountId: entity.providerAccountId.toString(),
-      passwordHash: entity.passwordHash,
     };
   }
 
@@ -34,7 +30,6 @@ export class AccountMapper {
       userId: entity.userId.getValue(),
       provider: entity.provider,
       providerAccountId: entity.providerAccountId.toString(),
-      passwordHash: entity.passwordHash,
     };
   }
 }

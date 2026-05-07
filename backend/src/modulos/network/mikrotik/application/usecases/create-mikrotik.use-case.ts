@@ -1,5 +1,3 @@
-import { CreateMikrotikInputDto } from "../dto/create-mikrotik.input.ts.js";
-
 import {
   Either,
   left,
@@ -8,20 +6,26 @@ import {
 import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error.js";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo.js";
 
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo.js";
+import { BcryptHasher } from "@/common/shared/cryptography/bcrypt-hasher.js";
 import { MikrotikEntity } from "../../domain/entities/mikrotik-entity.js";
 import { MikrotikRepository } from "../../domain/repositories/mikrotik.repository.js";
-import { MikrotikMapper } from "../../infrastructure/mappers/mikrotik.mapper.js";
-import { CreatMikrotikOutputDto } from "../dto/create-mikrotik.output.js";
+
+import { MikrotikMapper } from "../../domain/mappers/mikrotik-mapper.js";
+import { CreateMikrotikDto, MikrotikSummaryDto } from "../dto/mikrotik.dto.js";
 
 export type CreateMikrotikUseCaseResult = Either<
   AlreadyExistsError,
-  { mikrotik: CreatMikrotikOutputDto }
+  MikrotikSummaryDto
 >;
 
 export class CreateMikrotikUseCase {
-  constructor(private readonly mikrotikRepository: MikrotikRepository) {}
+  constructor(
+    private readonly mikrotikRepository: MikrotikRepository,
+    private readonly bcryptHasher: BcryptHasher,
+  ) {}
   async execute(
-    input: CreateMikrotikInputDto,
+    input: CreateMikrotikDto,
   ): Promise<CreateMikrotikUseCaseResult> {
     const mikrotikExists = await this.mikrotikRepository.findByMacAddress(
       input.macAddress,
@@ -37,18 +41,20 @@ export class CreateMikrotikUseCase {
       );
     }
 
+    const passwordHash = await this.bcryptHasher.hash(input.passwordHash);
+
     const newMikrotik = MikrotikEntity.create({
       name: input.name,
       host: input.host,
       port: input.port,
       username: input.username,
-      passwordHash: input.passwordHash,
+      passwordHash: new PasswordVO(passwordHash),
       ipAddress: input.ipAddress,
       macAddress: input.macAddress,
       organizationId: UUIDVO.create(input.organizationId),
     });
     const mikrotik = await this.mikrotikRepository.create(newMikrotik);
 
-    return right({ mikrotik: MikrotikMapper.toOutput(mikrotik) });
+    return right(MikrotikMapper.toSummary(mikrotik));
   }
 }

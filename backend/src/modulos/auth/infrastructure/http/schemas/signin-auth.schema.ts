@@ -1,8 +1,8 @@
 import {
   ErrorSchema,
   ValidationErrorSchema,
-} from "@/common/shared/schemas/error";
-import { EmailString } from "@/common/shared/schemas/helpers";
+} from "@/common/shared/lib/schemas/error";
+import { EmailString } from "@/common/shared/lib/schemas/helpers";
 import z from "zod";
 
 const AuthLoginBaseSchema = z.object({

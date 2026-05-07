@@ -238,6 +238,7 @@ exports.Prisma.MembershipScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   tenantId: 'tenantId',
+  organizationId: 'organizationId',
   role: 'role',
   status: 'status',
   joinedAt: 'joinedAt',
@@ -247,8 +248,7 @@ exports.Prisma.MembershipScalarFieldEnum = {
   removedAt: 'removedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt',
-  organizationId: 'organizationId'
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.AddressScalarFieldEnum = {
@@ -256,6 +256,7 @@ exports.Prisma.AddressScalarFieldEnum = {
   userId: 'userId',
   tenantId: 'tenantId',
   organizationId: 'organizationId',
+  membershipId: 'membershipId',
   AddressType: 'AddressType',
   street: 'street',
   addressNumber: 'addressNumber',
@@ -359,7 +360,8 @@ exports.Prisma.HotspotPlanScalarFieldEnum = {
   price: 'price',
   isActive: 'isActive',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.HotspotUserScalarFieldEnum = {
@@ -526,7 +528,8 @@ exports.Prisma.LeadScalarFieldEnum = {
   lgpdAccepted: 'lgpdAccepted',
   lgpdAcceptedAt: 'lgpdAcceptedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.LgpdConsentScalarFieldEnum = {
@@ -712,20 +715,24 @@ exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
   DELETED: 'DELETED'
 };
 
-exports.MemberRole = exports.$Enums.MemberRole = {
+exports.MemberShipRole = exports.$Enums.MemberShipRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
+  AFFILIATE: 'AFFILIATE',
+  OPERATOR: 'OPERATOR',
+  CUSTOMER: 'CUSTOMER',
   MANAGER: 'MANAGER',
   SUPPORT: 'SUPPORT',
   FINANCE: 'FINANCE',
   MEMBER: 'MEMBER'
 };
 
-exports.MemberStatus = exports.$Enums.MemberStatus = {
+exports.MemberShipStatus = exports.$Enums.MemberShipStatus = {
   ACTIVE: 'ACTIVE',
   INVITED: 'INVITED',
   SUSPENDED: 'SUSPENDED',
-  REMOVED: 'REMOVED'
+  REMOVED: 'REMOVED',
+  DELETED: 'DELETED'
 };
 
 exports.AddressType = exports.$Enums.AddressType = {
@@ -815,6 +822,9 @@ exports.CampaignItemType = exports.$Enums.CampaignItemType = {
 
 exports.LeadStatus = exports.$Enums.LeadStatus = {
   NEW: 'NEW',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BANNED: 'BANNED',
   CONTACTED: 'CONTACTED',
   CONVERTED: 'CONVERTED',
   DISCARDED: 'DISCARDED'

@@ -1,24 +1,27 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
 
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { MikrotikStatus } from "../emuns/mikrotik-status.enum";
+import { MikrotikStatus } from "@/common/shared/enums/mikrotik-status.enum";
 
-export interface MikrotikProps {
+export interface MikrotikEntityProps {
   organizationId: UUIDVO;
   name: string;
+  username: string;
+  passwordHash: PasswordVO;
   host: string;
   port: number;
   macAddress: string;
   ipAddress: string;
-  username: string;
-  passwordHash: string;
+  activeUser: boolean;
   status: MikrotikStatus;
   createdAt: Date;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
-export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
+export class MikrotikEntity extends BaseAggregate<MikrotikEntityProps> {
   get organizationId() {
     return this.props.organizationId;
   }
@@ -55,6 +58,10 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
     return this.props.status;
   }
 
+  get activeUser() {
+    return this.props.activeUser;
+  }
+
   get createdAt() {
     return this.props.createdAt;
   }
@@ -63,42 +70,25 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
     return this.props.updatedAt;
   }
 
-  markOnline() {
+  get deletedAt() {
+    return this.props.deletedAt;
+  }
+
+  online() {
     if (this.props.status === MikrotikStatus.ONLINE) return;
     this.props.status = MikrotikStatus.ONLINE;
     this.touch();
   }
 
-  markOffline() {
+  offline() {
     if (this.props.status === MikrotikStatus.OFFLINE) return;
     this.props.status = MikrotikStatus.OFFLINE;
     this.touch();
   }
 
-  markError() {
+  error() {
     if (this.props.status === MikrotikStatus.ERROR) return;
     this.props.status = MikrotikStatus.ERROR;
-    this.touch();
-  }
-
-  updateConnection(params: {
-    name?: string;
-    host?: string;
-    port?: number;
-    macAddress?: string;
-    ipAddress?: string;
-    username?: string;
-    passwordHash?: string;
-  }) {
-    if (params.name !== undefined) this.props.name = params.name;
-    if (params.host !== undefined) this.props.host = params.host;
-    if (params.port !== undefined) this.props.port = params.port;
-    if (params.macAddress !== undefined)
-      this.props.macAddress = params.macAddress;
-    if (params.ipAddress !== undefined) this.props.ipAddress = params.ipAddress;
-    if (params.username !== undefined) this.props.username = params.username;
-    if (params.passwordHash !== undefined)
-      this.props.passwordHash = params.passwordHash;
     this.touch();
   }
 
@@ -108,18 +98,19 @@ export class MikrotikEntity extends BaseAggregate<MikrotikProps> {
 
   static create(
     props: Optional<
-      MikrotikProps,
-      "port" | "status" | "createdAt" | "updatedAt"
+      MikrotikEntityProps,
+      "activeUser" | "status" | "createdAt" | "updatedAt" | "deletedAt"
     >,
     id?: UUIDVO,
   ) {
     return new MikrotikEntity(
       {
         ...props,
-        port: props.port ?? 8728,
+        activeUser: props.activeUser ?? false,
         status: props.status ?? MikrotikStatus.OFFLINE,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
+        deletedAt: null,
       },
       id,
     );

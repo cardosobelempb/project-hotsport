@@ -12,6 +12,21 @@ export class ValidatorUtils {
     }
   }
 
+  static validNullOrUndefined(
+    field: unknown,
+    fieldName: string,
+    validErrors: ValidErrors,
+  ): boolean {
+    if (field === null || field === undefined) {
+      validErrors.addErrors(
+        fieldName,
+        `${fieldName}${ValidatorMessage.REQUIRED_FIELD}`,
+      );
+      return false;
+    }
+    return true;
+  }
+
   static validMinLength(
     fieldName: string,
     minLength: number,

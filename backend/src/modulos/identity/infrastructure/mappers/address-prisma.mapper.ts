@@ -1,22 +1,22 @@
 import {
   Prisma,
   Address as PrismaAddress,
-} from "../../../../../../generated/prisma";
+} from "../../../../../generated/prisma";
 
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { AddressType } from "@/modulos/user/domain/enums/address-type.enum";
-import { AddressEntity } from "../../../domain/entities/address.entity";
+import { AddressType } from "@/common/shared/enums/address-type.enum";
+import { AddressEntity } from "../../domain/entities/address.entity";
 
 export class AddressPrismaMapper {
   static toDomain(raw: PrismaAddress): AddressEntity {
     return AddressEntity.create(
       {
         userId: UUIDVO.create(raw.userId),
-        type: raw.type as AddressType,
+        type: raw.type as any,
         isPrimary: raw.isPrimary,
         street: raw.street,
         number: raw.number,
-        complement: raw.complement,
+        complement: raw.complement ?? null,
         neighborhood: raw.neighborhood,
         city: raw.city,
         state: raw.state,
@@ -35,7 +35,7 @@ export class AddressPrismaMapper {
     return {
       id: entity.id.toString(),
       userId: entity.userId.toString(),
-      type: entity.type as AddressType.HOME,
+      type: entity.type as AddressType,
       isPrimary: entity.isPrimary ?? false,
       street: entity.street,
       number: entity.number,
@@ -54,7 +54,7 @@ export class AddressPrismaMapper {
     entity: AddressEntity,
   ): Prisma.AddressUncheckedUpdateInput {
     return {
-      type: entity.type as AddressType.HOME,
+      type: entity.type as AddressType,
       isPrimary: entity.isPrimary ?? false,
       street: entity.street,
       number: entity.number,

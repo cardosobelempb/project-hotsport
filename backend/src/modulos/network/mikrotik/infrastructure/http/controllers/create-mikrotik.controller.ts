@@ -1,57 +1,40 @@
-import type { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
+import { Controller } from "@/common/shared/http/decorators/controller.decorator";
+import { Post } from "@/common/shared/http/decorators/route.decorator";
+import { Validate } from "@/common/shared/http/decorators/validate.decorator";
 
-import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
-
-import { CreateMikrotikUseCase } from "../../../application/usecases/create-mikrotik.use-case";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import { CreateMikrotikDto } from "../../../application/dto/mikrotik.dto";
 import {
-  CreateMikrotikMikrotikSchema,
-  CreateMikrotikResponseSchema,
-} from "../schemas/mikrotik.schema";
+  CreateMikrotikSchema,
+  MikrotikResponseSchema,
+} from "../../../application/schema/mikrotik.schema";
+import { CreateMikrotikUseCase } from "../../../application/usecases/create-mikrotik.use-case";
 
-export const mikrotikRegisterController = (
-  createMikrotikUseCase: CreateMikrotikUseCase,
-) => {
-  return async (app: FastifyInstance): Promise<void> => {
-    app.withTypeProvider<ZodTypeProvider>().route({
-      method: "POST",
-      url: "/",
-      schema: {
-        tags: ["Create Mikrotik"],
-        summary: "Cria um novo Mikrotik",
-        body: CreateMikrotikMikrotikSchema,
-        response: CreateMikrotikResponseSchema,
-      },
-      handler: async (request, reply) => {
-        const result = await createMikrotikUseCase.execute(request.body);
+@Controller("/mikrotiks")
+export class CreateMikrotikController {
+  static inject = [CreateMikrotikUseCase];
 
-        if (result.isLeft()) {
-          const error = result.value;
+  constructor(private readonly createMikrotikUseCase: CreateMikrotikUseCase) {}
 
-          switch (error.constructor) {
-            case AlreadyExistsError:
-              return reply.status(409).send({
-                message: error.message,
-                statusCode: 409,
-                timestamp: new Date().toISOString(),
-                path: request.url,
-                fieldName: error.path?.includes("email") ? "email" : "cpf",
-                error: error.error,
-              });
+  @Validate({ body: CreateMikrotikSchema })
+  @Post("/", {
+    tags: ["Mikrotik"],
+    summary: "Cria um novo usuário",
+    description: "Endpoint para criar um novo usuário no sistema.",
+    body: CreateMikrotikSchema,
+    responses: {
+      201: { description: "Usuário criado", schema: MikrotikResponseSchema },
+      400: { description: "Dados inválidos" },
+    },
+  })
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const body = request.body as CreateMikrotikDto;
+    const result = await this.createMikrotikUseCase.execute(body);
 
-            default:
-              return reply.status(422).send({
-                message: error.message,
-                statusCode: 422,
-                timestamp: new Date().toISOString(),
-                path: request.url,
-                error: error.error,
-              });
-          }
-        }
+    if (result.isLeft()) {
+      throw result.value;
+    }
 
-        return reply.status(201).send(result.value.mikrotik);
-      },
-    });
-  };
-};
+    return reply.status(201).send(result.value);
+  }
+}
