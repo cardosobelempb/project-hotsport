@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BaseEntityBuild } from "@/common/domain/entities/entity-build.entity";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { PrismaDatabase } from "@/common/infrastructure/db/prisma-repository";
 import { BaseInMemoryRepository } from "../base-repository-in-memory";
 
 type StubEntityProsp = {
@@ -46,8 +47,8 @@ export class StubFactory implements BaseEntityBuild<
 }
 
 class StubInMemoryRepository extends BaseInMemoryRepository<StubEntity> {
-  constructor() {
-    super();
+  constructor(protected prisma: PrismaDatabase) {
+    super(prisma);
     this.sortableFields = ["name"];
   }
   protected async applyFilter(
@@ -74,7 +75,7 @@ describe("InmemoryRepository unit tests", () => {
   let deletedAt: Date;
 
   beforeEach(() => {
-    sut = new StubInMemoryRepository();
+    sut = new StubInMemoryRepository({} as PrismaDatabase);
     createdAt = new Date();
     updatedAt = new Date();
     deletedAt = new Date();

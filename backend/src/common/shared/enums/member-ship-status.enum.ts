@@ -1,6 +1,6 @@
 import z from "zod";
 
-export enum MemberShipStatus {
+export enum MembershipStatus {
   ACTIVE = "ACTIVE",
   INVITED = "INVITED",
   SUSPENDED = "SUSPENDED",
@@ -8,4 +8,4 @@ export enum MemberShipStatus {
   DELETED = "DELETED",
 }
 
-export const MemberStatusSchema = z.enum(MemberShipStatus);
+export const MemberStatusSchema = z.enum(MembershipStatus);

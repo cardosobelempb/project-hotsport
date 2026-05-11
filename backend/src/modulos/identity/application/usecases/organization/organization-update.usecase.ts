@@ -9,18 +9,17 @@ import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
+import { OrganizationMapper } from "@/modulos/identity/domain/mappers/organization.mapper";
 import { OrganizationRepository } from "@/modulos/identity/domain/repositories/organization.repository";
-
-import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
+import { OrganizationParams } from "@/modulos/identity/infrastructure/http/schemas/organization.schema";
 import {
-  OrganizationParams,
-  UpdateOrganizationInput,
-} from "../../../../organization/application/schemas/organization.shema";
-import { OrganizationPresentDto } from "../../dto/organization.dto";
+  OrganizationSummaryDto,
+  UpdateOrganizationDto,
+} from "../../dto/organization.dto";
 
 export type OrganizationUpdateUseCaseResponse = Either<
   BadRequestError | NotFoundError | ConflictError | AlreadyExistsError,
-  OrganizationPresentDto
+  OrganizationSummaryDto
 >;
 
 export class OrganizationUpdateUseCase {
@@ -30,7 +29,7 @@ export class OrganizationUpdateUseCase {
 
   async execute(
     { organizationId }: OrganizationParams,
-    input: UpdateOrganizationInput,
+    input: UpdateOrganizationDto,
   ): Promise<OrganizationUpdateUseCaseResponse> {
     if (!organizationId) {
       return left(
@@ -86,12 +85,12 @@ export class OrganizationUpdateUseCase {
     }
 
     if (input.logoUrl !== undefined) {
-      organization.changeLogoUrl(input.logoUrl);
+      organization.changeSlug(input.logoUrl);
     }
 
     const updatedOrganization =
       await this.organizationRepository.save(organization);
 
-    return right(OrganizationMapper.toUpdate(updatedOrganization));
+    return right(OrganizationMapper.toSummary(updatedOrganization));
   }
 }

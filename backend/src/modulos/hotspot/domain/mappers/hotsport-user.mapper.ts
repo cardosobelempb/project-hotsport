@@ -1,8 +1,9 @@
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+
 import {
   HotsportUserOutputDto,
   HotsportUserRawDto,
-} from "../../../application/dto/hotsport-user.dto";
+} from "../../application/dto/hotsport-user.dto";
 import { HotsportUserEntity } from "../entities/hotsport-user-entity";
 
 export class HotsportUserMapper {

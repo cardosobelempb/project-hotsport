@@ -5,7 +5,8 @@ import {
   Page,
   PageInput,
 } from "@/common/domain/repositories/types/pagination.types";
-import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
+
+import { OrganizationMapper } from "@/modulos/identity/domain/mappers/organization.mapper";
 import { OrganizationSummaryDto } from "../../dto/organization.dto";
 
 // ─── Tipo de retorno ──────────────────────────────────────────────────────────
@@ -26,7 +27,7 @@ export class OrganizationPageUseCase {
 
     return right({
       ...result,
-      content: result.content.map(OrganizationMapper.toPage),
+      content: result.content.map(OrganizationMapper.toSummary),
     });
   }
 }

@@ -13,7 +13,7 @@ export class VoucherPrismaMapper {
         code: raw.code,
         status: raw.status as VoucherStatus,
         usedAt: raw.usedAt,
-        expiresAt: raw.expiresAt,
+        expiredAt: raw.expiredAt,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
         deletedAt: raw.deletedAt,
@@ -33,7 +33,7 @@ export class VoucherPrismaMapper {
       code: entity.code,
       status: entity.status as VoucherStatus,
       usedAt: entity.usedAt ?? null,
-      expiresAt: entity.expiresAt ?? null,
+      expiredAt: entity.expiredAt ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       deletedAt: entity.deletedAt,
@@ -50,7 +50,7 @@ export class VoucherPrismaMapper {
       code: entity.code,
       status: entity.status as VoucherStatus,
       usedAt: entity.usedAt ?? null,
-      expiresAt: entity.expiresAt ?? null,
+      expiredAt: entity.expiredAt ?? null,
       updatedAt: entity.updatedAt,
     };
   }

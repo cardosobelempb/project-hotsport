@@ -6,14 +6,14 @@ import {
 } from "@/common/domain/errors/handle-errors/either";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 
+import { OrganizationMapper } from "@/modulos/identity/domain/mappers/organization.mapper";
 import { OrganizationRepository } from "@/modulos/identity/domain/repositories/organization.repository";
-import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
-import { OrganizationParams } from "../../../../organization/application/schemas/organization.shema";
-import { OrganizationPresentDto } from "../../dto/organization.dto";
+import { OrganizationParams } from "@/modulos/identity/infrastructure/http/schemas/organization.schema";
+import { OrganizationSummaryDto } from "../../dto/organization.dto";
 
 export type OrganizationFindByIdUseCaseResponse = Either<
   BadRequestError | NotFoundError,
-  OrganizationPresentDto
+  OrganizationSummaryDto
 >;
 
 export class OrganizationFindByIdUseCase {
@@ -47,6 +47,6 @@ export class OrganizationFindByIdUseCase {
       );
     }
 
-    return right(OrganizationMapper.toCreate(organization));
+    return right(OrganizationMapper.toSummary(organization));
   }
 }

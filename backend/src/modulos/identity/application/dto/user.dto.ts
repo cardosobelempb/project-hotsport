@@ -16,7 +16,7 @@ import {
   UserSchema,
   UserSummarySchema,
   UserUpdateResponseSchema,
-} from "../schemas/user.schema";
+} from "../../infrastructure/http/schemas/user.schema";
 
 export type UserDto = z.infer<typeof UserSchema>;
 export type CreateUserDto = z.infer<typeof CreateUserSchema>;

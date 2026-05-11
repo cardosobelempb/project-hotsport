@@ -8,15 +8,17 @@ import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exis
 import { ConflictError } from "@/common/domain/errors/usecases/conflict.error";
 
 import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
-import { OrganizationEntity } from "@/modulos/identity/domain/entities/organization.entity";
+import { OrganizationMapper } from "@/modulos/identity/domain/mappers/organization.mapper";
 import { OrganizationRepository } from "@/modulos/identity/domain/repositories/organization.repository";
-import { OrganizationMapper } from "@/modulos/organization/domain/mappers/organization.mapper";
-import { CreateOrganizationInput } from "../../../../organization/application/schemas/organization.shema";
-import { OrganizationPresentDto } from "../../dto/organization.dto";
+import {
+  CreateOrganizationDto,
+  OrganizationSummaryDto,
+} from "../../dto/organization.dto";
+import { OrganizationFactory } from "../../factories/organization.factory";
 
 export type OrganizationCreateUseCaseResponse = Either<
   AlreadyExistsError,
-  OrganizationPresentDto
+  OrganizationSummaryDto
 >;
 
 export class OrganizationCreateUseCase {
@@ -25,7 +27,7 @@ export class OrganizationCreateUseCase {
   ) {}
 
   async execute(
-    input: CreateOrganizationInput,
+    input: CreateOrganizationDto,
   ): Promise<OrganizationCreateUseCaseResponse> {
     const organizationWithSameSlug =
       await this.organizationRepository.findBySlug(input.slug);
@@ -40,15 +42,15 @@ export class OrganizationCreateUseCase {
       );
     }
 
-    const organization = OrganizationEntity.create({
+    const organization = OrganizationFactory.build({
       name: input.name,
       slug: SlugVO.create(input.slug),
-      logoUrl: input.logoUrl ?? null,
+      logoUrl: input.logoUrl,
     });
 
     const createdOrganization =
       await this.organizationRepository.create(organization);
 
-    return right(OrganizationMapper.toCreate(createdOrganization));
+    return right(OrganizationMapper.toSummary(createdOrganization));
   }
 }

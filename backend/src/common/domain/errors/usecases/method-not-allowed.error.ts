@@ -6,12 +6,13 @@ export class MethodNotAllowedError
   extends StandardError
   implements BaseUseCaseError
 {
-  constructor(path: string) {
+  constructor(params: { fieldName: string; value?: string; message?: string }) {
     super({
-      error: "MethodNotAllowedError",
-      message: CodeError.METHOD_NOT_ALLOWED,
       statusCode: 405,
-      path,
+      error: CodeError.METHOD_NOT_ALLOWED,
+      message:
+        params.message ?? `${params.fieldName} "${params.value}" já existe`,
+      fieldName: params.fieldName,
     });
   }
 }

@@ -1,6 +1,6 @@
 import z from "zod";
 
-export enum MemberShipRole {
+export enum MembershipRole {
   OWNER = "OWNER",
   ADMIN = "ADMIN",
   AFFILIATE = "AFFILIATE",
@@ -12,4 +12,4 @@ export enum MemberShipRole {
   MEMBER = "MEMBER",
 }
 
-export const MemberRoleSchema = z.enum(MemberShipRole);
+export const MemberRoleSchema = z.enum(MembershipRole);

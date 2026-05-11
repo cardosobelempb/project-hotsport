@@ -5,39 +5,39 @@
 
 import z from "zod";
 import {
-  CreateMemberShipSchema,
-  MemberShipActivateResponseSchema,
-  MemberShipCreateResponseSchema,
-  MemberShipDeactivateResponseSchema,
-  MemberShipFindByIdResponseSchema,
-  MemberShipPageResponseSchema,
-  MemberShipResponseSchema,
-  MemberShipSchema,
-  MemberShipSummarySchema,
-  MemberShipUpdateResponseSchema,
-  UpdateMemberShipSchema,
-} from "../schemas/member-ship.schema";
+  CreateMembershipSchema,
+  MembershipActivateResponseSchema,
+  MembershipCreateResponseSchema,
+  MembershipDeactivateResponseSchema,
+  MembershipFindByIdResponseSchema,
+  MembershipPageResponseSchema,
+  MembershipResponseSchema,
+  MembershipSchema,
+  MembershipSummarySchema,
+  MembershipUpdateResponseSchema,
+  UpdateMembershipSchema,
+} from "../../infrastructure/http/schemas/member-ship.schema";
 
-export type MemberShipDto = z.infer<typeof MemberShipSchema>;
-export type CreateMemberShipDto = z.infer<typeof CreateMemberShipSchema>;
-export type UpdateMemberShipDto = z.infer<typeof UpdateMemberShipSchema>;
-export type MemberShipSummaryDto = z.infer<typeof MemberShipSummarySchema>;
-export type MemberShipResponseDto = z.infer<typeof MemberShipResponseSchema>;
-export type MemberShipCreateResponseDto = z.infer<
-  typeof MemberShipCreateResponseSchema
+export type MembershipDto = z.infer<typeof MembershipSchema>;
+export type CreateMembershipDto = z.infer<typeof CreateMembershipSchema>;
+export type UpdateMembershipDto = z.infer<typeof UpdateMembershipSchema>;
+export type MembershipSummaryDto = z.infer<typeof MembershipSummarySchema>;
+export type MembershipResponseDto = z.infer<typeof MembershipResponseSchema>;
+export type MembershipCreateResponseDto = z.infer<
+  typeof MembershipCreateResponseSchema
 >;
-export type MemberShipFindByIdResponseDto = z.infer<
-  typeof MemberShipFindByIdResponseSchema
+export type MembershipFindByIdResponseDto = z.infer<
+  typeof MembershipFindByIdResponseSchema
 >;
-export type MemberShipUpdateResponseDto = z.infer<
-  typeof MemberShipUpdateResponseSchema
+export type MembershipUpdateResponseDto = z.infer<
+  typeof MembershipUpdateResponseSchema
 >;
-export type MemberShipActivateResponseDto = z.infer<
-  typeof MemberShipActivateResponseSchema
+export type MembershipActivateResponseDto = z.infer<
+  typeof MembershipActivateResponseSchema
 >;
-export type MemberShipDeactivateResponseDto = z.infer<
-  typeof MemberShipDeactivateResponseSchema
+export type MembershipDeactivateResponseDto = z.infer<
+  typeof MembershipDeactivateResponseSchema
 >;
-export type MemberShipPageResponseDto = z.infer<
-  typeof MemberShipPageResponseSchema
+export type MembershipPageResponseDto = z.infer<
+  typeof MembershipPageResponseSchema
 >;

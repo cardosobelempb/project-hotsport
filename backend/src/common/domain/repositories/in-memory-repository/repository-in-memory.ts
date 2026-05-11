@@ -1,3 +1,4 @@
+import { PrismaDatabase } from "@/common/infrastructure/db/prisma-repository";
 import { NotFoundError } from "../../errors/usecases/not-founde.rror";
 import { UUIDVO } from "../../values-objects/uuidvo/uuid.vo";
 import { PageRepository } from "../page-repository";
@@ -27,7 +28,10 @@ export type CreateProps<Entity> = Partial<
  */
 export abstract class RepositoryInMemory<
   Entity extends ModelProps,
-> implements PageRepository<Entity> {
+> extends PageRepository<Entity> {
+  constructor(protected prisma: PrismaDatabase) {
+    super(prisma);
+  }
   /** Armazena todas as entidades em memória */
   protected items: Entity[] = [];
 

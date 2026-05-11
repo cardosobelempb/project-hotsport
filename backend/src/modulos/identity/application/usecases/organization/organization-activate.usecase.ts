@@ -9,7 +9,7 @@ import {
 import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { OrganizationRepository } from "@/modulos/identity/domain/repositories/organization.repository";
-import { OrganizationParams } from "@/modulos/organization/application/schemas/organization.shema";
+import { OrganizationParams } from "@/modulos/identity/infrastructure/http/schemas/organization.schema";
 
 export type OrganizationActivateUseCaseResponse = Either<
   BadRequestError | NotFoundError | AlreadyExistsError,

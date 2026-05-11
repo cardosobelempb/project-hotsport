@@ -133,13 +133,12 @@ exports.Prisma.UserScalarFieldEnum = {
 exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  providerType: 'providerType',
+  tokenType: 'tokenType',
   provider: 'provider',
   providerAccountId: 'providerAccountId',
   refreshToken: 'refreshToken',
   accessToken: 'accessToken',
   expiresAt: 'expiresAt',
-  tokenType: 'tokenType',
   scope: 'scope',
   idToken: 'idToken',
   sessionState: 'sessionState',
@@ -150,15 +149,23 @@ exports.Prisma.AccountScalarFieldEnum = {
 
 exports.Prisma.SessionScalarFieldEnum = {
   id: 'id',
-  sessionToken: 'sessionToken',
   userId: 'userId',
-  expires: 'expires'
+  sessionToken: 'sessionToken',
+  expires: 'expires',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.VerificationTokenScalarFieldEnum = {
+  id: 'id',
   identifier: 'identifier',
   token: 'token',
-  expires: 'expires'
+  expiredAt: 'expiredAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.UserProfileScalarFieldEnum = {
@@ -184,8 +191,10 @@ exports.Prisma.TokenScalarFieldEnum = {
   userId: 'userId',
   type: 'type',
   valueHash: 'valueHash',
-  expiresAt: 'expiresAt',
+  expiredAt: 'expiredAt',
   revokedAt: 'revokedAt',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -196,7 +205,7 @@ exports.Prisma.OtpScalarFieldEnum = {
   userId: 'userId',
   phone: 'phone',
   codeHash: 'codeHash',
-  expiresAt: 'expiresAt',
+  expiredAt: 'expiredAt',
   attempts: 'attempts',
   usedAt: 'usedAt',
   createdAt: 'createdAt',
@@ -208,7 +217,6 @@ exports.Prisma.TenantScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
-  documentType: 'documentType',
   documentNumber: 'documentNumber',
   contactEmail: 'contactEmail',
   phone: 'phone',
@@ -223,10 +231,6 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   tenantId: 'tenantId',
   name: 'name',
   slug: 'slug',
-  documentType: 'documentType',
-  documentNumber: 'documentNumber',
-  contactEmail: 'contactEmail',
-  phone: 'phone',
   logoUrl: 'logoUrl',
   status: 'status',
   createdAt: 'createdAt',
@@ -244,7 +248,7 @@ exports.Prisma.MembershipScalarFieldEnum = {
   joinedAt: 'joinedAt',
   invitedEmail: 'invitedEmail',
   invitedById: 'invitedById',
-  expiresAt: 'expiresAt',
+  expiredAt: 'expiredAt',
   removedAt: 'removedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -256,7 +260,7 @@ exports.Prisma.AddressScalarFieldEnum = {
   userId: 'userId',
   tenantId: 'tenantId',
   organizationId: 'organizationId',
-  membershipId: 'membershipId',
+  memberId: 'memberId',
   AddressType: 'AddressType',
   street: 'street',
   addressNumber: 'addressNumber',
@@ -386,7 +390,7 @@ exports.Prisma.VoucherScalarFieldEnum = {
   code: 'code',
   status: 'status',
   usedAt: 'usedAt',
-  expiresAt: 'expiresAt',
+  expiredAt: 'expiredAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -425,7 +429,7 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   currentPeriodStart: 'currentPeriodStart',
   currentPeriodEnd: 'currentPeriodEnd',
   canceledAt: 'canceledAt',
-  expiresAt: 'expiresAt',
+  expiredAt: 'expiredAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -535,7 +539,6 @@ exports.Prisma.LeadScalarFieldEnum = {
 exports.Prisma.LgpdConsentScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  tenantId: 'tenantId',
   consentTerms: 'consentTerms',
   consentMarketing: 'consentMarketing',
   consentDataSharing: 'consentDataSharing',
@@ -548,7 +551,7 @@ exports.Prisma.LgpdConsentScalarFieldEnum = {
   withdrawnAt: 'withdrawnAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  organizationId: 'organizationId'
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.ConnectionLogScalarFieldEnum = {
@@ -673,19 +676,20 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.TokenType = exports.$Enums.TokenType = {
+  REFRESH: 'REFRESH',
+  ACCESS: 'ACCESS',
+  RESET_PASSWORD: 'RESET_PASSWORD',
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+  API_KEY: 'API_KEY'
+};
+
 exports.ProviderType = exports.$Enums.ProviderType = {
   GOOGLE: 'GOOGLE',
   FACEBOOK: 'FACEBOOK',
   APPLE: 'APPLE',
   CREDENTIALS: 'CREDENTIALS',
   OTHER: 'OTHER'
-};
-
-exports.TokenType = exports.$Enums.TokenType = {
-  REFRESH: 'REFRESH',
-  ACCESS: 'ACCESS',
-  RESET_PASSWORD: 'RESET_PASSWORD',
-  API_KEY: 'API_KEY'
 };
 
 exports.DocumentType = exports.$Enums.DocumentType = {
@@ -715,7 +719,7 @@ exports.OrganizationStatus = exports.$Enums.OrganizationStatus = {
   DELETED: 'DELETED'
 };
 
-exports.MemberShipRole = exports.$Enums.MemberShipRole = {
+exports.MembershipRole = exports.$Enums.MembershipRole = {
   OWNER: 'OWNER',
   ADMIN: 'ADMIN',
   AFFILIATE: 'AFFILIATE',
@@ -727,7 +731,7 @@ exports.MemberShipRole = exports.$Enums.MemberShipRole = {
   MEMBER: 'MEMBER'
 };
 
-exports.MemberShipStatus = exports.$Enums.MemberShipStatus = {
+exports.MembershipStatus = exports.$Enums.MembershipStatus = {
   ACTIVE: 'ACTIVE',
   INVITED: 'INVITED',
   SUSPENDED: 'SUSPENDED',
@@ -830,7 +834,7 @@ exports.LeadStatus = exports.$Enums.LeadStatus = {
   DISCARDED: 'DISCARDED'
 };
 
-exports.ConsentStatus = exports.$Enums.ConsentStatus = {
+exports.LgpdConsentStatus = exports.$Enums.LgpdConsentStatus = {
   ACTIVE: 'ACTIVE',
   REVOKED: 'REVOKED',
   WITHDRAWN: 'WITHDRAWN'

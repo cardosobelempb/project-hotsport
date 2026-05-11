@@ -1,22 +1,21 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { DateOfBirthVO } from "@/common/domain/values-objects/date-time/birth/date-of-birth-vo";
 import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { DocumentType } from "@/common/shared/enums/document-type.enum";
-import { UserProfileStatus } from "@/common/shared/enums/lead-status.enum";
+import { UserProfileStatus } from "@/common/shared/enums/user-profile-status.enum";
 
 export interface UserProfileProps {
   userId: UUIDVO;
-  firstName: string | null;
-  lastName: string | null;
-  displayName: string | null;
-  fullName: string | null;
-  birthDate: DateOfBirthVO | null;
-  phone: PhoneVO | null;
-  avatarUrl: string | null;
-  documentType: DocumentType | null;
-  documentNumber: string | null;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  fullName: string;
+  birthDate: Date | null;
+  phone: PhoneVO;
+  avatarUrl: string;
+  documentNumber: string;
+  documentType: DocumentType;
   status: UserProfileStatus;
   createdAt: Date;
   updatedAt: Date | null;
@@ -83,7 +82,12 @@ export class UserProfileEntity extends BaseEntity<UserProfileProps> {
   static create(
     props: Optional<
       UserProfileProps,
-      "status" | "createdAt" | "updatedAt" | "deletedAt"
+      | "status"
+      | "documentType"
+      | "createdAt"
+      | "updatedAt"
+      | "deletedAt"
+      | "birthDate"
     >,
     id?: UUIDVO,
   ) {
@@ -91,6 +95,8 @@ export class UserProfileEntity extends BaseEntity<UserProfileProps> {
       {
         ...props,
         status: props.status ?? UserProfileStatus.ACTIVE,
+        birthDate: props.birthDate ?? null,
+        documentType: props.documentType ?? DocumentType.CPF,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

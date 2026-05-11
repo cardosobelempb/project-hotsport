@@ -5,7 +5,7 @@ import { TOKENS } from "@/common/shared/container/tokens";
 import { ModuleDefinition } from "@/common/shared/module/module.types";
 import { UserCreateUseCase } from "./application/usecases/users/user-create.usecase";
 import { UserCreateController } from "./infrastructure/http/controllers/user/user-register.controller";
-import { PrismaUserRepository } from "./infrastructure/http/repositories/prisma/prisma-user.repository";
+import { PrismaUserRepository } from "./infrastructure/repositories/prisma/prisma-user.repository";
 
 const prisma = getPrismaClient();
 

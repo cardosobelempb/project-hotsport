@@ -27,21 +27,22 @@ datasource db {
 
 model User {
   id            String    @id @default(uuid()) @db.Uuid
-  email         String?   @unique @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
   emailVerified DateTime? @map("email_verified")
-  passwordHash  String?   @map("password_hash") @db.VarChar(255)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime? @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   accounts     Account[]
   sessions     Session[]
   tokens       Token[]
+  profile      UserProfile?
   otps         Otp[]
   memberships  Membership[]
   addresses    Address[]
   lgpdConsents LgpdConsent[]
-  profile      UserProfile?
   leads        Lead[]
 
   @@index([email])
@@ -52,17 +53,16 @@ model User {
 model Account {
   id                String       @id @default(uuid()) @db.Uuid
   userId            String       @map("user_id") @db.Uuid
-  providerType      ProviderType @default(CREDENTIALS) @map("provider_type")
-  provider          String       @db.VarChar(50)
+  tokenType         TokenType    @default(ACCESS) @map("token_type")
+  provider          ProviderType @default(CREDENTIALS) @map("provider")
   providerAccountId String       @map("provider_account_id") @db.VarChar(255)
 
-  refreshToken String?    @map("refresh_token") @db.Text
-  accessToken  String?    @map("access_token") @db.Text
-  expiresAt    Int?       @map("expires_at")
-  tokenType    TokenType? @default(ACCESS) @map("token_type")
-  scope        String?    @db.Text
-  idToken      String?    @map("id_token") @db.Text
-  sessionState String?    @map("session_state") @db.Text
+  refreshToken String? @map("refresh_token") @db.Text
+  accessToken  String? @map("access_token") @db.Text
+  expiresAt    Int?    @map("expires_at")
+  scope        String? @db.Text
+  idToken      String? @map("id_token") @db.Text
+  sessionState String? @map("session_state") @db.Text
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -72,28 +72,44 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+  @@index([expiresAt])
   @@index([deletedAt])
   @@map("accounts")
 }
 
 model Session {
   id           String   @id @default(uuid()) @db.Uuid
-  sessionToken String   @unique @map("session_token") @db.VarChar(255)
   userId       String   @map("user_id") @db.Uuid
-  expires      DateTime
+  sessionToken String   @unique @map("session_token") @db.VarChar(255)
+  expires      DateTime @map("expired_at")
+
+  ipAddress String? @map("ip_address") @db.VarChar(45)
+  userAgent String? @map("user_agent") @db.VarChar(500)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expires])
+  @@index([deletedAt])
   @@map("sessions")
 }
 
 model VerificationToken {
-  identifier String   @db.VarChar(255)
-  token      String   @unique @db.VarChar(255)
-  expires    DateTime
+  id         String    @id @default(uuid()) @db.Uuid
+  identifier String    @db.VarChar(255)
+  token      String    @unique @map("token") @db.VarChar(255)
+  expiredAt  DateTime  @map("expired_at")
+  usedAt     DateTime? @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([identifier, token])
+  @@index([identifier])
+  @@index([expiredAt])
   @@map("verification_tokens")
 }
 
@@ -126,19 +142,24 @@ model UserProfile {
 model Token {
   id        String    @id @default(uuid()) @db.Uuid
   userId    String    @map("user_id") @db.Uuid
-  type      TokenType @default(ACCESS)
+  type      TokenType @default(REFRESH)
   valueHash String    @map("value_hash") @db.VarChar(255)
-  expiresAt DateTime  @map("expires_at")
+  expiredAt DateTime  @map("expired_at")
   revokedAt DateTime? @map("revoked_at")
+
+  ipAddress String? @map("ip_address") @db.VarChar(45)
+  userAgent String? @map("user_agent") @db.VarChar(500)
+
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, type])
-  @@index([userId, expiresAt])
+  @@index([expiredAt])
+  @@index([revokedAt])
   @@index([deletedAt])
   @@map("tokens")
 }
@@ -148,7 +169,7 @@ model Otp {
   userId    String?   @map("user_id") @db.Uuid
   phone     String    @db.VarChar(30)
   codeHash  String    @map("code_hash") @db.VarChar(255)
-  expiresAt DateTime  @map("expires_at")
+  expiredAt DateTime  @map("expired_at")
   attempts  Int       @default(0)
   usedAt    DateTime? @map("used_at")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -159,7 +180,7 @@ model Otp {
 
   @@index([phone])
   @@index([userId])
-  @@index([expiresAt])
+  @@index([expiredAt])
   @@index([deletedAt])
   @@map("otps")
 }
@@ -168,24 +189,22 @@ model Otp {
 // SaaS / Multi-tenant
 // -----------------------------------------------------------------------------
 model Tenant {
-  id             String        @id @default(uuid()) @db.Uuid
-  name           String        @db.VarChar(150)
-  slug           String        @unique @db.VarChar(150)
-  documentType   DocumentType? @map("document_type")
-  documentNumber String?       @unique @map("document_number") @db.VarChar(30)
-  contactEmail   String?       @map("contact_email") @db.VarChar(255)
-  phone          String?       @db.VarChar(20)
-  status         TenantStatus  @default(TRIALING)
+  id             String       @id @default(uuid()) @db.Uuid
+  name           String       @db.VarChar(150)
+  slug           String       @unique @db.VarChar(150)
+  documentNumber String?      @unique @map("document_number") @db.VarChar(30)
+  contactEmail   String?      @map("contact_email") @db.VarChar(255)
+  phone          String?      @db.VarChar(20)
+  status         TenantStatus @default(TRIALING)
 
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   memberships   Membership[]
   organizations Organization[]
-  lgpdConsents  LgpdConsent[]
-  addresses     Address[]
   leads         Lead[]
+  addresses     Address[]
 
   @@index([status])
   @@index([deletedAt])
@@ -193,22 +212,20 @@ model Tenant {
 }
 
 model Organization {
-  id             String             @id @default(uuid()) @db.Uuid
-  tenantId       String?            @db.Uuid
-  name           String             @db.VarChar(150)
-  slug           String             @unique @db.VarChar(150)
-  documentType   DocumentType?      @map("document_type")
-  documentNumber String?            @unique @map("document_number") @db.VarChar(30)
-  contactEmail   String?            @map("contact_email") @db.VarChar(255)
-  phone          String?            @db.VarChar(20)
-  logoUrl        String?            @map("logo_url") @db.VarChar(500)
-  status         OrganizationStatus @default(ACTIVE)
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime?          @updatedAt @map("updated_at")
-  deletedAt      DateTime?          @map("deleted_at")
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
 
-  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  name    String  @db.VarChar(150)
+  slug    String  @db.VarChar(150)
+  logoUrl String? @map("logo_url") @db.VarChar(500)
 
+  status OrganizationStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   memberships         Membership[]
   addresses           Address[]
   organizationConfigs OrganizationConfig[]
@@ -225,11 +242,12 @@ model Organization {
   portals             Portal[]
   campaigns           Campaign[]
   campaignItems       CampaignItem[]
-  lgpdConsents        LgpdConsent[]
   connectionLogs      ConnectionLog[]
   whatsappLogs        WhatsappLog[]
   leads               Lead[]
 
+  @@unique([slug])
+  @@unique([tenantId])
   @@index([status])
   @@index([deletedAt])
   @@map("organizations")
@@ -239,32 +257,32 @@ model Membership {
   id             String  @id @default(uuid()) @db.Uuid
   userId         String  @map("user_id") @db.Uuid
   tenantId       String  @map("tenant_id") @db.Uuid
-  organizationId String? @db.Uuid
+  organizationId String? @map("organization_id") @db.Uuid
 
-  role   MemberShipRole   @default(MEMBER)
-  status MemberShipStatus @default(ACTIVE)
+  role   MembershipRole   @default(MEMBER)
+  status MembershipStatus @default(ACTIVE)
 
   joinedAt     DateTime? @map("joined_at")
   invitedEmail String?   @map("invited_email") @db.VarChar(255)
   invitedById  String?   @map("invited_by_id") @db.Uuid
-  expiresAt    DateTime? @map("expires_at")
+  expiredAt    DateTime? @map("expired_at")
   removedAt    DateTime? @map("removed_at")
 
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   addresses    Address[]
 
-  @@unique([userId, tenantId])
+  @@unique([userId, tenantId, organizationId])
   @@index([userId])
   @@index([tenantId])
+  @@index([organizationId])
   @@index([tenantId, role])
   @@index([tenantId, status])
-  @@index([invitedEmail])
   @@index([deletedAt])
   @@map("memberships")
 }
@@ -274,7 +292,7 @@ model Address {
   userId         String? @map("user_id") @db.Uuid
   tenantId       String? @map("tenant_id") @db.Uuid
   organizationId String? @map("organization_id") @db.Uuid
-  membershipId   String? @map("membership_id") @db.Uuid
+  memberId       String? @map("member_id") @db.Uuid
 
   AddressType AddressType? @default(HOME) @map("address_type")
 
@@ -299,7 +317,7 @@ model Address {
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant       Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  membership   Membership?   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  member       Membership?   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   city  City?  @relation(fields: [cityId], references: [id], onDelete: SetNull)
   state State? @relation(fields: [stateId], references: [id], onDelete: SetNull)
@@ -500,7 +518,7 @@ model Voucher {
   code           String        @unique @db.VarChar(50)
   status         VoucherStatus @default(UNUSED)
   usedAt         DateTime?     @map("used_at")
-  expiresAt      DateTime?     @map("expires_at")
+  expiredAt      DateTime?     @map("expired_at")
   createdAt      DateTime      @default(now()) @map("created_at")
   updatedAt      DateTime?     @updatedAt @map("updated_at")
   deletedAt      DateTime?     @map("deleted_at")
@@ -511,7 +529,7 @@ model Voucher {
 
   @@index([organizationId, status])
   @@index([hotspotPlanId])
-  @@index([expiresAt])
+  @@index([expiredAt])
   @@index([deletedAt])
   @@map("vouchers")
 }
@@ -564,7 +582,7 @@ model Subscription {
   currentPeriodStart DateTime           @map("current_period_start")
   currentPeriodEnd   DateTime           @map("current_period_end")
   canceledAt         DateTime?          @map("canceled_at")
-  expiresAt          DateTime?          @map("expires_at")
+  expiredAt          DateTime?          @map("expired_at")
   deletedAt          DateTime?          @map("deleted_at")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime?          @updatedAt @map("updated_at")
@@ -740,34 +758,31 @@ model Lead {
 // -----------------------------------------------------------------------------
 
 model LgpdConsent {
-  id       String @id @default(uuid()) @db.Uuid
-  userId   String @map("user_id") @db.Uuid
-  tenantId String @map("tenant_id") @db.Uuid
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
 
   consentTerms       Boolean @map("consent_terms")
   consentMarketing   Boolean @map("consent_marketing")
   consentDataSharing Boolean @map("consent_data_sharing")
   consentAnalytics   Boolean @map("consent_analytics")
 
-  ipAddress      String        @map("ip_address") @db.VarChar(45)
-  macAddress     String?       @map("mac_address") @db.VarChar(20)
-  userAgent      String        @map("user_agent") @db.VarChar(500)
-  consentVersion String        @map("consent_version") @db.VarChar(10)
-  status         ConsentStatus @default(ACTIVE)
-  withdrawnAt    DateTime?     @map("withdrawn_at")
+  ipAddress      String            @map("ip_address") @db.VarChar(45)
+  macAddress     String?           @map("mac_address") @db.VarChar(20)
+  userAgent      String            @map("user_agent") @db.VarChar(500)
+  consentVersion String            @map("consent_version") @db.VarChar(10)
+  status         LgpdConsentStatus @default(ACTIVE)
+  withdrawnAt    DateTime?         @map("withdrawn_at")
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?       @db.Uuid
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, tenantId, consentVersion])
+  @@unique([userId, consentVersion])
   @@index([userId])
-  @@index([tenantId])
   @@index([status])
+  @@index([deletedAt])
   @@map("lgpd_consents")
 }
 
@@ -954,6 +969,7 @@ enum TokenType {
   REFRESH
   ACCESS
   RESET_PASSWORD
+  EMAIL_VERIFICATION
   API_KEY
 }
 
@@ -1012,7 +1028,7 @@ enum VoucherStatus {
   CANCELED
 }
 
-enum ConsentStatus {
+enum LgpdConsentStatus {
   ACTIVE
   REVOKED
   WITHDRAWN
@@ -1103,4 +1119,24 @@ enum TenantStatus {
   ACTIVE
   SUSPENDED
   CANCELED
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  AFFILIATE
+  OPERATOR
+  CUSTOMER
+  MANAGER
+  SUPPORT
+  FINANCE
+  MEMBER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+  REMOVED
+  DELETED
 }

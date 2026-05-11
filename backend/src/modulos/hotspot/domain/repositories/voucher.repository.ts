@@ -1,8 +1,8 @@
-import { BaseSearchableRepository } from "@/core/domain/repositories/base-searchable.repository";
+import { PageRepository } from "@/common/domain/repositories/page-repository";
 import { Prisma } from "../../../../../generated/prisma";
-import { VoucherEntity } from "../../../domain/entities/voucher-entity";
+import { VoucherEntity } from "../entities/voucher-entity";
 
-export abstract class VoucherRepository extends BaseSearchableRepository<VoucherEntity> {
+export abstract class VoucherRepository extends PageRepository<VoucherEntity> {
   abstract findByCode(code: string): Promise<VoucherEntity | null>;
 
   abstract listByOrganization(organizationId: string): Promise<VoucherEntity[]>;

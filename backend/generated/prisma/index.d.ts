@@ -267,6 +267,7 @@ export const TokenType: {
   REFRESH: 'REFRESH',
   ACCESS: 'ACCESS',
   RESET_PASSWORD: 'RESET_PASSWORD',
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
   API_KEY: 'API_KEY'
 };
 
@@ -352,13 +353,13 @@ export const VoucherStatus: {
 export type VoucherStatus = (typeof VoucherStatus)[keyof typeof VoucherStatus]
 
 
-export const ConsentStatus: {
+export const LgpdConsentStatus: {
   ACTIVE: 'ACTIVE',
   REVOKED: 'REVOKED',
   WITHDRAWN: 'WITHDRAWN'
 };
 
-export type ConsentStatus = (typeof ConsentStatus)[keyof typeof ConsentStatus]
+export type LgpdConsentStatus = (typeof LgpdConsentStatus)[keyof typeof LgpdConsentStatus]
 
 
 export const PlanStatus: {
@@ -483,6 +484,32 @@ export const TenantStatus: {
 
 export type TenantStatus = (typeof TenantStatus)[keyof typeof TenantStatus]
 
+
+export const MembershipRole: {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  AFFILIATE: 'AFFILIATE',
+  OPERATOR: 'OPERATOR',
+  CUSTOMER: 'CUSTOMER',
+  MANAGER: 'MANAGER',
+  SUPPORT: 'SUPPORT',
+  FINANCE: 'FINANCE',
+  MEMBER: 'MEMBER'
+};
+
+export type MembershipRole = (typeof MembershipRole)[keyof typeof MembershipRole]
+
+
+export const MembershipStatus: {
+  ACTIVE: 'ACTIVE',
+  INVITED: 'INVITED',
+  SUSPENDED: 'SUSPENDED',
+  REMOVED: 'REMOVED',
+  DELETED: 'DELETED'
+};
+
+export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus]
+
 }
 
 export type UserProfileStatus = $Enums.UserProfileStatus
@@ -537,9 +564,9 @@ export type VoucherStatus = $Enums.VoucherStatus
 
 export const VoucherStatus: typeof $Enums.VoucherStatus
 
-export type ConsentStatus = $Enums.ConsentStatus
+export type LgpdConsentStatus = $Enums.LgpdConsentStatus
 
-export const ConsentStatus: typeof $Enums.ConsentStatus
+export const LgpdConsentStatus: typeof $Enums.LgpdConsentStatus
 
 export type PlanStatus = $Enums.PlanStatus
 
@@ -588,6 +615,14 @@ export const WhatsappLogStatus: typeof $Enums.WhatsappLogStatus
 export type TenantStatus = $Enums.TenantStatus
 
 export const TenantStatus: typeof $Enums.TenantStatus
+
+export type MembershipRole = $Enums.MembershipRole
+
+export const MembershipRole: typeof $Enums.MembershipRole
+
+export type MembershipStatus = $Enums.MembershipStatus
+
+export const MembershipStatus: typeof $Enums.MembershipStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -4886,17 +4921,15 @@ export namespace Prisma {
   export type TenantCountOutputType = {
     memberships: number
     organizations: number
-    lgpdConsents: number
-    addresses: number
     leads: number
+    addresses: number
   }
 
   export type TenantCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     memberships?: boolean | TenantCountOutputTypeCountMembershipsArgs
     organizations?: boolean | TenantCountOutputTypeCountOrganizationsArgs
-    lgpdConsents?: boolean | TenantCountOutputTypeCountLgpdConsentsArgs
-    addresses?: boolean | TenantCountOutputTypeCountAddressesArgs
     leads?: boolean | TenantCountOutputTypeCountLeadsArgs
+    addresses?: boolean | TenantCountOutputTypeCountAddressesArgs
   }
 
   // Custom InputTypes
@@ -4927,8 +4960,8 @@ export namespace Prisma {
   /**
    * TenantCountOutputType without action
    */
-  export type TenantCountOutputTypeCountLgpdConsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LgpdConsentWhereInput
+  export type TenantCountOutputTypeCountLeadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LeadWhereInput
   }
 
   /**
@@ -4936,13 +4969,6 @@ export namespace Prisma {
    */
   export type TenantCountOutputTypeCountAddressesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AddressWhereInput
-  }
-
-  /**
-   * TenantCountOutputType without action
-   */
-  export type TenantCountOutputTypeCountLeadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LeadWhereInput
   }
 
 
@@ -4965,7 +4991,6 @@ export namespace Prisma {
     portals: number
     campaigns: number
     campaignItems: number
-    lgpdConsents: number
     connectionLogs: number
     whatsappLogs: number
     leads: number
@@ -4986,7 +5011,6 @@ export namespace Prisma {
     portals?: boolean | OrganizationCountOutputTypeCountPortalsArgs
     campaigns?: boolean | OrganizationCountOutputTypeCountCampaignsArgs
     campaignItems?: boolean | OrganizationCountOutputTypeCountCampaignItemsArgs
-    lgpdConsents?: boolean | OrganizationCountOutputTypeCountLgpdConsentsArgs
     connectionLogs?: boolean | OrganizationCountOutputTypeCountConnectionLogsArgs
     whatsappLogs?: boolean | OrganizationCountOutputTypeCountWhatsappLogsArgs
     leads?: boolean | OrganizationCountOutputTypeCountLeadsArgs
@@ -5099,13 +5123,6 @@ export namespace Prisma {
    */
   export type OrganizationCountOutputTypeCountCampaignItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CampaignItemWhereInput
-  }
-
-  /**
-   * OrganizationCountOutputType without action
-   */
-  export type OrganizationCountOutputTypeCountLgpdConsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LgpdConsentWhereInput
   }
 
   /**
@@ -5658,9 +5675,9 @@ export namespace Prisma {
 
   export type UserGroupByOutputType = {
     id: string
-    email: string | null
+    email: string
     emailVerified: Date | null
-    passwordHash: string | null
+    passwordHash: string
     createdAt: Date
     updatedAt: Date | null
     deletedAt: Date | null
@@ -5694,11 +5711,11 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tokens?: boolean | User$tokensArgs<ExtArgs>
+    profile?: boolean | User$profileArgs<ExtArgs>
     otps?: boolean | User$otpsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
     addresses?: boolean | User$addressesArgs<ExtArgs>
     lgpdConsents?: boolean | User$lgpdConsentsArgs<ExtArgs>
-    profile?: boolean | User$profileArgs<ExtArgs>
     leads?: boolean | User$leadsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -5738,11 +5755,11 @@ export namespace Prisma {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     tokens?: boolean | User$tokensArgs<ExtArgs>
+    profile?: boolean | User$profileArgs<ExtArgs>
     otps?: boolean | User$otpsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
     addresses?: boolean | User$addressesArgs<ExtArgs>
     lgpdConsents?: boolean | User$lgpdConsentsArgs<ExtArgs>
-    profile?: boolean | User$profileArgs<ExtArgs>
     leads?: boolean | User$leadsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -5755,18 +5772,18 @@ export namespace Prisma {
       accounts: Prisma.$AccountPayload<ExtArgs>[]
       sessions: Prisma.$SessionPayload<ExtArgs>[]
       tokens: Prisma.$TokenPayload<ExtArgs>[]
+      profile: Prisma.$UserProfilePayload<ExtArgs> | null
       otps: Prisma.$OtpPayload<ExtArgs>[]
       memberships: Prisma.$MembershipPayload<ExtArgs>[]
       addresses: Prisma.$AddressPayload<ExtArgs>[]
       lgpdConsents: Prisma.$LgpdConsentPayload<ExtArgs>[]
-      profile: Prisma.$UserProfilePayload<ExtArgs> | null
       leads: Prisma.$LeadPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      email: string | null
+      email: string
       emailVerified: Date | null
-      passwordHash: string | null
+      passwordHash: string
       createdAt: Date
       updatedAt: Date | null
       deletedAt: Date | null
@@ -6167,11 +6184,11 @@ export namespace Prisma {
     accounts<T extends User$accountsArgs<ExtArgs> = {}>(args?: Subset<T, User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends User$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tokens<T extends User$tokensArgs<ExtArgs> = {}>(args?: Subset<T, User$tokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    profile<T extends User$profileArgs<ExtArgs> = {}>(args?: Subset<T, User$profileArgs<ExtArgs>>): Prisma__UserProfileClient<$Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     otps<T extends User$otpsArgs<ExtArgs> = {}>(args?: Subset<T, User$otpsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     memberships<T extends User$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     addresses<T extends User$addressesArgs<ExtArgs> = {}>(args?: Subset<T, User$addressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     lgpdConsents<T extends User$lgpdConsentsArgs<ExtArgs> = {}>(args?: Subset<T, User$lgpdConsentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LgpdConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    profile<T extends User$profileArgs<ExtArgs> = {}>(args?: Subset<T, User$profileArgs<ExtArgs>>): Prisma__UserProfileClient<$Result.GetResult<Prisma.$UserProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     leads<T extends User$leadsArgs<ExtArgs> = {}>(args?: Subset<T, User$leadsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -6432,7 +6449,7 @@ export namespace Prisma {
     /**
      * The data needed to create a User.
      */
-    data?: XOR<UserCreateInput, UserUncheckedCreateInput>
+    data: XOR<UserCreateInput, UserUncheckedCreateInput>
   }
 
   /**
@@ -6674,6 +6691,25 @@ export namespace Prisma {
   }
 
   /**
+   * User.profile
+   */
+  export type User$profileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserProfile
+     */
+    select?: UserProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserProfile
+     */
+    omit?: UserProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserProfileInclude<ExtArgs> | null
+    where?: UserProfileWhereInput
+  }
+
+  /**
    * User.otps
    */
   export type User$otpsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6770,25 +6806,6 @@ export namespace Prisma {
   }
 
   /**
-   * User.profile
-   */
-  export type User$profileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserProfile
-     */
-    select?: UserProfileSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserProfile
-     */
-    omit?: UserProfileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserProfileInclude<ExtArgs> | null
-    where?: UserProfileWhereInput
-  }
-
-  /**
    * User.leads
    */
   export type User$leadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6854,13 +6871,12 @@ export namespace Prisma {
   export type AccountMinAggregateOutputType = {
     id: string | null
     userId: string | null
-    providerType: $Enums.ProviderType | null
-    provider: string | null
+    tokenType: $Enums.TokenType | null
+    provider: $Enums.ProviderType | null
     providerAccountId: string | null
     refreshToken: string | null
     accessToken: string | null
     expiresAt: number | null
-    tokenType: $Enums.TokenType | null
     scope: string | null
     idToken: string | null
     sessionState: string | null
@@ -6872,13 +6888,12 @@ export namespace Prisma {
   export type AccountMaxAggregateOutputType = {
     id: string | null
     userId: string | null
-    providerType: $Enums.ProviderType | null
-    provider: string | null
+    tokenType: $Enums.TokenType | null
+    provider: $Enums.ProviderType | null
     providerAccountId: string | null
     refreshToken: string | null
     accessToken: string | null
     expiresAt: number | null
-    tokenType: $Enums.TokenType | null
     scope: string | null
     idToken: string | null
     sessionState: string | null
@@ -6890,13 +6905,12 @@ export namespace Prisma {
   export type AccountCountAggregateOutputType = {
     id: number
     userId: number
-    providerType: number
+    tokenType: number
     provider: number
     providerAccountId: number
     refreshToken: number
     accessToken: number
     expiresAt: number
-    tokenType: number
     scope: number
     idToken: number
     sessionState: number
@@ -6918,13 +6932,12 @@ export namespace Prisma {
   export type AccountMinAggregateInputType = {
     id?: true
     userId?: true
-    providerType?: true
+    tokenType?: true
     provider?: true
     providerAccountId?: true
     refreshToken?: true
     accessToken?: true
     expiresAt?: true
-    tokenType?: true
     scope?: true
     idToken?: true
     sessionState?: true
@@ -6936,13 +6949,12 @@ export namespace Prisma {
   export type AccountMaxAggregateInputType = {
     id?: true
     userId?: true
-    providerType?: true
+    tokenType?: true
     provider?: true
     providerAccountId?: true
     refreshToken?: true
     accessToken?: true
     expiresAt?: true
-    tokenType?: true
     scope?: true
     idToken?: true
     sessionState?: true
@@ -6954,13 +6966,12 @@ export namespace Prisma {
   export type AccountCountAggregateInputType = {
     id?: true
     userId?: true
-    providerType?: true
+    tokenType?: true
     provider?: true
     providerAccountId?: true
     refreshToken?: true
     accessToken?: true
     expiresAt?: true
-    tokenType?: true
     scope?: true
     idToken?: true
     sessionState?: true
@@ -7059,13 +7070,12 @@ export namespace Prisma {
   export type AccountGroupByOutputType = {
     id: string
     userId: string
-    providerType: $Enums.ProviderType
-    provider: string
+    tokenType: $Enums.TokenType
+    provider: $Enums.ProviderType
     providerAccountId: string
     refreshToken: string | null
     accessToken: string | null
     expiresAt: number | null
-    tokenType: $Enums.TokenType | null
     scope: string | null
     idToken: string | null
     sessionState: string | null
@@ -7096,13 +7106,12 @@ export namespace Prisma {
   export type AccountSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    providerType?: boolean
+    tokenType?: boolean
     provider?: boolean
     providerAccountId?: boolean
     refreshToken?: boolean
     accessToken?: boolean
     expiresAt?: boolean
-    tokenType?: boolean
     scope?: boolean
     idToken?: boolean
     sessionState?: boolean
@@ -7115,13 +7124,12 @@ export namespace Prisma {
   export type AccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    providerType?: boolean
+    tokenType?: boolean
     provider?: boolean
     providerAccountId?: boolean
     refreshToken?: boolean
     accessToken?: boolean
     expiresAt?: boolean
-    tokenType?: boolean
     scope?: boolean
     idToken?: boolean
     sessionState?: boolean
@@ -7134,13 +7142,12 @@ export namespace Prisma {
   export type AccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    providerType?: boolean
+    tokenType?: boolean
     provider?: boolean
     providerAccountId?: boolean
     refreshToken?: boolean
     accessToken?: boolean
     expiresAt?: boolean
-    tokenType?: boolean
     scope?: boolean
     idToken?: boolean
     sessionState?: boolean
@@ -7153,13 +7160,12 @@ export namespace Prisma {
   export type AccountSelectScalar = {
     id?: boolean
     userId?: boolean
-    providerType?: boolean
+    tokenType?: boolean
     provider?: boolean
     providerAccountId?: boolean
     refreshToken?: boolean
     accessToken?: boolean
     expiresAt?: boolean
-    tokenType?: boolean
     scope?: boolean
     idToken?: boolean
     sessionState?: boolean
@@ -7168,7 +7174,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "providerType" | "provider" | "providerAccountId" | "refreshToken" | "accessToken" | "expiresAt" | "tokenType" | "scope" | "idToken" | "sessionState" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tokenType" | "provider" | "providerAccountId" | "refreshToken" | "accessToken" | "expiresAt" | "scope" | "idToken" | "sessionState" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -7187,13 +7193,12 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      providerType: $Enums.ProviderType
-      provider: string
+      tokenType: $Enums.TokenType
+      provider: $Enums.ProviderType
       providerAccountId: string
       refreshToken: string | null
       accessToken: string | null
       expiresAt: number | null
-      tokenType: $Enums.TokenType | null
       scope: string | null
       idToken: string | null
       sessionState: string | null
@@ -7626,13 +7631,12 @@ export namespace Prisma {
   interface AccountFieldRefs {
     readonly id: FieldRef<"Account", 'String'>
     readonly userId: FieldRef<"Account", 'String'>
-    readonly providerType: FieldRef<"Account", 'ProviderType'>
-    readonly provider: FieldRef<"Account", 'String'>
+    readonly tokenType: FieldRef<"Account", 'TokenType'>
+    readonly provider: FieldRef<"Account", 'ProviderType'>
     readonly providerAccountId: FieldRef<"Account", 'String'>
     readonly refreshToken: FieldRef<"Account", 'String'>
     readonly accessToken: FieldRef<"Account", 'String'>
     readonly expiresAt: FieldRef<"Account", 'Int'>
-    readonly tokenType: FieldRef<"Account", 'TokenType'>
     readonly scope: FieldRef<"Account", 'String'>
     readonly idToken: FieldRef<"Account", 'String'>
     readonly sessionState: FieldRef<"Account", 'String'>
@@ -8070,46 +8074,76 @@ export namespace Prisma {
 
   export type SessionMinAggregateOutputType = {
     id: string | null
-    sessionToken: string | null
     userId: string | null
+    sessionToken: string | null
     expires: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type SessionMaxAggregateOutputType = {
     id: string | null
-    sessionToken: string | null
     userId: string | null
+    sessionToken: string | null
     expires: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
   }
 
   export type SessionCountAggregateOutputType = {
     id: number
-    sessionToken: number
     userId: number
+    sessionToken: number
     expires: number
+    ipAddress: number
+    userAgent: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
     _all: number
   }
 
 
   export type SessionMinAggregateInputType = {
     id?: true
-    sessionToken?: true
     userId?: true
+    sessionToken?: true
     expires?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
   }
 
   export type SessionMaxAggregateInputType = {
     id?: true
-    sessionToken?: true
     userId?: true
+    sessionToken?: true
     expires?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
   }
 
   export type SessionCountAggregateInputType = {
     id?: true
-    sessionToken?: true
     userId?: true
+    sessionToken?: true
     expires?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
     _all?: true
   }
 
@@ -8187,9 +8221,14 @@ export namespace Prisma {
 
   export type SessionGroupByOutputType = {
     id: string
-    sessionToken: string
     userId: string
+    sessionToken: string
     expires: Date
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date
+    updatedAt: Date | null
+    deletedAt: Date | null
     _count: SessionCountAggregateOutputType | null
     _min: SessionMinAggregateOutputType | null
     _max: SessionMaxAggregateOutputType | null
@@ -8211,36 +8250,56 @@ export namespace Prisma {
 
   export type SessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    sessionToken?: boolean
     userId?: boolean
+    sessionToken?: boolean
     expires?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    sessionToken?: boolean
     userId?: boolean
+    sessionToken?: boolean
     expires?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    sessionToken?: boolean
     userId?: boolean
+    sessionToken?: boolean
     expires?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["session"]>
 
   export type SessionSelectScalar = {
     id?: boolean
-    sessionToken?: boolean
     userId?: boolean
+    sessionToken?: boolean
     expires?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
   }
 
-  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionToken" | "userId" | "expires", ExtArgs["result"]["session"]>
+  export type SessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "sessionToken" | "expires" | "ipAddress" | "userAgent" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["session"]>
   export type SessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -8258,9 +8317,14 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      sessionToken: string
       userId: string
+      sessionToken: string
       expires: Date
+      ipAddress: string | null
+      userAgent: string | null
+      createdAt: Date
+      updatedAt: Date | null
+      deletedAt: Date | null
     }, ExtArgs["result"]["session"]>
     composites: {}
   }
@@ -8686,9 +8750,14 @@ export namespace Prisma {
    */
   interface SessionFieldRefs {
     readonly id: FieldRef<"Session", 'String'>
-    readonly sessionToken: FieldRef<"Session", 'String'>
     readonly userId: FieldRef<"Session", 'String'>
+    readonly sessionToken: FieldRef<"Session", 'String'>
     readonly expires: FieldRef<"Session", 'DateTime'>
+    readonly ipAddress: FieldRef<"Session", 'String'>
+    readonly userAgent: FieldRef<"Session", 'String'>
+    readonly createdAt: FieldRef<"Session", 'DateTime'>
+    readonly updatedAt: FieldRef<"Session", 'DateTime'>
+    readonly deletedAt: FieldRef<"Session", 'DateTime'>
   }
     
 
@@ -9119,41 +9188,59 @@ export namespace Prisma {
   }
 
   export type VerificationTokenMinAggregateOutputType = {
+    id: string | null
     identifier: string | null
     token: string | null
-    expires: Date | null
+    expiredAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
   }
 
   export type VerificationTokenMaxAggregateOutputType = {
+    id: string | null
     identifier: string | null
     token: string | null
-    expires: Date | null
+    expiredAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
   }
 
   export type VerificationTokenCountAggregateOutputType = {
+    id: number
     identifier: number
     token: number
-    expires: number
+    expiredAt: number
+    usedAt: number
+    createdAt: number
     _all: number
   }
 
 
   export type VerificationTokenMinAggregateInputType = {
+    id?: true
     identifier?: true
     token?: true
-    expires?: true
+    expiredAt?: true
+    usedAt?: true
+    createdAt?: true
   }
 
   export type VerificationTokenMaxAggregateInputType = {
+    id?: true
     identifier?: true
     token?: true
-    expires?: true
+    expiredAt?: true
+    usedAt?: true
+    createdAt?: true
   }
 
   export type VerificationTokenCountAggregateInputType = {
+    id?: true
     identifier?: true
     token?: true
-    expires?: true
+    expiredAt?: true
+    usedAt?: true
+    createdAt?: true
     _all?: true
   }
 
@@ -9230,9 +9317,12 @@ export namespace Prisma {
   }
 
   export type VerificationTokenGroupByOutputType = {
+    id: string
     identifier: string
     token: string
-    expires: Date
+    expiredAt: Date
+    usedAt: Date | null
+    createdAt: Date
     _count: VerificationTokenCountAggregateOutputType | null
     _min: VerificationTokenMinAggregateOutputType | null
     _max: VerificationTokenMaxAggregateOutputType | null
@@ -9253,38 +9343,53 @@ export namespace Prisma {
 
 
   export type VerificationTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     identifier?: boolean
     token?: boolean
-    expires?: boolean
+    expiredAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["verificationToken"]>
 
   export type VerificationTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     identifier?: boolean
     token?: boolean
-    expires?: boolean
+    expiredAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["verificationToken"]>
 
   export type VerificationTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
     identifier?: boolean
     token?: boolean
-    expires?: boolean
+    expiredAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
   }, ExtArgs["result"]["verificationToken"]>
 
   export type VerificationTokenSelectScalar = {
+    id?: boolean
     identifier?: boolean
     token?: boolean
-    expires?: boolean
+    expiredAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
   }
 
-  export type VerificationTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"identifier" | "token" | "expires", ExtArgs["result"]["verificationToken"]>
+  export type VerificationTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identifier" | "token" | "expiredAt" | "usedAt" | "createdAt", ExtArgs["result"]["verificationToken"]>
 
   export type $VerificationTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "VerificationToken"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
+      id: string
       identifier: string
       token: string
-      expires: Date
+      expiredAt: Date
+      usedAt: Date | null
+      createdAt: Date
     }, ExtArgs["result"]["verificationToken"]>
     composites: {}
   }
@@ -9368,8 +9473,8 @@ export namespace Prisma {
      * // Get first 10 VerificationTokens
      * const verificationTokens = await prisma.verificationToken.findMany({ take: 10 })
      * 
-     * // Only select the `identifier`
-     * const verificationTokenWithIdentifierOnly = await prisma.verificationToken.findMany({ select: { identifier: true } })
+     * // Only select the `id`
+     * const verificationTokenWithIdOnly = await prisma.verificationToken.findMany({ select: { id: true } })
      * 
      */
     findMany<T extends VerificationTokenFindManyArgs>(args?: SelectSubset<T, VerificationTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -9413,9 +9518,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Create many VerificationTokens and only return the `identifier`
-     * const verificationTokenWithIdentifierOnly = await prisma.verificationToken.createManyAndReturn({
-     *   select: { identifier: true },
+     * // Create many VerificationTokens and only return the `id`
+     * const verificationTokenWithIdOnly = await prisma.verificationToken.createManyAndReturn({
+     *   select: { id: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -9504,9 +9609,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more VerificationTokens and only return the `identifier`
-     * const verificationTokenWithIdentifierOnly = await prisma.verificationToken.updateManyAndReturn({
-     *   select: { identifier: true },
+     * // Update zero or more VerificationTokens and only return the `id`
+     * const verificationTokenWithIdOnly = await prisma.verificationToken.updateManyAndReturn({
+     *   select: { id: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -9708,9 +9813,12 @@ export namespace Prisma {
    * Fields of the VerificationToken model
    */
   interface VerificationTokenFieldRefs {
+    readonly id: FieldRef<"VerificationToken", 'String'>
     readonly identifier: FieldRef<"VerificationToken", 'String'>
     readonly token: FieldRef<"VerificationToken", 'String'>
-    readonly expires: FieldRef<"VerificationToken", 'DateTime'>
+    readonly expiredAt: FieldRef<"VerificationToken", 'DateTime'>
+    readonly usedAt: FieldRef<"VerificationToken", 'DateTime'>
+    readonly createdAt: FieldRef<"VerificationToken", 'DateTime'>
   }
     
 
@@ -11290,8 +11398,10 @@ export namespace Prisma {
     userId: string | null
     type: $Enums.TokenType | null
     valueHash: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     revokedAt: Date | null
+    ipAddress: string | null
+    userAgent: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -11302,8 +11412,10 @@ export namespace Prisma {
     userId: string | null
     type: $Enums.TokenType | null
     valueHash: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     revokedAt: Date | null
+    ipAddress: string | null
+    userAgent: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -11314,8 +11426,10 @@ export namespace Prisma {
     userId: number
     type: number
     valueHash: number
-    expiresAt: number
+    expiredAt: number
     revokedAt: number
+    ipAddress: number
+    userAgent: number
     createdAt: number
     updatedAt: number
     deletedAt: number
@@ -11328,8 +11442,10 @@ export namespace Prisma {
     userId?: true
     type?: true
     valueHash?: true
-    expiresAt?: true
+    expiredAt?: true
     revokedAt?: true
+    ipAddress?: true
+    userAgent?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -11340,8 +11456,10 @@ export namespace Prisma {
     userId?: true
     type?: true
     valueHash?: true
-    expiresAt?: true
+    expiredAt?: true
     revokedAt?: true
+    ipAddress?: true
+    userAgent?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -11352,8 +11470,10 @@ export namespace Prisma {
     userId?: true
     type?: true
     valueHash?: true
-    expiresAt?: true
+    expiredAt?: true
     revokedAt?: true
+    ipAddress?: true
+    userAgent?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -11437,10 +11557,12 @@ export namespace Prisma {
     userId: string
     type: $Enums.TokenType
     valueHash: string
-    expiresAt: Date
+    expiredAt: Date
     revokedAt: Date | null
+    ipAddress: string | null
+    userAgent: string | null
     createdAt: Date
-    updatedAt: Date
+    updatedAt: Date | null
     deletedAt: Date | null
     _count: TokenCountAggregateOutputType | null
     _min: TokenMinAggregateOutputType | null
@@ -11466,8 +11588,10 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     valueHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     revokedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -11479,8 +11603,10 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     valueHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     revokedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -11492,8 +11618,10 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     valueHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     revokedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -11505,14 +11633,16 @@ export namespace Prisma {
     userId?: boolean
     type?: boolean
     valueHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     revokedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type TokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "valueHash" | "expiresAt" | "revokedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["token"]>
+  export type TokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "type" | "valueHash" | "expiredAt" | "revokedAt" | "ipAddress" | "userAgent" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["token"]>
   export type TokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -11533,10 +11663,12 @@ export namespace Prisma {
       userId: string
       type: $Enums.TokenType
       valueHash: string
-      expiresAt: Date
+      expiredAt: Date
       revokedAt: Date | null
+      ipAddress: string | null
+      userAgent: string | null
       createdAt: Date
-      updatedAt: Date
+      updatedAt: Date | null
       deletedAt: Date | null
     }, ExtArgs["result"]["token"]>
     composites: {}
@@ -11966,8 +12098,10 @@ export namespace Prisma {
     readonly userId: FieldRef<"Token", 'String'>
     readonly type: FieldRef<"Token", 'TokenType'>
     readonly valueHash: FieldRef<"Token", 'String'>
-    readonly expiresAt: FieldRef<"Token", 'DateTime'>
+    readonly expiredAt: FieldRef<"Token", 'DateTime'>
     readonly revokedAt: FieldRef<"Token", 'DateTime'>
+    readonly ipAddress: FieldRef<"Token", 'String'>
+    readonly userAgent: FieldRef<"Token", 'String'>
     readonly createdAt: FieldRef<"Token", 'DateTime'>
     readonly updatedAt: FieldRef<"Token", 'DateTime'>
     readonly deletedAt: FieldRef<"Token", 'DateTime'>
@@ -12415,7 +12549,7 @@ export namespace Prisma {
     userId: string | null
     phone: string | null
     codeHash: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     attempts: number | null
     usedAt: Date | null
     createdAt: Date | null
@@ -12428,7 +12562,7 @@ export namespace Prisma {
     userId: string | null
     phone: string | null
     codeHash: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     attempts: number | null
     usedAt: Date | null
     createdAt: Date | null
@@ -12441,7 +12575,7 @@ export namespace Prisma {
     userId: number
     phone: number
     codeHash: number
-    expiresAt: number
+    expiredAt: number
     attempts: number
     usedAt: number
     createdAt: number
@@ -12464,7 +12598,7 @@ export namespace Prisma {
     userId?: true
     phone?: true
     codeHash?: true
-    expiresAt?: true
+    expiredAt?: true
     attempts?: true
     usedAt?: true
     createdAt?: true
@@ -12477,7 +12611,7 @@ export namespace Prisma {
     userId?: true
     phone?: true
     codeHash?: true
-    expiresAt?: true
+    expiredAt?: true
     attempts?: true
     usedAt?: true
     createdAt?: true
@@ -12490,7 +12624,7 @@ export namespace Prisma {
     userId?: true
     phone?: true
     codeHash?: true
-    expiresAt?: true
+    expiredAt?: true
     attempts?: true
     usedAt?: true
     createdAt?: true
@@ -12590,7 +12724,7 @@ export namespace Prisma {
     userId: string | null
     phone: string
     codeHash: string
-    expiresAt: Date
+    expiredAt: Date
     attempts: number
     usedAt: Date | null
     createdAt: Date
@@ -12622,7 +12756,7 @@ export namespace Prisma {
     userId?: boolean
     phone?: boolean
     codeHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     attempts?: boolean
     usedAt?: boolean
     createdAt?: boolean
@@ -12636,7 +12770,7 @@ export namespace Prisma {
     userId?: boolean
     phone?: boolean
     codeHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     attempts?: boolean
     usedAt?: boolean
     createdAt?: boolean
@@ -12650,7 +12784,7 @@ export namespace Prisma {
     userId?: boolean
     phone?: boolean
     codeHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     attempts?: boolean
     usedAt?: boolean
     createdAt?: boolean
@@ -12664,7 +12798,7 @@ export namespace Prisma {
     userId?: boolean
     phone?: boolean
     codeHash?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     attempts?: boolean
     usedAt?: boolean
     createdAt?: boolean
@@ -12672,7 +12806,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type OtpOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "phone" | "codeHash" | "expiresAt" | "attempts" | "usedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["otp"]>
+  export type OtpOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "phone" | "codeHash" | "expiredAt" | "attempts" | "usedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["otp"]>
   export type OtpInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Otp$userArgs<ExtArgs>
   }
@@ -12693,7 +12827,7 @@ export namespace Prisma {
       userId: string | null
       phone: string
       codeHash: string
-      expiresAt: Date
+      expiredAt: Date
       attempts: number
       usedAt: Date | null
       createdAt: Date
@@ -13127,7 +13261,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Otp", 'String'>
     readonly phone: FieldRef<"Otp", 'String'>
     readonly codeHash: FieldRef<"Otp", 'String'>
-    readonly expiresAt: FieldRef<"Otp", 'DateTime'>
+    readonly expiredAt: FieldRef<"Otp", 'DateTime'>
     readonly attempts: FieldRef<"Otp", 'Int'>
     readonly usedAt: FieldRef<"Otp", 'DateTime'>
     readonly createdAt: FieldRef<"Otp", 'DateTime'>
@@ -13585,7 +13719,6 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
-    documentType: $Enums.DocumentType | null
     documentNumber: string | null
     contactEmail: string | null
     phone: string | null
@@ -13599,7 +13732,6 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
-    documentType: $Enums.DocumentType | null
     documentNumber: string | null
     contactEmail: string | null
     phone: string | null
@@ -13613,7 +13745,6 @@ export namespace Prisma {
     id: number
     name: number
     slug: number
-    documentType: number
     documentNumber: number
     contactEmail: number
     phone: number
@@ -13629,7 +13760,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    documentType?: true
     documentNumber?: true
     contactEmail?: true
     phone?: true
@@ -13643,7 +13773,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    documentType?: true
     documentNumber?: true
     contactEmail?: true
     phone?: true
@@ -13657,7 +13786,6 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
-    documentType?: true
     documentNumber?: true
     contactEmail?: true
     phone?: true
@@ -13744,13 +13872,12 @@ export namespace Prisma {
     id: string
     name: string
     slug: string
-    documentType: $Enums.DocumentType | null
     documentNumber: string | null
     contactEmail: string | null
     phone: string | null
     status: $Enums.TenantStatus
     createdAt: Date
-    updatedAt: Date
+    updatedAt: Date | null
     deletedAt: Date | null
     _count: TenantCountAggregateOutputType | null
     _min: TenantMinAggregateOutputType | null
@@ -13775,7 +13902,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
     documentNumber?: boolean
     contactEmail?: boolean
     phone?: boolean
@@ -13785,9 +13911,8 @@ export namespace Prisma {
     deletedAt?: boolean
     memberships?: boolean | Tenant$membershipsArgs<ExtArgs>
     organizations?: boolean | Tenant$organizationsArgs<ExtArgs>
-    lgpdConsents?: boolean | Tenant$lgpdConsentsArgs<ExtArgs>
-    addresses?: boolean | Tenant$addressesArgs<ExtArgs>
     leads?: boolean | Tenant$leadsArgs<ExtArgs>
+    addresses?: boolean | Tenant$addressesArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["tenant"]>
 
@@ -13795,7 +13920,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
     documentNumber?: boolean
     contactEmail?: boolean
     phone?: boolean
@@ -13809,7 +13933,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
     documentNumber?: boolean
     contactEmail?: boolean
     phone?: boolean
@@ -13823,7 +13946,6 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
     documentNumber?: boolean
     contactEmail?: boolean
     phone?: boolean
@@ -13833,13 +13955,12 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "documentType" | "documentNumber" | "contactEmail" | "phone" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["tenant"]>
+  export type TenantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "documentNumber" | "contactEmail" | "phone" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["tenant"]>
   export type TenantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     memberships?: boolean | Tenant$membershipsArgs<ExtArgs>
     organizations?: boolean | Tenant$organizationsArgs<ExtArgs>
-    lgpdConsents?: boolean | Tenant$lgpdConsentsArgs<ExtArgs>
-    addresses?: boolean | Tenant$addressesArgs<ExtArgs>
     leads?: boolean | Tenant$leadsArgs<ExtArgs>
+    addresses?: boolean | Tenant$addressesArgs<ExtArgs>
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -13850,21 +13971,19 @@ export namespace Prisma {
     objects: {
       memberships: Prisma.$MembershipPayload<ExtArgs>[]
       organizations: Prisma.$OrganizationPayload<ExtArgs>[]
-      lgpdConsents: Prisma.$LgpdConsentPayload<ExtArgs>[]
-      addresses: Prisma.$AddressPayload<ExtArgs>[]
       leads: Prisma.$LeadPayload<ExtArgs>[]
+      addresses: Prisma.$AddressPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       slug: string
-      documentType: $Enums.DocumentType | null
       documentNumber: string | null
       contactEmail: string | null
       phone: string | null
       status: $Enums.TenantStatus
       createdAt: Date
-      updatedAt: Date
+      updatedAt: Date | null
       deletedAt: Date | null
     }, ExtArgs["result"]["tenant"]>
     composites: {}
@@ -14262,9 +14381,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     memberships<T extends Tenant$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     organizations<T extends Tenant$organizationsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$organizationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    lgpdConsents<T extends Tenant$lgpdConsentsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$lgpdConsentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LgpdConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    addresses<T extends Tenant$addressesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$addressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     leads<T extends Tenant$leadsArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$leadsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    addresses<T extends Tenant$addressesArgs<ExtArgs> = {}>(args?: Subset<T, Tenant$addressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14297,7 +14415,6 @@ export namespace Prisma {
     readonly id: FieldRef<"Tenant", 'String'>
     readonly name: FieldRef<"Tenant", 'String'>
     readonly slug: FieldRef<"Tenant", 'String'>
-    readonly documentType: FieldRef<"Tenant", 'DocumentType'>
     readonly documentNumber: FieldRef<"Tenant", 'String'>
     readonly contactEmail: FieldRef<"Tenant", 'String'>
     readonly phone: FieldRef<"Tenant", 'String'>
@@ -14746,27 +14863,27 @@ export namespace Prisma {
   }
 
   /**
-   * Tenant.lgpdConsents
+   * Tenant.leads
    */
-  export type Tenant$lgpdConsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Tenant$leadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the LgpdConsent
+     * Select specific fields to fetch from the Lead
      */
-    select?: LgpdConsentSelect<ExtArgs> | null
+    select?: LeadSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LgpdConsent
+     * Omit specific fields from the Lead
      */
-    omit?: LgpdConsentOmit<ExtArgs> | null
+    omit?: LeadOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: LgpdConsentInclude<ExtArgs> | null
-    where?: LgpdConsentWhereInput
-    orderBy?: LgpdConsentOrderByWithRelationInput | LgpdConsentOrderByWithRelationInput[]
-    cursor?: LgpdConsentWhereUniqueInput
+    include?: LeadInclude<ExtArgs> | null
+    where?: LeadWhereInput
+    orderBy?: LeadOrderByWithRelationInput | LeadOrderByWithRelationInput[]
+    cursor?: LeadWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: LgpdConsentScalarFieldEnum | LgpdConsentScalarFieldEnum[]
+    distinct?: LeadScalarFieldEnum | LeadScalarFieldEnum[]
   }
 
   /**
@@ -14791,30 +14908,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AddressScalarFieldEnum | AddressScalarFieldEnum[]
-  }
-
-  /**
-   * Tenant.leads
-   */
-  export type Tenant$leadsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Lead
-     */
-    select?: LeadSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Lead
-     */
-    omit?: LeadOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LeadInclude<ExtArgs> | null
-    where?: LeadWhereInput
-    orderBy?: LeadOrderByWithRelationInput | LeadOrderByWithRelationInput[]
-    cursor?: LeadWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LeadScalarFieldEnum | LeadScalarFieldEnum[]
   }
 
   /**
@@ -14851,10 +14944,6 @@ export namespace Prisma {
     tenantId: string | null
     name: string | null
     slug: string | null
-    documentType: $Enums.DocumentType | null
-    documentNumber: string | null
-    contactEmail: string | null
-    phone: string | null
     logoUrl: string | null
     status: $Enums.OrganizationStatus | null
     createdAt: Date | null
@@ -14867,10 +14956,6 @@ export namespace Prisma {
     tenantId: string | null
     name: string | null
     slug: string | null
-    documentType: $Enums.DocumentType | null
-    documentNumber: string | null
-    contactEmail: string | null
-    phone: string | null
     logoUrl: string | null
     status: $Enums.OrganizationStatus | null
     createdAt: Date | null
@@ -14883,10 +14968,6 @@ export namespace Prisma {
     tenantId: number
     name: number
     slug: number
-    documentType: number
-    documentNumber: number
-    contactEmail: number
-    phone: number
     logoUrl: number
     status: number
     createdAt: number
@@ -14901,10 +14982,6 @@ export namespace Prisma {
     tenantId?: true
     name?: true
     slug?: true
-    documentType?: true
-    documentNumber?: true
-    contactEmail?: true
-    phone?: true
     logoUrl?: true
     status?: true
     createdAt?: true
@@ -14917,10 +14994,6 @@ export namespace Prisma {
     tenantId?: true
     name?: true
     slug?: true
-    documentType?: true
-    documentNumber?: true
-    contactEmail?: true
-    phone?: true
     logoUrl?: true
     status?: true
     createdAt?: true
@@ -14933,10 +15006,6 @@ export namespace Prisma {
     tenantId?: true
     name?: true
     slug?: true
-    documentType?: true
-    documentNumber?: true
-    contactEmail?: true
-    phone?: true
     logoUrl?: true
     status?: true
     createdAt?: true
@@ -15019,13 +15088,9 @@ export namespace Prisma {
 
   export type OrganizationGroupByOutputType = {
     id: string
-    tenantId: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType: $Enums.DocumentType | null
-    documentNumber: string | null
-    contactEmail: string | null
-    phone: string | null
     logoUrl: string | null
     status: $Enums.OrganizationStatus
     createdAt: Date
@@ -15055,16 +15120,12 @@ export namespace Prisma {
     tenantId?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
-    documentNumber?: boolean
-    contactEmail?: boolean
-    phone?: boolean
     logoUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
     addresses?: boolean | Organization$addressesArgs<ExtArgs>
     organizationConfigs?: boolean | Organization$organizationConfigsArgs<ExtArgs>
@@ -15081,7 +15142,6 @@ export namespace Prisma {
     portals?: boolean | Organization$portalsArgs<ExtArgs>
     campaigns?: boolean | Organization$campaignsArgs<ExtArgs>
     campaignItems?: boolean | Organization$campaignItemsArgs<ExtArgs>
-    lgpdConsents?: boolean | Organization$lgpdConsentsArgs<ExtArgs>
     connectionLogs?: boolean | Organization$connectionLogsArgs<ExtArgs>
     whatsappLogs?: boolean | Organization$whatsappLogsArgs<ExtArgs>
     leads?: boolean | Organization$leadsArgs<ExtArgs>
@@ -15093,16 +15153,12 @@ export namespace Prisma {
     tenantId?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
-    documentNumber?: boolean
-    contactEmail?: boolean
-    phone?: boolean
     logoUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
   export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15110,16 +15166,12 @@ export namespace Prisma {
     tenantId?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
-    documentNumber?: boolean
-    contactEmail?: boolean
-    phone?: boolean
     logoUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
   export type OrganizationSelectScalar = {
@@ -15127,10 +15179,6 @@ export namespace Prisma {
     tenantId?: boolean
     name?: boolean
     slug?: boolean
-    documentType?: boolean
-    documentNumber?: boolean
-    contactEmail?: boolean
-    phone?: boolean
     logoUrl?: boolean
     status?: boolean
     createdAt?: boolean
@@ -15138,9 +15186,9 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "name" | "slug" | "documentType" | "documentNumber" | "contactEmail" | "phone" | "logoUrl" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
+  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tenantId" | "name" | "slug" | "logoUrl" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["organization"]>
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
     addresses?: boolean | Organization$addressesArgs<ExtArgs>
     organizationConfigs?: boolean | Organization$organizationConfigsArgs<ExtArgs>
@@ -15157,23 +15205,22 @@ export namespace Prisma {
     portals?: boolean | Organization$portalsArgs<ExtArgs>
     campaigns?: boolean | Organization$campaignsArgs<ExtArgs>
     campaignItems?: boolean | Organization$campaignItemsArgs<ExtArgs>
-    lgpdConsents?: boolean | Organization$lgpdConsentsArgs<ExtArgs>
     connectionLogs?: boolean | Organization$connectionLogsArgs<ExtArgs>
     whatsappLogs?: boolean | Organization$whatsappLogsArgs<ExtArgs>
     leads?: boolean | Organization$leadsArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
   export type OrganizationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | Organization$tenantArgs<ExtArgs>
+    tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
   export type $OrganizationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Organization"
     objects: {
-      tenant: Prisma.$TenantPayload<ExtArgs> | null
+      tenant: Prisma.$TenantPayload<ExtArgs>
       memberships: Prisma.$MembershipPayload<ExtArgs>[]
       addresses: Prisma.$AddressPayload<ExtArgs>[]
       organizationConfigs: Prisma.$OrganizationConfigPayload<ExtArgs>[]
@@ -15190,20 +15237,15 @@ export namespace Prisma {
       portals: Prisma.$PortalPayload<ExtArgs>[]
       campaigns: Prisma.$CampaignPayload<ExtArgs>[]
       campaignItems: Prisma.$CampaignItemPayload<ExtArgs>[]
-      lgpdConsents: Prisma.$LgpdConsentPayload<ExtArgs>[]
       connectionLogs: Prisma.$ConnectionLogPayload<ExtArgs>[]
       whatsappLogs: Prisma.$WhatsappLogPayload<ExtArgs>[]
       leads: Prisma.$LeadPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      tenantId: string | null
+      tenantId: string
       name: string
       slug: string
-      documentType: $Enums.DocumentType | null
-      documentNumber: string | null
-      contactEmail: string | null
-      phone: string | null
       logoUrl: string | null
       status: $Enums.OrganizationStatus
       createdAt: Date
@@ -15603,7 +15645,7 @@ export namespace Prisma {
    */
   export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    tenant<T extends Organization$tenantArgs<ExtArgs> = {}>(args?: Subset<T, Organization$tenantArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     memberships<T extends Organization$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     addresses<T extends Organization$addressesArgs<ExtArgs> = {}>(args?: Subset<T, Organization$addressesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AddressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     organizationConfigs<T extends Organization$organizationConfigsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$organizationConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrganizationConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -15620,7 +15662,6 @@ export namespace Prisma {
     portals<T extends Organization$portalsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$portalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PortalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     campaigns<T extends Organization$campaignsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$campaignsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     campaignItems<T extends Organization$campaignItemsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$campaignItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CampaignItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    lgpdConsents<T extends Organization$lgpdConsentsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$lgpdConsentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LgpdConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     connectionLogs<T extends Organization$connectionLogsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$connectionLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConnectionLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     whatsappLogs<T extends Organization$whatsappLogsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$whatsappLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsappLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     leads<T extends Organization$leadsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$leadsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -15657,10 +15698,6 @@ export namespace Prisma {
     readonly tenantId: FieldRef<"Organization", 'String'>
     readonly name: FieldRef<"Organization", 'String'>
     readonly slug: FieldRef<"Organization", 'String'>
-    readonly documentType: FieldRef<"Organization", 'DocumentType'>
-    readonly documentNumber: FieldRef<"Organization", 'String'>
-    readonly contactEmail: FieldRef<"Organization", 'String'>
-    readonly phone: FieldRef<"Organization", 'String'>
     readonly logoUrl: FieldRef<"Organization", 'String'>
     readonly status: FieldRef<"Organization", 'OrganizationStatus'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
@@ -16067,25 +16104,6 @@ export namespace Prisma {
   }
 
   /**
-   * Organization.tenant
-   */
-  export type Organization$tenantArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Tenant
-     */
-    select?: TenantSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Tenant
-     */
-    omit?: TenantOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TenantInclude<ExtArgs> | null
-    where?: TenantWhereInput
-  }
-
-  /**
    * Organization.memberships
    */
   export type Organization$membershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16460,30 +16478,6 @@ export namespace Prisma {
   }
 
   /**
-   * Organization.lgpdConsents
-   */
-  export type Organization$lgpdConsentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LgpdConsent
-     */
-    select?: LgpdConsentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LgpdConsent
-     */
-    omit?: LgpdConsentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LgpdConsentInclude<ExtArgs> | null
-    where?: LgpdConsentWhereInput
-    orderBy?: LgpdConsentOrderByWithRelationInput | LgpdConsentOrderByWithRelationInput[]
-    cursor?: LgpdConsentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LgpdConsentScalarFieldEnum | LgpdConsentScalarFieldEnum[]
-  }
-
-  /**
    * Organization.connectionLogs
    */
   export type Organization$connectionLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16589,12 +16583,12 @@ export namespace Prisma {
     userId: string | null
     tenantId: string | null
     organizationId: string | null
-    role: $Enums.MemberShipRole | null
-    status: $Enums.MemberShipStatus | null
+    role: $Enums.MembershipRole | null
+    status: $Enums.MembershipStatus | null
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     removedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16606,12 +16600,12 @@ export namespace Prisma {
     userId: string | null
     tenantId: string | null
     organizationId: string | null
-    role: $Enums.MemberShipRole | null
-    status: $Enums.MemberShipStatus | null
+    role: $Enums.MembershipRole | null
+    status: $Enums.MembershipStatus | null
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     removedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16628,7 +16622,7 @@ export namespace Prisma {
     joinedAt: number
     invitedEmail: number
     invitedById: number
-    expiresAt: number
+    expiredAt: number
     removedAt: number
     createdAt: number
     updatedAt: number
@@ -16647,7 +16641,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiresAt?: true
+    expiredAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16664,7 +16658,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiresAt?: true
+    expiredAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16681,7 +16675,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiresAt?: true
+    expiredAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16766,15 +16760,15 @@ export namespace Prisma {
     userId: string
     tenantId: string
     organizationId: string | null
-    role: $Enums.MemberShipRole
-    status: $Enums.MemberShipStatus
+    role: $Enums.MembershipRole
+    status: $Enums.MembershipStatus
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     removedAt: Date | null
     createdAt: Date
-    updatedAt: Date
+    updatedAt: Date | null
     deletedAt: Date | null
     _count: MembershipCountAggregateOutputType | null
     _min: MembershipMinAggregateOutputType | null
@@ -16805,7 +16799,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16827,7 +16821,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16847,7 +16841,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16867,14 +16861,14 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "role" | "status" | "joinedAt" | "invitedEmail" | "invitedById" | "expiresAt" | "removedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
+  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "role" | "status" | "joinedAt" | "invitedEmail" | "invitedById" | "expiredAt" | "removedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
   export type MembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -16906,15 +16900,15 @@ export namespace Prisma {
       userId: string
       tenantId: string
       organizationId: string | null
-      role: $Enums.MemberShipRole
-      status: $Enums.MemberShipStatus
+      role: $Enums.MembershipRole
+      status: $Enums.MembershipStatus
       joinedAt: Date | null
       invitedEmail: string | null
       invitedById: string | null
-      expiresAt: Date | null
+      expiredAt: Date | null
       removedAt: Date | null
       createdAt: Date
-      updatedAt: Date
+      updatedAt: Date | null
       deletedAt: Date | null
     }, ExtArgs["result"]["membership"]>
     composites: {}
@@ -17347,12 +17341,12 @@ export namespace Prisma {
     readonly userId: FieldRef<"Membership", 'String'>
     readonly tenantId: FieldRef<"Membership", 'String'>
     readonly organizationId: FieldRef<"Membership", 'String'>
-    readonly role: FieldRef<"Membership", 'MemberShipRole'>
-    readonly status: FieldRef<"Membership", 'MemberShipStatus'>
+    readonly role: FieldRef<"Membership", 'MembershipRole'>
+    readonly status: FieldRef<"Membership", 'MembershipStatus'>
     readonly joinedAt: FieldRef<"Membership", 'DateTime'>
     readonly invitedEmail: FieldRef<"Membership", 'String'>
     readonly invitedById: FieldRef<"Membership", 'String'>
-    readonly expiresAt: FieldRef<"Membership", 'DateTime'>
+    readonly expiredAt: FieldRef<"Membership", 'DateTime'>
     readonly removedAt: FieldRef<"Membership", 'DateTime'>
     readonly createdAt: FieldRef<"Membership", 'DateTime'>
     readonly updatedAt: FieldRef<"Membership", 'DateTime'>
@@ -17834,7 +17828,7 @@ export namespace Prisma {
     userId: string | null
     tenantId: string | null
     organizationId: string | null
-    membershipId: string | null
+    memberId: string | null
     AddressType: $Enums.AddressType | null
     street: string | null
     addressNumber: string | null
@@ -17856,7 +17850,7 @@ export namespace Prisma {
     userId: string | null
     tenantId: string | null
     organizationId: string | null
-    membershipId: string | null
+    memberId: string | null
     AddressType: $Enums.AddressType | null
     street: string | null
     addressNumber: string | null
@@ -17878,7 +17872,7 @@ export namespace Prisma {
     userId: number
     tenantId: number
     organizationId: number
-    membershipId: number
+    memberId: number
     AddressType: number
     street: number
     addressNumber: number
@@ -17902,7 +17896,7 @@ export namespace Prisma {
     userId?: true
     tenantId?: true
     organizationId?: true
-    membershipId?: true
+    memberId?: true
     AddressType?: true
     street?: true
     addressNumber?: true
@@ -17924,7 +17918,7 @@ export namespace Prisma {
     userId?: true
     tenantId?: true
     organizationId?: true
-    membershipId?: true
+    memberId?: true
     AddressType?: true
     street?: true
     addressNumber?: true
@@ -17946,7 +17940,7 @@ export namespace Prisma {
     userId?: true
     tenantId?: true
     organizationId?: true
-    membershipId?: true
+    memberId?: true
     AddressType?: true
     street?: true
     addressNumber?: true
@@ -18041,7 +18035,7 @@ export namespace Prisma {
     userId: string | null
     tenantId: string | null
     organizationId: string | null
-    membershipId: string | null
+    memberId: string | null
     AddressType: $Enums.AddressType | null
     street: string | null
     addressNumber: string | null
@@ -18080,7 +18074,7 @@ export namespace Prisma {
     userId?: boolean
     tenantId?: boolean
     organizationId?: boolean
-    membershipId?: boolean
+    memberId?: boolean
     AddressType?: boolean
     street?: boolean
     addressNumber?: boolean
@@ -18098,7 +18092,7 @@ export namespace Prisma {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }, ExtArgs["result"]["address"]>
@@ -18108,7 +18102,7 @@ export namespace Prisma {
     userId?: boolean
     tenantId?: boolean
     organizationId?: boolean
-    membershipId?: boolean
+    memberId?: boolean
     AddressType?: boolean
     street?: boolean
     addressNumber?: boolean
@@ -18126,7 +18120,7 @@ export namespace Prisma {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }, ExtArgs["result"]["address"]>
@@ -18136,7 +18130,7 @@ export namespace Prisma {
     userId?: boolean
     tenantId?: boolean
     organizationId?: boolean
-    membershipId?: boolean
+    memberId?: boolean
     AddressType?: boolean
     street?: boolean
     addressNumber?: boolean
@@ -18154,7 +18148,7 @@ export namespace Prisma {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }, ExtArgs["result"]["address"]>
@@ -18164,7 +18158,7 @@ export namespace Prisma {
     userId?: boolean
     tenantId?: boolean
     organizationId?: boolean
-    membershipId?: boolean
+    memberId?: boolean
     AddressType?: boolean
     street?: boolean
     addressNumber?: boolean
@@ -18181,12 +18175,12 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type AddressOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "membershipId" | "AddressType" | "street" | "addressNumber" | "complement" | "neighborhood" | "reference" | "cityId" | "stateId" | "zipCode" | "country" | "isPrimary" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["address"]>
+  export type AddressOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "memberId" | "AddressType" | "street" | "addressNumber" | "complement" | "neighborhood" | "reference" | "cityId" | "stateId" | "zipCode" | "country" | "isPrimary" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["address"]>
   export type AddressInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }
@@ -18194,7 +18188,7 @@ export namespace Prisma {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }
@@ -18202,7 +18196,7 @@ export namespace Prisma {
     user?: boolean | Address$userArgs<ExtArgs>
     tenant?: boolean | Address$tenantArgs<ExtArgs>
     organization?: boolean | Address$organizationArgs<ExtArgs>
-    membership?: boolean | Address$membershipArgs<ExtArgs>
+    member?: boolean | Address$memberArgs<ExtArgs>
     city?: boolean | Address$cityArgs<ExtArgs>
     state?: boolean | Address$stateArgs<ExtArgs>
   }
@@ -18213,7 +18207,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs> | null
       tenant: Prisma.$TenantPayload<ExtArgs> | null
       organization: Prisma.$OrganizationPayload<ExtArgs> | null
-      membership: Prisma.$MembershipPayload<ExtArgs> | null
+      member: Prisma.$MembershipPayload<ExtArgs> | null
       city: Prisma.$CityPayload<ExtArgs> | null
       state: Prisma.$StatePayload<ExtArgs> | null
     }
@@ -18222,7 +18216,7 @@ export namespace Prisma {
       userId: string | null
       tenantId: string | null
       organizationId: string | null
-      membershipId: string | null
+      memberId: string | null
       AddressType: $Enums.AddressType | null
       street: string | null
       addressNumber: string | null
@@ -18634,7 +18628,7 @@ export namespace Prisma {
     user<T extends Address$userArgs<ExtArgs> = {}>(args?: Subset<T, Address$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     tenant<T extends Address$tenantArgs<ExtArgs> = {}>(args?: Subset<T, Address$tenantArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     organization<T extends Address$organizationArgs<ExtArgs> = {}>(args?: Subset<T, Address$organizationArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    membership<T extends Address$membershipArgs<ExtArgs> = {}>(args?: Subset<T, Address$membershipArgs<ExtArgs>>): Prisma__MembershipClient<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    member<T extends Address$memberArgs<ExtArgs> = {}>(args?: Subset<T, Address$memberArgs<ExtArgs>>): Prisma__MembershipClient<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     city<T extends Address$cityArgs<ExtArgs> = {}>(args?: Subset<T, Address$cityArgs<ExtArgs>>): Prisma__CityClient<$Result.GetResult<Prisma.$CityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     state<T extends Address$stateArgs<ExtArgs> = {}>(args?: Subset<T, Address$stateArgs<ExtArgs>>): Prisma__StateClient<$Result.GetResult<Prisma.$StatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
@@ -18670,7 +18664,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Address", 'String'>
     readonly tenantId: FieldRef<"Address", 'String'>
     readonly organizationId: FieldRef<"Address", 'String'>
-    readonly membershipId: FieldRef<"Address", 'String'>
+    readonly memberId: FieldRef<"Address", 'String'>
     readonly AddressType: FieldRef<"Address", 'AddressType'>
     readonly street: FieldRef<"Address", 'String'>
     readonly addressNumber: FieldRef<"Address", 'String'>
@@ -19143,9 +19137,9 @@ export namespace Prisma {
   }
 
   /**
-   * Address.membership
+   * Address.member
    */
-  export type Address$membershipArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Address$memberArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Membership
      */
@@ -29489,7 +29483,7 @@ export namespace Prisma {
     code: string | null
     status: $Enums.VoucherStatus | null
     usedAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -29503,7 +29497,7 @@ export namespace Prisma {
     code: string | null
     status: $Enums.VoucherStatus | null
     usedAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -29517,7 +29511,7 @@ export namespace Prisma {
     code: number
     status: number
     usedAt: number
-    expiresAt: number
+    expiredAt: number
     createdAt: number
     updatedAt: number
     deletedAt: number
@@ -29533,7 +29527,7 @@ export namespace Prisma {
     code?: true
     status?: true
     usedAt?: true
-    expiresAt?: true
+    expiredAt?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -29547,7 +29541,7 @@ export namespace Prisma {
     code?: true
     status?: true
     usedAt?: true
-    expiresAt?: true
+    expiredAt?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -29561,7 +29555,7 @@ export namespace Prisma {
     code?: true
     status?: true
     usedAt?: true
-    expiresAt?: true
+    expiredAt?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -29648,7 +29642,7 @@ export namespace Prisma {
     code: string
     status: $Enums.VoucherStatus
     usedAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     createdAt: Date
     updatedAt: Date | null
     deletedAt: Date | null
@@ -29679,7 +29673,7 @@ export namespace Prisma {
     code?: boolean
     status?: boolean
     usedAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -29696,7 +29690,7 @@ export namespace Prisma {
     code?: boolean
     status?: boolean
     usedAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -29713,7 +29707,7 @@ export namespace Prisma {
     code?: boolean
     status?: boolean
     usedAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -29730,13 +29724,13 @@ export namespace Prisma {
     code?: boolean
     status?: boolean
     usedAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type VoucherOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "mikrotikId" | "hotspotPlanId" | "code" | "status" | "usedAt" | "expiresAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["voucher"]>
+  export type VoucherOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "mikrotikId" | "hotspotPlanId" | "code" | "status" | "usedAt" | "expiredAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["voucher"]>
   export type VoucherInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     organization?: boolean | Voucher$organizationArgs<ExtArgs>
     mikrotik?: boolean | Voucher$mikrotikArgs<ExtArgs>
@@ -29768,7 +29762,7 @@ export namespace Prisma {
       code: string
       status: $Enums.VoucherStatus
       usedAt: Date | null
-      expiresAt: Date | null
+      expiredAt: Date | null
       createdAt: Date
       updatedAt: Date | null
       deletedAt: Date | null
@@ -30205,7 +30199,7 @@ export namespace Prisma {
     readonly code: FieldRef<"Voucher", 'String'>
     readonly status: FieldRef<"Voucher", 'VoucherStatus'>
     readonly usedAt: FieldRef<"Voucher", 'DateTime'>
-    readonly expiresAt: FieldRef<"Voucher", 'DateTime'>
+    readonly expiredAt: FieldRef<"Voucher", 'DateTime'>
     readonly createdAt: FieldRef<"Voucher", 'DateTime'>
     readonly updatedAt: FieldRef<"Voucher", 'DateTime'>
     readonly deletedAt: FieldRef<"Voucher", 'DateTime'>
@@ -32016,7 +32010,7 @@ export namespace Prisma {
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     canceledAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -32036,7 +32030,7 @@ export namespace Prisma {
     currentPeriodStart: Date | null
     currentPeriodEnd: Date | null
     canceledAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     deletedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -32056,7 +32050,7 @@ export namespace Prisma {
     currentPeriodStart: number
     currentPeriodEnd: number
     canceledAt: number
-    expiresAt: number
+    expiredAt: number
     deletedAt: number
     createdAt: number
     updatedAt: number
@@ -32086,7 +32080,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     canceledAt?: true
-    expiresAt?: true
+    expiredAt?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -32106,7 +32100,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     canceledAt?: true
-    expiresAt?: true
+    expiredAt?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -32126,7 +32120,7 @@ export namespace Prisma {
     currentPeriodStart?: true
     currentPeriodEnd?: true
     canceledAt?: true
-    expiresAt?: true
+    expiredAt?: true
     deletedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -32233,7 +32227,7 @@ export namespace Prisma {
     currentPeriodStart: Date
     currentPeriodEnd: Date
     canceledAt: Date | null
-    expiresAt: Date | null
+    expiredAt: Date | null
     deletedAt: Date | null
     createdAt: Date
     updatedAt: Date | null
@@ -32272,7 +32266,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     canceledAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -32296,7 +32290,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     canceledAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -32318,7 +32312,7 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     canceledAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -32340,13 +32334,13 @@ export namespace Prisma {
     currentPeriodStart?: boolean
     currentPeriodEnd?: boolean
     canceledAt?: boolean
-    expiresAt?: boolean
+    expiredAt?: boolean
     deletedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "subscriptionPlanId" | "status" | "billingCycle" | "amount" | "currency" | "trialStartsAt" | "trialEndsAt" | "startsAt" | "currentPeriodStart" | "currentPeriodEnd" | "canceledAt" | "expiresAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
+  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "subscriptionPlanId" | "status" | "billingCycle" | "amount" | "currency" | "trialStartsAt" | "trialEndsAt" | "startsAt" | "currentPeriodStart" | "currentPeriodEnd" | "canceledAt" | "expiredAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
   export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     subscriptionPlan?: boolean | SubscriptionPlanDefaultArgs<ExtArgs>
@@ -32383,7 +32377,7 @@ export namespace Prisma {
       currentPeriodStart: Date
       currentPeriodEnd: Date
       canceledAt: Date | null
-      expiresAt: Date | null
+      expiredAt: Date | null
       deletedAt: Date | null
       createdAt: Date
       updatedAt: Date | null
@@ -32826,7 +32820,7 @@ export namespace Prisma {
     readonly currentPeriodStart: FieldRef<"Subscription", 'DateTime'>
     readonly currentPeriodEnd: FieldRef<"Subscription", 'DateTime'>
     readonly canceledAt: FieldRef<"Subscription", 'DateTime'>
-    readonly expiresAt: FieldRef<"Subscription", 'DateTime'>
+    readonly expiredAt: FieldRef<"Subscription", 'DateTime'>
     readonly deletedAt: FieldRef<"Subscription", 'DateTime'>
     readonly createdAt: FieldRef<"Subscription", 'DateTime'>
     readonly updatedAt: FieldRef<"Subscription", 'DateTime'>
@@ -40713,7 +40707,6 @@ export namespace Prisma {
   export type LgpdConsentMinAggregateOutputType = {
     id: string | null
     userId: string | null
-    tenantId: string | null
     consentTerms: boolean | null
     consentMarketing: boolean | null
     consentDataSharing: boolean | null
@@ -40722,17 +40715,16 @@ export namespace Prisma {
     macAddress: string | null
     userAgent: string | null
     consentVersion: string | null
-    status: $Enums.ConsentStatus | null
+    status: $Enums.LgpdConsentStatus | null
     withdrawnAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
-    organizationId: string | null
+    deletedAt: Date | null
   }
 
   export type LgpdConsentMaxAggregateOutputType = {
     id: string | null
     userId: string | null
-    tenantId: string | null
     consentTerms: boolean | null
     consentMarketing: boolean | null
     consentDataSharing: boolean | null
@@ -40741,17 +40733,16 @@ export namespace Prisma {
     macAddress: string | null
     userAgent: string | null
     consentVersion: string | null
-    status: $Enums.ConsentStatus | null
+    status: $Enums.LgpdConsentStatus | null
     withdrawnAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
-    organizationId: string | null
+    deletedAt: Date | null
   }
 
   export type LgpdConsentCountAggregateOutputType = {
     id: number
     userId: number
-    tenantId: number
     consentTerms: number
     consentMarketing: number
     consentDataSharing: number
@@ -40764,7 +40755,7 @@ export namespace Prisma {
     withdrawnAt: number
     createdAt: number
     updatedAt: number
-    organizationId: number
+    deletedAt: number
     _all: number
   }
 
@@ -40772,7 +40763,6 @@ export namespace Prisma {
   export type LgpdConsentMinAggregateInputType = {
     id?: true
     userId?: true
-    tenantId?: true
     consentTerms?: true
     consentMarketing?: true
     consentDataSharing?: true
@@ -40785,13 +40775,12 @@ export namespace Prisma {
     withdrawnAt?: true
     createdAt?: true
     updatedAt?: true
-    organizationId?: true
+    deletedAt?: true
   }
 
   export type LgpdConsentMaxAggregateInputType = {
     id?: true
     userId?: true
-    tenantId?: true
     consentTerms?: true
     consentMarketing?: true
     consentDataSharing?: true
@@ -40804,13 +40793,12 @@ export namespace Prisma {
     withdrawnAt?: true
     createdAt?: true
     updatedAt?: true
-    organizationId?: true
+    deletedAt?: true
   }
 
   export type LgpdConsentCountAggregateInputType = {
     id?: true
     userId?: true
-    tenantId?: true
     consentTerms?: true
     consentMarketing?: true
     consentDataSharing?: true
@@ -40823,7 +40811,7 @@ export namespace Prisma {
     withdrawnAt?: true
     createdAt?: true
     updatedAt?: true
-    organizationId?: true
+    deletedAt?: true
     _all?: true
   }
 
@@ -40902,7 +40890,6 @@ export namespace Prisma {
   export type LgpdConsentGroupByOutputType = {
     id: string
     userId: string
-    tenantId: string
     consentTerms: boolean
     consentMarketing: boolean
     consentDataSharing: boolean
@@ -40911,11 +40898,11 @@ export namespace Prisma {
     macAddress: string | null
     userAgent: string
     consentVersion: string
-    status: $Enums.ConsentStatus
+    status: $Enums.LgpdConsentStatus
     withdrawnAt: Date | null
     createdAt: Date
     updatedAt: Date | null
-    organizationId: string | null
+    deletedAt: Date | null
     _count: LgpdConsentCountAggregateOutputType | null
     _min: LgpdConsentMinAggregateOutputType | null
     _max: LgpdConsentMaxAggregateOutputType | null
@@ -40938,7 +40925,6 @@ export namespace Prisma {
   export type LgpdConsentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    tenantId?: boolean
     consentTerms?: boolean
     consentMarketing?: boolean
     consentDataSharing?: boolean
@@ -40951,16 +40937,13 @@ export namespace Prisma {
     withdrawnAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    organizationId?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }, ExtArgs["result"]["lgpdConsent"]>
 
   export type LgpdConsentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    tenantId?: boolean
     consentTerms?: boolean
     consentMarketing?: boolean
     consentDataSharing?: boolean
@@ -40973,16 +40956,13 @@ export namespace Prisma {
     withdrawnAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    organizationId?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }, ExtArgs["result"]["lgpdConsent"]>
 
   export type LgpdConsentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    tenantId?: boolean
     consentTerms?: boolean
     consentMarketing?: boolean
     consentDataSharing?: boolean
@@ -40995,16 +40975,13 @@ export namespace Prisma {
     withdrawnAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    organizationId?: boolean
+    deletedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }, ExtArgs["result"]["lgpdConsent"]>
 
   export type LgpdConsentSelectScalar = {
     id?: boolean
     userId?: boolean
-    tenantId?: boolean
     consentTerms?: boolean
     consentMarketing?: boolean
     consentDataSharing?: boolean
@@ -41017,37 +40994,28 @@ export namespace Prisma {
     withdrawnAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    organizationId?: boolean
+    deletedAt?: boolean
   }
 
-  export type LgpdConsentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "consentTerms" | "consentMarketing" | "consentDataSharing" | "consentAnalytics" | "ipAddress" | "macAddress" | "userAgent" | "consentVersion" | "status" | "withdrawnAt" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["lgpdConsent"]>
+  export type LgpdConsentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "consentTerms" | "consentMarketing" | "consentDataSharing" | "consentAnalytics" | "ipAddress" | "macAddress" | "userAgent" | "consentVersion" | "status" | "withdrawnAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["lgpdConsent"]>
   export type LgpdConsentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }
   export type LgpdConsentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }
   export type LgpdConsentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    organization?: boolean | LgpdConsent$organizationArgs<ExtArgs>
   }
 
   export type $LgpdConsentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LgpdConsent"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      tenant: Prisma.$TenantPayload<ExtArgs>
-      organization: Prisma.$OrganizationPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      tenantId: string
       consentTerms: boolean
       consentMarketing: boolean
       consentDataSharing: boolean
@@ -41056,11 +41024,11 @@ export namespace Prisma {
       macAddress: string | null
       userAgent: string
       consentVersion: string
-      status: $Enums.ConsentStatus
+      status: $Enums.LgpdConsentStatus
       withdrawnAt: Date | null
       createdAt: Date
       updatedAt: Date | null
-      organizationId: string | null
+      deletedAt: Date | null
     }, ExtArgs["result"]["lgpdConsent"]>
     composites: {}
   }
@@ -41456,8 +41424,6 @@ export namespace Prisma {
   export interface Prisma__LgpdConsentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    tenant<T extends TenantDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TenantDefaultArgs<ExtArgs>>): Prisma__TenantClient<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    organization<T extends LgpdConsent$organizationArgs<ExtArgs> = {}>(args?: Subset<T, LgpdConsent$organizationArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -41489,7 +41455,6 @@ export namespace Prisma {
   interface LgpdConsentFieldRefs {
     readonly id: FieldRef<"LgpdConsent", 'String'>
     readonly userId: FieldRef<"LgpdConsent", 'String'>
-    readonly tenantId: FieldRef<"LgpdConsent", 'String'>
     readonly consentTerms: FieldRef<"LgpdConsent", 'Boolean'>
     readonly consentMarketing: FieldRef<"LgpdConsent", 'Boolean'>
     readonly consentDataSharing: FieldRef<"LgpdConsent", 'Boolean'>
@@ -41498,11 +41463,11 @@ export namespace Prisma {
     readonly macAddress: FieldRef<"LgpdConsent", 'String'>
     readonly userAgent: FieldRef<"LgpdConsent", 'String'>
     readonly consentVersion: FieldRef<"LgpdConsent", 'String'>
-    readonly status: FieldRef<"LgpdConsent", 'ConsentStatus'>
+    readonly status: FieldRef<"LgpdConsent", 'LgpdConsentStatus'>
     readonly withdrawnAt: FieldRef<"LgpdConsent", 'DateTime'>
     readonly createdAt: FieldRef<"LgpdConsent", 'DateTime'>
     readonly updatedAt: FieldRef<"LgpdConsent", 'DateTime'>
-    readonly organizationId: FieldRef<"LgpdConsent", 'String'>
+    readonly deletedAt: FieldRef<"LgpdConsent", 'DateTime'>
   }
     
 
@@ -41901,25 +41866,6 @@ export namespace Prisma {
      * Limit how many LgpdConsents to delete.
      */
     limit?: number
-  }
-
-  /**
-   * LgpdConsent.organization
-   */
-  export type LgpdConsent$organizationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Organization
-     */
-    select?: OrganizationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Organization
-     */
-    omit?: OrganizationOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrganizationInclude<ExtArgs> | null
-    where?: OrganizationWhereInput
   }
 
   /**
@@ -52636,13 +52582,12 @@ export namespace Prisma {
   export const AccountScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
-    providerType: 'providerType',
+    tokenType: 'tokenType',
     provider: 'provider',
     providerAccountId: 'providerAccountId',
     refreshToken: 'refreshToken',
     accessToken: 'accessToken',
     expiresAt: 'expiresAt',
-    tokenType: 'tokenType',
     scope: 'scope',
     idToken: 'idToken',
     sessionState: 'sessionState',
@@ -52656,18 +52601,26 @@ export namespace Prisma {
 
   export const SessionScalarFieldEnum: {
     id: 'id',
-    sessionToken: 'sessionToken',
     userId: 'userId',
-    expires: 'expires'
+    sessionToken: 'sessionToken',
+    expires: 'expires',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
   };
 
   export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
   export const VerificationTokenScalarFieldEnum: {
+    id: 'id',
     identifier: 'identifier',
     token: 'token',
-    expires: 'expires'
+    expiredAt: 'expiredAt',
+    usedAt: 'usedAt',
+    createdAt: 'createdAt'
   };
 
   export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
@@ -52699,8 +52652,10 @@ export namespace Prisma {
     userId: 'userId',
     type: 'type',
     valueHash: 'valueHash',
-    expiresAt: 'expiresAt',
+    expiredAt: 'expiredAt',
     revokedAt: 'revokedAt',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -52714,7 +52669,7 @@ export namespace Prisma {
     userId: 'userId',
     phone: 'phone',
     codeHash: 'codeHash',
-    expiresAt: 'expiresAt',
+    expiredAt: 'expiredAt',
     attempts: 'attempts',
     usedAt: 'usedAt',
     createdAt: 'createdAt',
@@ -52729,7 +52684,6 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     slug: 'slug',
-    documentType: 'documentType',
     documentNumber: 'documentNumber',
     contactEmail: 'contactEmail',
     phone: 'phone',
@@ -52747,10 +52701,6 @@ export namespace Prisma {
     tenantId: 'tenantId',
     name: 'name',
     slug: 'slug',
-    documentType: 'documentType',
-    documentNumber: 'documentNumber',
-    contactEmail: 'contactEmail',
-    phone: 'phone',
     logoUrl: 'logoUrl',
     status: 'status',
     createdAt: 'createdAt',
@@ -52771,7 +52721,7 @@ export namespace Prisma {
     joinedAt: 'joinedAt',
     invitedEmail: 'invitedEmail',
     invitedById: 'invitedById',
-    expiresAt: 'expiresAt',
+    expiredAt: 'expiredAt',
     removedAt: 'removedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -52786,7 +52736,7 @@ export namespace Prisma {
     userId: 'userId',
     tenantId: 'tenantId',
     organizationId: 'organizationId',
-    membershipId: 'membershipId',
+    memberId: 'memberId',
     AddressType: 'AddressType',
     street: 'street',
     addressNumber: 'addressNumber',
@@ -52946,7 +52896,7 @@ export namespace Prisma {
     code: 'code',
     status: 'status',
     usedAt: 'usedAt',
-    expiresAt: 'expiresAt',
+    expiredAt: 'expiredAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -52991,7 +52941,7 @@ export namespace Prisma {
     currentPeriodStart: 'currentPeriodStart',
     currentPeriodEnd: 'currentPeriodEnd',
     canceledAt: 'canceledAt',
-    expiresAt: 'expiresAt',
+    expiredAt: 'expiredAt',
     deletedAt: 'deletedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -53122,7 +53072,6 @@ export namespace Prisma {
   export const LgpdConsentScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
-    tenantId: 'tenantId',
     consentTerms: 'consentTerms',
     consentMarketing: 'consentMarketing',
     consentDataSharing: 'consentDataSharing',
@@ -53135,7 +53084,7 @@ export namespace Prisma {
     withdrawnAt: 'withdrawnAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    organizationId: 'organizationId'
+    deletedAt: 'deletedAt'
   };
 
   export type LgpdConsentScalarFieldEnum = (typeof LgpdConsentScalarFieldEnum)[keyof typeof LgpdConsentScalarFieldEnum]
@@ -53346,6 +53295,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'TokenType'
+   */
+  export type EnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenType'>
+    
+
+
+  /**
+   * Reference to a field of type 'TokenType[]'
+   */
+  export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ProviderType'
    */
   export type EnumProviderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProviderType'>
@@ -53370,20 +53333,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'TokenType'
-   */
-  export type EnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenType'>
-    
-
-
-  /**
-   * Reference to a field of type 'TokenType[]'
-   */
-  export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TokenType[]'>
     
 
 
@@ -53444,30 +53393,30 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'MemberShipRole'
+   * Reference to a field of type 'MembershipRole'
    */
-  export type EnumMemberShipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberShipRole'>
+  export type EnumMembershipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipRole'>
     
 
 
   /**
-   * Reference to a field of type 'MemberShipRole[]'
+   * Reference to a field of type 'MembershipRole[]'
    */
-  export type ListEnumMemberShipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberShipRole[]'>
+  export type ListEnumMembershipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipRole[]'>
     
 
 
   /**
-   * Reference to a field of type 'MemberShipStatus'
+   * Reference to a field of type 'MembershipStatus'
    */
-  export type EnumMemberShipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberShipStatus'>
+  export type EnumMembershipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipStatus'>
     
 
 
   /**
-   * Reference to a field of type 'MemberShipStatus[]'
+   * Reference to a field of type 'MembershipStatus[]'
    */
-  export type ListEnumMemberShipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberShipStatus[]'>
+  export type ListEnumMembershipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipStatus[]'>
     
 
 
@@ -53689,16 +53638,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'ConsentStatus'
+   * Reference to a field of type 'LgpdConsentStatus'
    */
-  export type EnumConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConsentStatus'>
+  export type EnumLgpdConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LgpdConsentStatus'>
     
 
 
   /**
-   * Reference to a field of type 'ConsentStatus[]'
+   * Reference to a field of type 'LgpdConsentStatus[]'
    */
-  export type ListEnumConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConsentStatus[]'>
+  export type ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LgpdConsentStatus[]'>
     
 
 
@@ -53794,39 +53743,39 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     id?: UuidFilter<"User"> | string
-    email?: StringNullableFilter<"User"> | string | null
+    email?: StringFilter<"User"> | string
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
-    passwordHash?: StringNullableFilter<"User"> | string | null
+    passwordHash?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     tokens?: TokenListRelationFilter
+    profile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     otps?: OtpListRelationFilter
     memberships?: MembershipListRelationFilter
     addresses?: AddressListRelationFilter
     lgpdConsents?: LgpdConsentListRelationFilter
-    profile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     leads?: LeadListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
-    email?: SortOrderInput | SortOrder
+    email?: SortOrder
     emailVerified?: SortOrderInput | SortOrder
-    passwordHash?: SortOrderInput | SortOrder
+    passwordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     sessions?: SessionOrderByRelationAggregateInput
     tokens?: TokenOrderByRelationAggregateInput
+    profile?: UserProfileOrderByWithRelationInput
     otps?: OtpOrderByRelationAggregateInput
     memberships?: MembershipOrderByRelationAggregateInput
     addresses?: AddressOrderByRelationAggregateInput
     lgpdConsents?: LgpdConsentOrderByRelationAggregateInput
-    profile?: UserProfileOrderByWithRelationInput
     leads?: LeadOrderByRelationAggregateInput
   }
 
@@ -53837,26 +53786,26 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
-    passwordHash?: StringNullableFilter<"User"> | string | null
+    passwordHash?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     accounts?: AccountListRelationFilter
     sessions?: SessionListRelationFilter
     tokens?: TokenListRelationFilter
+    profile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     otps?: OtpListRelationFilter
     memberships?: MembershipListRelationFilter
     addresses?: AddressListRelationFilter
     lgpdConsents?: LgpdConsentListRelationFilter
-    profile?: XOR<UserProfileNullableScalarRelationFilter, UserProfileWhereInput> | null
     leads?: LeadListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
-    email?: SortOrderInput | SortOrder
+    email?: SortOrder
     emailVerified?: SortOrderInput | SortOrder
-    passwordHash?: SortOrderInput | SortOrder
+    passwordHash?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -53870,9 +53819,9 @@ export namespace Prisma {
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"User"> | string
-    email?: StringNullableWithAggregatesFilter<"User"> | string | null
+    email?: StringWithAggregatesFilter<"User"> | string
     emailVerified?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-    passwordHash?: StringNullableWithAggregatesFilter<"User"> | string | null
+    passwordHash?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -53884,13 +53833,12 @@ export namespace Prisma {
     NOT?: AccountWhereInput | AccountWhereInput[]
     id?: UuidFilter<"Account"> | string
     userId?: UuidFilter<"Account"> | string
-    providerType?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
-    provider?: StringFilter<"Account"> | string
+    tokenType?: EnumTokenTypeFilter<"Account"> | $Enums.TokenType
+    provider?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
     providerAccountId?: StringFilter<"Account"> | string
     refreshToken?: StringNullableFilter<"Account"> | string | null
     accessToken?: StringNullableFilter<"Account"> | string | null
     expiresAt?: IntNullableFilter<"Account"> | number | null
-    tokenType?: EnumTokenTypeNullableFilter<"Account"> | $Enums.TokenType | null
     scope?: StringNullableFilter<"Account"> | string | null
     idToken?: StringNullableFilter<"Account"> | string | null
     sessionState?: StringNullableFilter<"Account"> | string | null
@@ -53903,13 +53851,12 @@ export namespace Prisma {
   export type AccountOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
-    providerType?: SortOrder
+    tokenType?: SortOrder
     provider?: SortOrder
     providerAccountId?: SortOrder
     refreshToken?: SortOrderInput | SortOrder
     accessToken?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
-    tokenType?: SortOrderInput | SortOrder
     scope?: SortOrderInput | SortOrder
     idToken?: SortOrderInput | SortOrder
     sessionState?: SortOrderInput | SortOrder
@@ -53926,13 +53873,12 @@ export namespace Prisma {
     OR?: AccountWhereInput[]
     NOT?: AccountWhereInput | AccountWhereInput[]
     userId?: UuidFilter<"Account"> | string
-    providerType?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
-    provider?: StringFilter<"Account"> | string
+    tokenType?: EnumTokenTypeFilter<"Account"> | $Enums.TokenType
+    provider?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
     providerAccountId?: StringFilter<"Account"> | string
     refreshToken?: StringNullableFilter<"Account"> | string | null
     accessToken?: StringNullableFilter<"Account"> | string | null
     expiresAt?: IntNullableFilter<"Account"> | number | null
-    tokenType?: EnumTokenTypeNullableFilter<"Account"> | $Enums.TokenType | null
     scope?: StringNullableFilter<"Account"> | string | null
     idToken?: StringNullableFilter<"Account"> | string | null
     sessionState?: StringNullableFilter<"Account"> | string | null
@@ -53945,13 +53891,12 @@ export namespace Prisma {
   export type AccountOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
-    providerType?: SortOrder
+    tokenType?: SortOrder
     provider?: SortOrder
     providerAccountId?: SortOrder
     refreshToken?: SortOrderInput | SortOrder
     accessToken?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
-    tokenType?: SortOrderInput | SortOrder
     scope?: SortOrderInput | SortOrder
     idToken?: SortOrderInput | SortOrder
     sessionState?: SortOrderInput | SortOrder
@@ -53971,13 +53916,12 @@ export namespace Prisma {
     NOT?: AccountScalarWhereWithAggregatesInput | AccountScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"Account"> | string
     userId?: UuidWithAggregatesFilter<"Account"> | string
-    providerType?: EnumProviderTypeWithAggregatesFilter<"Account"> | $Enums.ProviderType
-    provider?: StringWithAggregatesFilter<"Account"> | string
+    tokenType?: EnumTokenTypeWithAggregatesFilter<"Account"> | $Enums.TokenType
+    provider?: EnumProviderTypeWithAggregatesFilter<"Account"> | $Enums.ProviderType
     providerAccountId?: StringWithAggregatesFilter<"Account"> | string
     refreshToken?: StringNullableWithAggregatesFilter<"Account"> | string | null
     accessToken?: StringNullableWithAggregatesFilter<"Account"> | string | null
     expiresAt?: IntNullableWithAggregatesFilter<"Account"> | number | null
-    tokenType?: EnumTokenTypeNullableWithAggregatesFilter<"Account"> | $Enums.TokenType | null
     scope?: StringNullableWithAggregatesFilter<"Account"> | string | null
     idToken?: StringNullableWithAggregatesFilter<"Account"> | string | null
     sessionState?: StringNullableWithAggregatesFilter<"Account"> | string | null
@@ -53991,17 +53935,27 @@ export namespace Prisma {
     OR?: SessionWhereInput[]
     NOT?: SessionWhereInput | SessionWhereInput[]
     id?: UuidFilter<"Session"> | string
-    sessionToken?: StringFilter<"Session"> | string
     userId?: UuidFilter<"Session"> | string
+    sessionToken?: StringFilter<"Session"> | string
     expires?: DateTimeFilter<"Session"> | Date | string
+    ipAddress?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type SessionOrderByWithRelationInput = {
     id?: SortOrder
-    sessionToken?: SortOrder
     userId?: SortOrder
+    sessionToken?: SortOrder
     expires?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -54013,14 +53967,24 @@ export namespace Prisma {
     NOT?: SessionWhereInput | SessionWhereInput[]
     userId?: UuidFilter<"Session"> | string
     expires?: DateTimeFilter<"Session"> | Date | string
+    ipAddress?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "sessionToken">
 
   export type SessionOrderByWithAggregationInput = {
     id?: SortOrder
-    sessionToken?: SortOrder
     userId?: SortOrder
+    sessionToken?: SortOrder
     expires?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     _count?: SessionCountOrderByAggregateInput
     _max?: SessionMaxOrderByAggregateInput
     _min?: SessionMinOrderByAggregateInput
@@ -54031,40 +53995,57 @@ export namespace Prisma {
     OR?: SessionScalarWhereWithAggregatesInput[]
     NOT?: SessionScalarWhereWithAggregatesInput | SessionScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"Session"> | string
-    sessionToken?: StringWithAggregatesFilter<"Session"> | string
     userId?: UuidWithAggregatesFilter<"Session"> | string
+    sessionToken?: StringWithAggregatesFilter<"Session"> | string
     expires?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    ipAddress?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"Session"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Session"> | Date | string
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
   }
 
   export type VerificationTokenWhereInput = {
     AND?: VerificationTokenWhereInput | VerificationTokenWhereInput[]
     OR?: VerificationTokenWhereInput[]
     NOT?: VerificationTokenWhereInput | VerificationTokenWhereInput[]
+    id?: UuidFilter<"VerificationToken"> | string
     identifier?: StringFilter<"VerificationToken"> | string
     token?: StringFilter<"VerificationToken"> | string
-    expires?: DateTimeFilter<"VerificationToken"> | Date | string
+    expiredAt?: DateTimeFilter<"VerificationToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"VerificationToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"VerificationToken"> | Date | string
   }
 
   export type VerificationTokenOrderByWithRelationInput = {
+    id?: SortOrder
     identifier?: SortOrder
     token?: SortOrder
-    expires?: SortOrder
+    expiredAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
   }
 
   export type VerificationTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
     token?: string
     identifier_token?: VerificationTokenIdentifierTokenCompoundUniqueInput
     AND?: VerificationTokenWhereInput | VerificationTokenWhereInput[]
     OR?: VerificationTokenWhereInput[]
     NOT?: VerificationTokenWhereInput | VerificationTokenWhereInput[]
     identifier?: StringFilter<"VerificationToken"> | string
-    expires?: DateTimeFilter<"VerificationToken"> | Date | string
-  }, "token" | "identifier_token">
+    expiredAt?: DateTimeFilter<"VerificationToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"VerificationToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"VerificationToken"> | Date | string
+  }, "id" | "token" | "identifier_token">
 
   export type VerificationTokenOrderByWithAggregationInput = {
+    id?: SortOrder
     identifier?: SortOrder
     token?: SortOrder
-    expires?: SortOrder
+    expiredAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
     _count?: VerificationTokenCountOrderByAggregateInput
     _max?: VerificationTokenMaxOrderByAggregateInput
     _min?: VerificationTokenMinOrderByAggregateInput
@@ -54074,9 +54055,12 @@ export namespace Prisma {
     AND?: VerificationTokenScalarWhereWithAggregatesInput | VerificationTokenScalarWhereWithAggregatesInput[]
     OR?: VerificationTokenScalarWhereWithAggregatesInput[]
     NOT?: VerificationTokenScalarWhereWithAggregatesInput | VerificationTokenScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"VerificationToken"> | string
     identifier?: StringWithAggregatesFilter<"VerificationToken"> | string
     token?: StringWithAggregatesFilter<"VerificationToken"> | string
-    expires?: DateTimeWithAggregatesFilter<"VerificationToken"> | Date | string
+    expiredAt?: DateTimeWithAggregatesFilter<"VerificationToken"> | Date | string
+    usedAt?: DateTimeNullableWithAggregatesFilter<"VerificationToken"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"VerificationToken"> | Date | string
   }
 
   export type UserProfileWhereInput = {
@@ -54192,10 +54176,12 @@ export namespace Prisma {
     userId?: UuidFilter<"Token"> | string
     type?: EnumTokenTypeFilter<"Token"> | $Enums.TokenType
     valueHash?: StringFilter<"Token"> | string
-    expiresAt?: DateTimeFilter<"Token"> | Date | string
+    expiredAt?: DateTimeFilter<"Token"> | Date | string
     revokedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    ipAddress?: StringNullableFilter<"Token"> | string | null
+    userAgent?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
-    updatedAt?: DateTimeFilter<"Token"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -54205,10 +54191,12 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     valueHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     revokedAt?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
   }
@@ -54221,10 +54209,12 @@ export namespace Prisma {
     userId?: UuidFilter<"Token"> | string
     type?: EnumTokenTypeFilter<"Token"> | $Enums.TokenType
     valueHash?: StringFilter<"Token"> | string
-    expiresAt?: DateTimeFilter<"Token"> | Date | string
+    expiredAt?: DateTimeFilter<"Token"> | Date | string
     revokedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    ipAddress?: StringNullableFilter<"Token"> | string | null
+    userAgent?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
-    updatedAt?: DateTimeFilter<"Token"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -54234,10 +54224,12 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     valueHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     revokedAt?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: TokenCountOrderByAggregateInput
     _max?: TokenMaxOrderByAggregateInput
@@ -54252,10 +54244,12 @@ export namespace Prisma {
     userId?: UuidWithAggregatesFilter<"Token"> | string
     type?: EnumTokenTypeWithAggregatesFilter<"Token"> | $Enums.TokenType
     valueHash?: StringWithAggregatesFilter<"Token"> | string
-    expiresAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
+    expiredAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
     revokedAt?: DateTimeNullableWithAggregatesFilter<"Token"> | Date | string | null
+    ipAddress?: StringNullableWithAggregatesFilter<"Token"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"Token"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Token"> | Date | string
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"Token"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Token"> | Date | string | null
   }
 
@@ -54267,7 +54261,7 @@ export namespace Prisma {
     userId?: UuidNullableFilter<"Otp"> | string | null
     phone?: StringFilter<"Otp"> | string
     codeHash?: StringFilter<"Otp"> | string
-    expiresAt?: DateTimeFilter<"Otp"> | Date | string
+    expiredAt?: DateTimeFilter<"Otp"> | Date | string
     attempts?: IntFilter<"Otp"> | number
     usedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
     createdAt?: DateTimeFilter<"Otp"> | Date | string
@@ -54281,7 +54275,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     phone?: SortOrder
     codeHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     attempts?: SortOrder
     usedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -54298,7 +54292,7 @@ export namespace Prisma {
     userId?: UuidNullableFilter<"Otp"> | string | null
     phone?: StringFilter<"Otp"> | string
     codeHash?: StringFilter<"Otp"> | string
-    expiresAt?: DateTimeFilter<"Otp"> | Date | string
+    expiredAt?: DateTimeFilter<"Otp"> | Date | string
     attempts?: IntFilter<"Otp"> | number
     usedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
     createdAt?: DateTimeFilter<"Otp"> | Date | string
@@ -54312,7 +54306,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     phone?: SortOrder
     codeHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     attempts?: SortOrder
     usedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -54333,7 +54327,7 @@ export namespace Prisma {
     userId?: UuidNullableWithAggregatesFilter<"Otp"> | string | null
     phone?: StringWithAggregatesFilter<"Otp"> | string
     codeHash?: StringWithAggregatesFilter<"Otp"> | string
-    expiresAt?: DateTimeWithAggregatesFilter<"Otp"> | Date | string
+    expiredAt?: DateTimeWithAggregatesFilter<"Otp"> | Date | string
     attempts?: IntWithAggregatesFilter<"Otp"> | number
     usedAt?: DateTimeNullableWithAggregatesFilter<"Otp"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Otp"> | Date | string
@@ -54348,38 +54342,34 @@ export namespace Prisma {
     id?: UuidFilter<"Tenant"> | string
     name?: StringFilter<"Tenant"> | string
     slug?: StringFilter<"Tenant"> | string
-    documentType?: EnumDocumentTypeNullableFilter<"Tenant"> | $Enums.DocumentType | null
     documentNumber?: StringNullableFilter<"Tenant"> | string | null
     contactEmail?: StringNullableFilter<"Tenant"> | string | null
     phone?: StringNullableFilter<"Tenant"> | string | null
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
-    updatedAt?: DateTimeFilter<"Tenant"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     memberships?: MembershipListRelationFilter
     organizations?: OrganizationListRelationFilter
-    lgpdConsents?: LgpdConsentListRelationFilter
-    addresses?: AddressListRelationFilter
     leads?: LeadListRelationFilter
+    addresses?: AddressListRelationFilter
   }
 
   export type TenantOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrderInput | SortOrder
     documentNumber?: SortOrderInput | SortOrder
     contactEmail?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     memberships?: MembershipOrderByRelationAggregateInput
     organizations?: OrganizationOrderByRelationAggregateInput
-    lgpdConsents?: LgpdConsentOrderByRelationAggregateInput
-    addresses?: AddressOrderByRelationAggregateInput
     leads?: LeadOrderByRelationAggregateInput
+    addresses?: AddressOrderByRelationAggregateInput
   }
 
   export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -54390,31 +54380,28 @@ export namespace Prisma {
     OR?: TenantWhereInput[]
     NOT?: TenantWhereInput | TenantWhereInput[]
     name?: StringFilter<"Tenant"> | string
-    documentType?: EnumDocumentTypeNullableFilter<"Tenant"> | $Enums.DocumentType | null
     contactEmail?: StringNullableFilter<"Tenant"> | string | null
     phone?: StringNullableFilter<"Tenant"> | string | null
     status?: EnumTenantStatusFilter<"Tenant"> | $Enums.TenantStatus
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
-    updatedAt?: DateTimeFilter<"Tenant"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Tenant"> | Date | string | null
     memberships?: MembershipListRelationFilter
     organizations?: OrganizationListRelationFilter
-    lgpdConsents?: LgpdConsentListRelationFilter
-    addresses?: AddressListRelationFilter
     leads?: LeadListRelationFilter
+    addresses?: AddressListRelationFilter
   }, "id" | "slug" | "documentNumber">
 
   export type TenantOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrderInput | SortOrder
     documentNumber?: SortOrderInput | SortOrder
     contactEmail?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: TenantCountOrderByAggregateInput
     _max?: TenantMaxOrderByAggregateInput
@@ -54428,13 +54415,12 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"Tenant"> | string
     name?: StringWithAggregatesFilter<"Tenant"> | string
     slug?: StringWithAggregatesFilter<"Tenant"> | string
-    documentType?: EnumDocumentTypeNullableWithAggregatesFilter<"Tenant"> | $Enums.DocumentType | null
     documentNumber?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     contactEmail?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     phone?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     status?: EnumTenantStatusWithAggregatesFilter<"Tenant"> | $Enums.TenantStatus
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   }
 
@@ -54443,19 +54429,15 @@ export namespace Prisma {
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
     id?: UuidFilter<"Organization"> | string
-    tenantId?: UuidNullableFilter<"Organization"> | string | null
+    tenantId?: UuidFilter<"Organization"> | string
     name?: StringFilter<"Organization"> | string
     slug?: StringFilter<"Organization"> | string
-    documentType?: EnumDocumentTypeNullableFilter<"Organization"> | $Enums.DocumentType | null
-    documentNumber?: StringNullableFilter<"Organization"> | string | null
-    contactEmail?: StringNullableFilter<"Organization"> | string | null
-    phone?: StringNullableFilter<"Organization"> | string | null
     logoUrl?: StringNullableFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
-    tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     memberships?: MembershipListRelationFilter
     addresses?: AddressListRelationFilter
     organizationConfigs?: OrganizationConfigListRelationFilter
@@ -54472,7 +54454,6 @@ export namespace Prisma {
     portals?: PortalListRelationFilter
     campaigns?: CampaignListRelationFilter
     campaignItems?: CampaignItemListRelationFilter
-    lgpdConsents?: LgpdConsentListRelationFilter
     connectionLogs?: ConnectionLogListRelationFilter
     whatsappLogs?: WhatsappLogListRelationFilter
     leads?: LeadListRelationFilter
@@ -54480,13 +54461,9 @@ export namespace Prisma {
 
   export type OrganizationOrderByWithRelationInput = {
     id?: SortOrder
-    tenantId?: SortOrderInput | SortOrder
+    tenantId?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrderInput | SortOrder
-    documentNumber?: SortOrderInput | SortOrder
-    contactEmail?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -54509,7 +54486,6 @@ export namespace Prisma {
     portals?: PortalOrderByRelationAggregateInput
     campaigns?: CampaignOrderByRelationAggregateInput
     campaignItems?: CampaignItemOrderByRelationAggregateInput
-    lgpdConsents?: LgpdConsentOrderByRelationAggregateInput
     connectionLogs?: ConnectionLogOrderByRelationAggregateInput
     whatsappLogs?: WhatsappLogOrderByRelationAggregateInput
     leads?: LeadOrderByRelationAggregateInput
@@ -54517,22 +54493,18 @@ export namespace Prisma {
 
   export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    tenantId?: string
     slug?: string
-    documentNumber?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
-    tenantId?: UuidNullableFilter<"Organization"> | string | null
     name?: StringFilter<"Organization"> | string
-    documentType?: EnumDocumentTypeNullableFilter<"Organization"> | $Enums.DocumentType | null
-    contactEmail?: StringNullableFilter<"Organization"> | string | null
-    phone?: StringNullableFilter<"Organization"> | string | null
     logoUrl?: StringNullableFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
-    tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
+    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     memberships?: MembershipListRelationFilter
     addresses?: AddressListRelationFilter
     organizationConfigs?: OrganizationConfigListRelationFilter
@@ -54549,21 +54521,16 @@ export namespace Prisma {
     portals?: PortalListRelationFilter
     campaigns?: CampaignListRelationFilter
     campaignItems?: CampaignItemListRelationFilter
-    lgpdConsents?: LgpdConsentListRelationFilter
     connectionLogs?: ConnectionLogListRelationFilter
     whatsappLogs?: WhatsappLogListRelationFilter
     leads?: LeadListRelationFilter
-  }, "id" | "slug" | "documentNumber">
+  }, "id" | "slug" | "tenantId">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder
-    tenantId?: SortOrderInput | SortOrder
+    tenantId?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrderInput | SortOrder
-    documentNumber?: SortOrderInput | SortOrder
-    contactEmail?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -54579,13 +54546,9 @@ export namespace Prisma {
     OR?: OrganizationScalarWhereWithAggregatesInput[]
     NOT?: OrganizationScalarWhereWithAggregatesInput | OrganizationScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"Organization"> | string
-    tenantId?: UuidNullableWithAggregatesFilter<"Organization"> | string | null
+    tenantId?: UuidWithAggregatesFilter<"Organization"> | string
     name?: StringWithAggregatesFilter<"Organization"> | string
     slug?: StringWithAggregatesFilter<"Organization"> | string
-    documentType?: EnumDocumentTypeNullableWithAggregatesFilter<"Organization"> | $Enums.DocumentType | null
-    documentNumber?: StringNullableWithAggregatesFilter<"Organization"> | string | null
-    contactEmail?: StringNullableWithAggregatesFilter<"Organization"> | string | null
-    phone?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     logoUrl?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusWithAggregatesFilter<"Organization"> | $Enums.OrganizationStatus
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
@@ -54601,15 +54564,15 @@ export namespace Prisma {
     userId?: UuidFilter<"Membership"> | string
     tenantId?: UuidFilter<"Membership"> | string
     organizationId?: UuidNullableFilter<"Membership"> | string | null
-    role?: EnumMemberShipRoleFilter<"Membership"> | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFilter<"Membership"> | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+    status?: EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
     joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableFilter<"Membership"> | string | null
     invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -54627,10 +54590,10 @@ export namespace Prisma {
     joinedAt?: SortOrderInput | SortOrder
     invitedEmail?: SortOrderInput | SortOrder
     invitedById?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     removedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     tenant?: TenantOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
@@ -54640,28 +54603,28 @@ export namespace Prisma {
 
   export type MembershipWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    userId_tenantId?: MembershipUserIdTenantIdCompoundUniqueInput
+    userId_tenantId_organizationId?: MembershipUserIdTenantIdOrganizationIdCompoundUniqueInput
     AND?: MembershipWhereInput | MembershipWhereInput[]
     OR?: MembershipWhereInput[]
     NOT?: MembershipWhereInput | MembershipWhereInput[]
     userId?: UuidFilter<"Membership"> | string
     tenantId?: UuidFilter<"Membership"> | string
     organizationId?: UuidNullableFilter<"Membership"> | string | null
-    role?: EnumMemberShipRoleFilter<"Membership"> | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFilter<"Membership"> | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+    status?: EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
     joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableFilter<"Membership"> | string | null
     invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
     addresses?: AddressListRelationFilter
-  }, "id" | "userId_tenantId">
+  }, "id" | "userId_tenantId_organizationId">
 
   export type MembershipOrderByWithAggregationInput = {
     id?: SortOrder
@@ -54673,10 +54636,10 @@ export namespace Prisma {
     joinedAt?: SortOrderInput | SortOrder
     invitedEmail?: SortOrderInput | SortOrder
     invitedById?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     removedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
+    updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     _count?: MembershipCountOrderByAggregateInput
     _max?: MembershipMaxOrderByAggregateInput
@@ -54691,15 +54654,15 @@ export namespace Prisma {
     userId?: UuidWithAggregatesFilter<"Membership"> | string
     tenantId?: UuidWithAggregatesFilter<"Membership"> | string
     organizationId?: UuidNullableWithAggregatesFilter<"Membership"> | string | null
-    role?: EnumMemberShipRoleWithAggregatesFilter<"Membership"> | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusWithAggregatesFilter<"Membership"> | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleWithAggregatesFilter<"Membership"> | $Enums.MembershipRole
+    status?: EnumMembershipStatusWithAggregatesFilter<"Membership"> | $Enums.MembershipStatus
     joinedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableWithAggregatesFilter<"Membership"> | string | null
     invitedById?: UuidNullableWithAggregatesFilter<"Membership"> | string | null
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
+    expiredAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
   }
 
@@ -54711,7 +54674,7 @@ export namespace Prisma {
     userId?: UuidNullableFilter<"Address"> | string | null
     tenantId?: UuidNullableFilter<"Address"> | string | null
     organizationId?: UuidNullableFilter<"Address"> | string | null
-    membershipId?: UuidNullableFilter<"Address"> | string | null
+    memberId?: UuidNullableFilter<"Address"> | string | null
     AddressType?: EnumAddressTypeNullableFilter<"Address"> | $Enums.AddressType | null
     street?: StringNullableFilter<"Address"> | string | null
     addressNumber?: StringNullableFilter<"Address"> | string | null
@@ -54729,7 +54692,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
-    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
+    member?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
     city?: XOR<CityNullableScalarRelationFilter, CityWhereInput> | null
     state?: XOR<StateNullableScalarRelationFilter, StateWhereInput> | null
   }
@@ -54739,7 +54702,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     tenantId?: SortOrderInput | SortOrder
     organizationId?: SortOrderInput | SortOrder
-    membershipId?: SortOrderInput | SortOrder
+    memberId?: SortOrderInput | SortOrder
     AddressType?: SortOrderInput | SortOrder
     street?: SortOrderInput | SortOrder
     addressNumber?: SortOrderInput | SortOrder
@@ -54757,7 +54720,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     tenant?: TenantOrderByWithRelationInput
     organization?: OrganizationOrderByWithRelationInput
-    membership?: MembershipOrderByWithRelationInput
+    member?: MembershipOrderByWithRelationInput
     city?: CityOrderByWithRelationInput
     state?: StateOrderByWithRelationInput
   }
@@ -54770,7 +54733,7 @@ export namespace Prisma {
     userId?: UuidNullableFilter<"Address"> | string | null
     tenantId?: UuidNullableFilter<"Address"> | string | null
     organizationId?: UuidNullableFilter<"Address"> | string | null
-    membershipId?: UuidNullableFilter<"Address"> | string | null
+    memberId?: UuidNullableFilter<"Address"> | string | null
     AddressType?: EnumAddressTypeNullableFilter<"Address"> | $Enums.AddressType | null
     street?: StringNullableFilter<"Address"> | string | null
     addressNumber?: StringNullableFilter<"Address"> | string | null
@@ -54788,7 +54751,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     tenant?: XOR<TenantNullableScalarRelationFilter, TenantWhereInput> | null
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
-    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
+    member?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
     city?: XOR<CityNullableScalarRelationFilter, CityWhereInput> | null
     state?: XOR<StateNullableScalarRelationFilter, StateWhereInput> | null
   }, "id">
@@ -54798,7 +54761,7 @@ export namespace Prisma {
     userId?: SortOrderInput | SortOrder
     tenantId?: SortOrderInput | SortOrder
     organizationId?: SortOrderInput | SortOrder
-    membershipId?: SortOrderInput | SortOrder
+    memberId?: SortOrderInput | SortOrder
     AddressType?: SortOrderInput | SortOrder
     street?: SortOrderInput | SortOrder
     addressNumber?: SortOrderInput | SortOrder
@@ -54826,7 +54789,7 @@ export namespace Prisma {
     userId?: UuidNullableWithAggregatesFilter<"Address"> | string | null
     tenantId?: UuidNullableWithAggregatesFilter<"Address"> | string | null
     organizationId?: UuidNullableWithAggregatesFilter<"Address"> | string | null
-    membershipId?: UuidNullableWithAggregatesFilter<"Address"> | string | null
+    memberId?: UuidNullableWithAggregatesFilter<"Address"> | string | null
     AddressType?: EnumAddressTypeNullableWithAggregatesFilter<"Address"> | $Enums.AddressType | null
     street?: StringNullableWithAggregatesFilter<"Address"> | string | null
     addressNumber?: StringNullableWithAggregatesFilter<"Address"> | string | null
@@ -55538,7 +55501,7 @@ export namespace Prisma {
     code?: StringFilter<"Voucher"> | string
     status?: EnumVoucherStatusFilter<"Voucher"> | $Enums.VoucherStatus
     usedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
@@ -55555,7 +55518,7 @@ export namespace Prisma {
     code?: SortOrder
     status?: SortOrder
     usedAt?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -55575,7 +55538,7 @@ export namespace Prisma {
     hotspotPlanId?: UuidNullableFilter<"Voucher"> | string | null
     status?: EnumVoucherStatusFilter<"Voucher"> | $Enums.VoucherStatus
     usedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
@@ -55592,7 +55555,7 @@ export namespace Prisma {
     code?: SortOrder
     status?: SortOrder
     usedAt?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -55612,7 +55575,7 @@ export namespace Prisma {
     code?: StringWithAggregatesFilter<"Voucher"> | string
     status?: EnumVoucherStatusWithAggregatesFilter<"Voucher"> | $Enums.VoucherStatus
     usedAt?: DateTimeNullableWithAggregatesFilter<"Voucher"> | Date | string | null
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"Voucher"> | Date | string | null
+    expiredAt?: DateTimeNullableWithAggregatesFilter<"Voucher"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"Voucher"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Voucher"> | Date | string | null
@@ -55751,7 +55714,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
@@ -55774,7 +55737,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     canceledAt?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -55800,7 +55763,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
@@ -55823,7 +55786,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     canceledAt?: SortOrderInput | SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    expiredAt?: SortOrderInput | SortOrder
     deletedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -55851,7 +55814,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     canceledAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
+    expiredAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"Subscription"> | Date | string | null
@@ -56492,7 +56455,6 @@ export namespace Prisma {
     NOT?: LgpdConsentWhereInput | LgpdConsentWhereInput[]
     id?: UuidFilter<"LgpdConsent"> | string
     userId?: UuidFilter<"LgpdConsent"> | string
-    tenantId?: UuidFilter<"LgpdConsent"> | string
     consentTerms?: BoolFilter<"LgpdConsent"> | boolean
     consentMarketing?: BoolFilter<"LgpdConsent"> | boolean
     consentDataSharing?: BoolFilter<"LgpdConsent"> | boolean
@@ -56501,20 +56463,17 @@ export namespace Prisma {
     macAddress?: StringNullableFilter<"LgpdConsent"> | string | null
     userAgent?: StringFilter<"LgpdConsent"> | string
     consentVersion?: StringFilter<"LgpdConsent"> | string
-    status?: EnumConsentStatusFilter<"LgpdConsent"> | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFilter<"LgpdConsent"> | $Enums.LgpdConsentStatus
     withdrawnAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
     createdAt?: DateTimeFilter<"LgpdConsent"> | Date | string
     updatedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
-    organizationId?: UuidNullableFilter<"LgpdConsent"> | string | null
+    deletedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
-    organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
   }
 
   export type LgpdConsentOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
-    tenantId?: SortOrder
     consentTerms?: SortOrder
     consentMarketing?: SortOrder
     consentDataSharing?: SortOrder
@@ -56527,20 +56486,17 @@ export namespace Prisma {
     withdrawnAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
-    organizationId?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
-    tenant?: TenantOrderByWithRelationInput
-    organization?: OrganizationOrderByWithRelationInput
   }
 
   export type LgpdConsentWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    userId_tenantId_consentVersion?: LgpdConsentUserIdTenantIdConsentVersionCompoundUniqueInput
+    userId_consentVersion?: LgpdConsentUserIdConsentVersionCompoundUniqueInput
     AND?: LgpdConsentWhereInput | LgpdConsentWhereInput[]
     OR?: LgpdConsentWhereInput[]
     NOT?: LgpdConsentWhereInput | LgpdConsentWhereInput[]
     userId?: UuidFilter<"LgpdConsent"> | string
-    tenantId?: UuidFilter<"LgpdConsent"> | string
     consentTerms?: BoolFilter<"LgpdConsent"> | boolean
     consentMarketing?: BoolFilter<"LgpdConsent"> | boolean
     consentDataSharing?: BoolFilter<"LgpdConsent"> | boolean
@@ -56549,20 +56505,17 @@ export namespace Prisma {
     macAddress?: StringNullableFilter<"LgpdConsent"> | string | null
     userAgent?: StringFilter<"LgpdConsent"> | string
     consentVersion?: StringFilter<"LgpdConsent"> | string
-    status?: EnumConsentStatusFilter<"LgpdConsent"> | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFilter<"LgpdConsent"> | $Enums.LgpdConsentStatus
     withdrawnAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
     createdAt?: DateTimeFilter<"LgpdConsent"> | Date | string
     updatedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
-    organizationId?: UuidNullableFilter<"LgpdConsent"> | string | null
+    deletedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
-    organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
-  }, "id" | "userId_tenantId_consentVersion">
+  }, "id" | "userId_consentVersion">
 
   export type LgpdConsentOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
-    tenantId?: SortOrder
     consentTerms?: SortOrder
     consentMarketing?: SortOrder
     consentDataSharing?: SortOrder
@@ -56575,7 +56528,7 @@ export namespace Prisma {
     withdrawnAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
-    organizationId?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
     _count?: LgpdConsentCountOrderByAggregateInput
     _max?: LgpdConsentMaxOrderByAggregateInput
     _min?: LgpdConsentMinOrderByAggregateInput
@@ -56587,7 +56540,6 @@ export namespace Prisma {
     NOT?: LgpdConsentScalarWhereWithAggregatesInput | LgpdConsentScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"LgpdConsent"> | string
     userId?: UuidWithAggregatesFilter<"LgpdConsent"> | string
-    tenantId?: UuidWithAggregatesFilter<"LgpdConsent"> | string
     consentTerms?: BoolWithAggregatesFilter<"LgpdConsent"> | boolean
     consentMarketing?: BoolWithAggregatesFilter<"LgpdConsent"> | boolean
     consentDataSharing?: BoolWithAggregatesFilter<"LgpdConsent"> | boolean
@@ -56596,11 +56548,11 @@ export namespace Prisma {
     macAddress?: StringNullableWithAggregatesFilter<"LgpdConsent"> | string | null
     userAgent?: StringWithAggregatesFilter<"LgpdConsent"> | string
     consentVersion?: StringWithAggregatesFilter<"LgpdConsent"> | string
-    status?: EnumConsentStatusWithAggregatesFilter<"LgpdConsent"> | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusWithAggregatesFilter<"LgpdConsent"> | $Enums.LgpdConsentStatus
     withdrawnAt?: DateTimeNullableWithAggregatesFilter<"LgpdConsent"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LgpdConsent"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"LgpdConsent"> | Date | string | null
-    organizationId?: UuidNullableWithAggregatesFilter<"LgpdConsent"> | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"LgpdConsent"> | Date | string | null
   }
 
   export type ConnectionLogWhereInput = {
@@ -57215,85 +57167,85 @@ export namespace Prisma {
 
   export type UserCreateInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -57301,9 +57253,9 @@ export namespace Prisma {
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -57311,9 +57263,9 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -57321,13 +57273,12 @@ export namespace Prisma {
 
   export type AccountCreateInput = {
     id?: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -57340,13 +57291,12 @@ export namespace Prisma {
   export type AccountUncheckedCreateInput = {
     id?: string
     userId: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -57357,13 +57307,12 @@ export namespace Prisma {
 
   export type AccountUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57376,13 +57325,12 @@ export namespace Prisma {
   export type AccountUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57394,13 +57342,12 @@ export namespace Prisma {
   export type AccountCreateManyInput = {
     id?: string
     userId: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -57411,13 +57358,12 @@ export namespace Prisma {
 
   export type AccountUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57429,13 +57375,12 @@ export namespace Prisma {
   export type AccountUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57448,90 +57393,146 @@ export namespace Prisma {
     id?: string
     sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutSessionsInput
   }
 
   export type SessionUncheckedCreateInput = {
     id?: string
-    sessionToken: string
     userId: string
+    sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
   }
 
   export type SessionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutSessionsNestedInput
   }
 
   export type SessionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    sessionToken?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionCreateManyInput = {
     id?: string
-    sessionToken: string
     userId: string
+    sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
   }
 
   export type SessionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    sessionToken?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type VerificationTokenCreateInput = {
+    id?: string
     identifier: string
     token: string
-    expires: Date | string
+    expiredAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
   }
 
   export type VerificationTokenUncheckedCreateInput = {
+    id?: string
     identifier: string
     token: string
-    expires: Date | string
+    expiredAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
   }
 
   export type VerificationTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
     identifier?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
-    expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type VerificationTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
     identifier?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
-    expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type VerificationTokenCreateManyInput = {
+    id?: string
     identifier: string
     token: string
-    expires: Date | string
+    expiredAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
   }
 
   export type VerificationTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
     identifier?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
-    expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type VerificationTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
     identifier?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
-    expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserProfileCreateInput = {
@@ -57663,10 +57664,12 @@ export namespace Prisma {
     id?: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutTokensInput
   }
@@ -57676,10 +57679,12 @@ export namespace Prisma {
     userId: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -57687,10 +57692,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutTokensNestedInput
   }
@@ -57700,10 +57707,12 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -57712,10 +57721,12 @@ export namespace Prisma {
     userId: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -57723,10 +57734,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -57735,10 +57748,12 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -57746,7 +57761,7 @@ export namespace Prisma {
     id?: string
     phone: string
     codeHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     attempts?: number
     usedAt?: Date | string | null
     createdAt?: Date | string
@@ -57760,7 +57775,7 @@ export namespace Prisma {
     userId?: string | null
     phone: string
     codeHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     attempts?: number
     usedAt?: Date | string | null
     createdAt?: Date | string
@@ -57772,7 +57787,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57786,7 +57801,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57799,7 +57814,7 @@ export namespace Prisma {
     userId?: string | null
     phone: string
     codeHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     attempts?: number
     usedAt?: Date | string | null
     createdAt?: Date | string
@@ -57811,7 +57826,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57824,7 +57839,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -57836,89 +57851,80 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipCreateNestedManyWithoutTenantInput
     organizations?: OrganizationCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutTenantInput
-    addresses?: AddressCreateNestedManyWithoutTenantInput
     leads?: LeadCreateNestedManyWithoutTenantInput
+    addresses?: AddressCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipUncheckedCreateNestedManyWithoutTenantInput
     organizations?: OrganizationUncheckedCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutTenantInput
-    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
     leads?: LeadUncheckedCreateNestedManyWithoutTenantInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUpdateManyWithoutTenantNestedInput
     leads?: LeadUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUncheckedUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUncheckedUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
     leads?: LeadUncheckedUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantCreateManyInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -57926,13 +57932,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -57940,13 +57945,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -57954,16 +57958,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -57980,7 +57980,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -57988,13 +57987,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -58016,7 +58011,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -58026,16 +58020,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -58052,7 +58042,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -58060,13 +58049,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58088,7 +58073,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -58096,13 +58080,9 @@ export namespace Prisma {
 
   export type OrganizationCreateManyInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -58114,10 +58094,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58127,13 +58103,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58143,20 +58115,20 @@ export namespace Prisma {
 
   export type MembershipCreateInput = {
     id?: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutMembershipsInput
     user: UserCreateNestedOneWithoutMembershipsInput
     organization?: OrganizationCreateNestedOneWithoutMembershipsInput
-    addresses?: AddressCreateNestedManyWithoutMembershipInput
+    addresses?: AddressCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipUncheckedCreateInput = {
@@ -58164,35 +58136,35 @@ export namespace Prisma {
     userId: string
     tenantId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    addresses?: AddressUncheckedCreateNestedManyWithoutMembershipInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutMembershipsNestedInput
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     organization?: OrganizationUpdateOneWithoutMembershipsNestedInput
-    addresses?: AddressUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateInput = {
@@ -58200,17 +58172,17 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    addresses?: AddressUncheckedUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipCreateManyInput = {
@@ -58218,29 +58190,29 @@ export namespace Prisma {
     userId: string
     tenantId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
   export type MembershipUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -58249,15 +58221,15 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -58278,7 +58250,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutAddressesInput
     tenant?: TenantCreateNestedOneWithoutAddressesInput
     organization?: OrganizationCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
     city?: CityCreateNestedOneWithoutAddressesInput
     state?: StateCreateNestedOneWithoutAddressesInput
   }
@@ -58288,7 +58260,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -58322,7 +58294,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutAddressesNestedInput
     tenant?: TenantUpdateOneWithoutAddressesNestedInput
     organization?: OrganizationUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
     city?: CityUpdateOneWithoutAddressesNestedInput
     state?: StateUpdateOneWithoutAddressesNestedInput
   }
@@ -58332,7 +58304,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58354,7 +58326,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -58392,7 +58364,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59164,7 +59136,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -59181,7 +59153,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -59192,7 +59164,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59209,7 +59181,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59223,7 +59195,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -59234,7 +59206,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59248,7 +59220,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59402,7 +59374,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -59425,7 +59397,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -59444,7 +59416,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59467,7 +59439,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59488,7 +59460,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -59506,7 +59478,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -59526,7 +59498,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -60254,19 +60226,17 @@ export namespace Prisma {
     macAddress?: string | null
     userAgent: string
     consentVersion: string
-    status?: $Enums.ConsentStatus
+    status?: $Enums.LgpdConsentStatus
     withdrawnAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutLgpdConsentsInput
-    tenant: TenantCreateNestedOneWithoutLgpdConsentsInput
-    organization?: OrganizationCreateNestedOneWithoutLgpdConsentsInput
   }
 
   export type LgpdConsentUncheckedCreateInput = {
     id?: string
     userId: string
-    tenantId: string
     consentTerms: boolean
     consentMarketing: boolean
     consentDataSharing: boolean
@@ -60275,11 +60245,11 @@ export namespace Prisma {
     macAddress?: string | null
     userAgent: string
     consentVersion: string
-    status?: $Enums.ConsentStatus
+    status?: $Enums.LgpdConsentStatus
     withdrawnAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
-    organizationId?: string | null
+    deletedAt?: Date | string | null
   }
 
   export type LgpdConsentUpdateInput = {
@@ -60292,19 +60262,17 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutLgpdConsentsNestedInput
-    tenant?: TenantUpdateOneRequiredWithoutLgpdConsentsNestedInput
-    organization?: OrganizationUpdateOneWithoutLgpdConsentsNestedInput
   }
 
   export type LgpdConsentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
     consentTerms?: BoolFieldUpdateOperationsInput | boolean
     consentMarketing?: BoolFieldUpdateOperationsInput | boolean
     consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
@@ -60313,17 +60281,16 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LgpdConsentCreateManyInput = {
     id?: string
     userId: string
-    tenantId: string
     consentTerms: boolean
     consentMarketing: boolean
     consentDataSharing: boolean
@@ -60332,11 +60299,11 @@ export namespace Prisma {
     macAddress?: string | null
     userAgent: string
     consentVersion: string
-    status?: $Enums.ConsentStatus
+    status?: $Enums.LgpdConsentStatus
     withdrawnAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
-    organizationId?: string | null
+    deletedAt?: Date | string | null
   }
 
   export type LgpdConsentUpdateManyMutationInput = {
@@ -60349,16 +60316,16 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LgpdConsentUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
     consentTerms?: BoolFieldUpdateOperationsInput | boolean
     consentMarketing?: BoolFieldUpdateOperationsInput | boolean
     consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
@@ -60367,11 +60334,11 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ConnectionLogCreateInput = {
@@ -61040,10 +61007,10 @@ export namespace Prisma {
     not?: NestedUuidFilter<$PrismaModel> | string
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+  export type StringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -61052,7 +61019,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -61095,6 +61062,11 @@ export namespace Prisma {
     none?: TokenWhereInput
   }
 
+  export type UserProfileNullableScalarRelationFilter = {
+    is?: UserProfileWhereInput | null
+    isNot?: UserProfileWhereInput | null
+  }
+
   export type OtpListRelationFilter = {
     every?: OtpWhereInput
     some?: OtpWhereInput
@@ -61117,11 +61089,6 @@ export namespace Prisma {
     every?: LgpdConsentWhereInput
     some?: LgpdConsentWhereInput
     none?: LgpdConsentWhereInput
-  }
-
-  export type UserProfileNullableScalarRelationFilter = {
-    is?: UserProfileWhereInput | null
-    isNot?: UserProfileWhereInput | null
   }
 
   export type LeadListRelationFilter = {
@@ -61212,10 +61179,10 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -61224,10 +61191,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -61258,6 +61225,13 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type EnumTokenTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTokenTypeFilter<$PrismaModel> | $Enums.TokenType
+  }
+
   export type EnumProviderTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
@@ -61265,10 +61239,10 @@ export namespace Prisma {
     not?: NestedEnumProviderTypeFilter<$PrismaModel> | $Enums.ProviderType
   }
 
-  export type StringFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -61277,7 +61251,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringFilter<$PrismaModel> | string
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -61291,33 +61265,25 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type EnumTokenTypeNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTokenTypeNullableFilter<$PrismaModel> | $Enums.TokenType | null
-  }
-
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
   }
 
   export type AccountProviderProviderAccountIdCompoundUniqueInput = {
-    provider: string
+    provider: $Enums.ProviderType
     providerAccountId: string
   }
 
   export type AccountCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    providerType?: SortOrder
+    tokenType?: SortOrder
     provider?: SortOrder
     providerAccountId?: SortOrder
     refreshToken?: SortOrder
     accessToken?: SortOrder
     expiresAt?: SortOrder
-    tokenType?: SortOrder
     scope?: SortOrder
     idToken?: SortOrder
     sessionState?: SortOrder
@@ -61333,13 +61299,12 @@ export namespace Prisma {
   export type AccountMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    providerType?: SortOrder
+    tokenType?: SortOrder
     provider?: SortOrder
     providerAccountId?: SortOrder
     refreshToken?: SortOrder
     accessToken?: SortOrder
     expiresAt?: SortOrder
-    tokenType?: SortOrder
     scope?: SortOrder
     idToken?: SortOrder
     sessionState?: SortOrder
@@ -61351,13 +61316,12 @@ export namespace Prisma {
   export type AccountMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    providerType?: SortOrder
+    tokenType?: SortOrder
     provider?: SortOrder
     providerAccountId?: SortOrder
     refreshToken?: SortOrder
     accessToken?: SortOrder
     expiresAt?: SortOrder
-    tokenType?: SortOrder
     scope?: SortOrder
     idToken?: SortOrder
     sessionState?: SortOrder
@@ -61370,6 +61334,16 @@ export namespace Prisma {
     expiresAt?: SortOrder
   }
 
+  export type EnumTokenTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.TokenType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTokenTypeFilter<$PrismaModel>
+    _max?: NestedEnumTokenTypeFilter<$PrismaModel>
+  }
+
   export type EnumProviderTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
@@ -61380,10 +61354,10 @@ export namespace Prisma {
     _max?: NestedEnumProviderTypeFilter<$PrismaModel>
   }
 
-  export type StringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -61392,10 +61366,10 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -61414,35 +61388,40 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type EnumTokenTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTokenTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.TokenType | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumTokenTypeNullableFilter<$PrismaModel>
-    _max?: NestedEnumTokenTypeNullableFilter<$PrismaModel>
-  }
-
   export type SessionCountOrderByAggregateInput = {
     id?: SortOrder
-    sessionToken?: SortOrder
     userId?: SortOrder
+    sessionToken?: SortOrder
     expires?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type SessionMaxOrderByAggregateInput = {
     id?: SortOrder
-    sessionToken?: SortOrder
     userId?: SortOrder
+    sessionToken?: SortOrder
     expires?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type SessionMinOrderByAggregateInput = {
     id?: SortOrder
-    sessionToken?: SortOrder
     userId?: SortOrder
+    sessionToken?: SortOrder
     expires?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type VerificationTokenIdentifierTokenCompoundUniqueInput = {
@@ -61451,21 +61430,30 @@ export namespace Prisma {
   }
 
   export type VerificationTokenCountOrderByAggregateInput = {
+    id?: SortOrder
     identifier?: SortOrder
     token?: SortOrder
-    expires?: SortOrder
+    expiredAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type VerificationTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
     identifier?: SortOrder
     token?: SortOrder
-    expires?: SortOrder
+    expiredAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type VerificationTokenMinOrderByAggregateInput = {
+    id?: SortOrder
     identifier?: SortOrder
     token?: SortOrder
-    expires?: SortOrder
+    expiredAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type EnumDocumentTypeNullableFilter<$PrismaModel = never> = {
@@ -61556,20 +61544,15 @@ export namespace Prisma {
     _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
   }
 
-  export type EnumTokenTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumTokenTypeFilter<$PrismaModel> | $Enums.TokenType
-  }
-
   export type TokenCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
     type?: SortOrder
     valueHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     revokedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -61580,8 +61563,10 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     valueHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     revokedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -61592,21 +61577,13 @@ export namespace Prisma {
     userId?: SortOrder
     type?: SortOrder
     valueHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     revokedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
-  }
-
-  export type EnumTokenTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.TokenType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumTokenTypeFilter<$PrismaModel>
-    _max?: NestedEnumTokenTypeFilter<$PrismaModel>
   }
 
   export type UuidNullableFilter<$PrismaModel = never> = {
@@ -61642,7 +61619,7 @@ export namespace Prisma {
     userId?: SortOrder
     phone?: SortOrder
     codeHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     attempts?: SortOrder
     usedAt?: SortOrder
     createdAt?: SortOrder
@@ -61659,7 +61636,7 @@ export namespace Prisma {
     userId?: SortOrder
     phone?: SortOrder
     codeHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     attempts?: SortOrder
     usedAt?: SortOrder
     createdAt?: SortOrder
@@ -61672,7 +61649,7 @@ export namespace Prisma {
     userId?: SortOrder
     phone?: SortOrder
     codeHash?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     attempts?: SortOrder
     usedAt?: SortOrder
     createdAt?: SortOrder
@@ -61736,7 +61713,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
     documentNumber?: SortOrder
     contactEmail?: SortOrder
     phone?: SortOrder
@@ -61750,7 +61726,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
     documentNumber?: SortOrder
     contactEmail?: SortOrder
     phone?: SortOrder
@@ -61764,7 +61739,6 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
     documentNumber?: SortOrder
     contactEmail?: SortOrder
     phone?: SortOrder
@@ -61791,9 +61765,9 @@ export namespace Prisma {
     not?: NestedEnumOrganizationStatusFilter<$PrismaModel> | $Enums.OrganizationStatus
   }
 
-  export type TenantNullableScalarRelationFilter = {
-    is?: TenantWhereInput | null
-    isNot?: TenantWhereInput | null
+  export type TenantScalarRelationFilter = {
+    is?: TenantWhereInput
+    isNot?: TenantWhereInput
   }
 
   export type OrganizationConfigListRelationFilter = {
@@ -61951,10 +61925,6 @@ export namespace Prisma {
     tenantId?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
-    documentNumber?: SortOrder
-    contactEmail?: SortOrder
-    phone?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -61967,10 +61937,6 @@ export namespace Prisma {
     tenantId?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
-    documentNumber?: SortOrder
-    contactEmail?: SortOrder
-    phone?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -61983,10 +61949,6 @@ export namespace Prisma {
     tenantId?: SortOrder
     name?: SortOrder
     slug?: SortOrder
-    documentType?: SortOrder
-    documentNumber?: SortOrder
-    contactEmail?: SortOrder
-    phone?: SortOrder
     logoUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -62004,23 +61966,18 @@ export namespace Prisma {
     _max?: NestedEnumOrganizationStatusFilter<$PrismaModel>
   }
 
-  export type EnumMemberShipRoleFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipRole | EnumMemberShipRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipRoleFilter<$PrismaModel> | $Enums.MemberShipRole
+  export type EnumMembershipRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipRole | EnumMembershipRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipRoleFilter<$PrismaModel> | $Enums.MembershipRole
   }
 
-  export type EnumMemberShipStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipStatus | EnumMemberShipStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipStatusFilter<$PrismaModel> | $Enums.MemberShipStatus
-  }
-
-  export type TenantScalarRelationFilter = {
-    is?: TenantWhereInput
-    isNot?: TenantWhereInput
+  export type EnumMembershipStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipStatus | EnumMembershipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
   }
 
   export type OrganizationNullableScalarRelationFilter = {
@@ -62028,9 +61985,10 @@ export namespace Prisma {
     isNot?: OrganizationWhereInput | null
   }
 
-  export type MembershipUserIdTenantIdCompoundUniqueInput = {
+  export type MembershipUserIdTenantIdOrganizationIdCompoundUniqueInput = {
     userId: string
     tenantId: string
+    organizationId: string
   }
 
   export type MembershipCountOrderByAggregateInput = {
@@ -62043,7 +62001,7 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -62060,7 +62018,7 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -62077,31 +62035,31 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
   }
 
-  export type EnumMemberShipRoleWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipRole | EnumMemberShipRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipRoleWithAggregatesFilter<$PrismaModel> | $Enums.MemberShipRole
+  export type EnumMembershipRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipRole | EnumMembershipRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipRoleWithAggregatesFilter<$PrismaModel> | $Enums.MembershipRole
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMemberShipRoleFilter<$PrismaModel>
-    _max?: NestedEnumMemberShipRoleFilter<$PrismaModel>
+    _min?: NestedEnumMembershipRoleFilter<$PrismaModel>
+    _max?: NestedEnumMembershipRoleFilter<$PrismaModel>
   }
 
-  export type EnumMemberShipStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipStatus | EnumMemberShipStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipStatusWithAggregatesFilter<$PrismaModel> | $Enums.MemberShipStatus
+  export type EnumMembershipStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipStatus | EnumMembershipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipStatusWithAggregatesFilter<$PrismaModel> | $Enums.MembershipStatus
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMemberShipStatusFilter<$PrismaModel>
-    _max?: NestedEnumMemberShipStatusFilter<$PrismaModel>
+    _min?: NestedEnumMembershipStatusFilter<$PrismaModel>
+    _max?: NestedEnumMembershipStatusFilter<$PrismaModel>
   }
 
   export type EnumAddressTypeNullableFilter<$PrismaModel = never> = {
@@ -62114,6 +62072,11 @@ export namespace Prisma {
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type TenantNullableScalarRelationFilter = {
+    is?: TenantWhereInput | null
+    isNot?: TenantWhereInput | null
   }
 
   export type MembershipNullableScalarRelationFilter = {
@@ -62136,7 +62099,7 @@ export namespace Prisma {
     userId?: SortOrder
     tenantId?: SortOrder
     organizationId?: SortOrder
-    membershipId?: SortOrder
+    memberId?: SortOrder
     AddressType?: SortOrder
     street?: SortOrder
     addressNumber?: SortOrder
@@ -62158,7 +62121,7 @@ export namespace Prisma {
     userId?: SortOrder
     tenantId?: SortOrder
     organizationId?: SortOrder
-    membershipId?: SortOrder
+    memberId?: SortOrder
     AddressType?: SortOrder
     street?: SortOrder
     addressNumber?: SortOrder
@@ -62180,7 +62143,7 @@ export namespace Prisma {
     userId?: SortOrder
     tenantId?: SortOrder
     organizationId?: SortOrder
-    membershipId?: SortOrder
+    memberId?: SortOrder
     AddressType?: SortOrder
     street?: SortOrder
     addressNumber?: SortOrder
@@ -62777,7 +62740,7 @@ export namespace Prisma {
     code?: SortOrder
     status?: SortOrder
     usedAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -62791,7 +62754,7 @@ export namespace Prisma {
     code?: SortOrder
     status?: SortOrder
     usedAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -62805,7 +62768,7 @@ export namespace Prisma {
     code?: SortOrder
     status?: SortOrder
     usedAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -62982,7 +62945,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     canceledAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -63006,7 +62969,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     canceledAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -63026,7 +62989,7 @@ export namespace Prisma {
     currentPeriodStart?: SortOrder
     currentPeriodEnd?: SortOrder
     canceledAt?: SortOrder
-    expiresAt?: SortOrder
+    expiredAt?: SortOrder
     deletedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -63496,23 +63459,21 @@ export namespace Prisma {
     _max?: NestedEnumLeadStatusFilter<$PrismaModel>
   }
 
-  export type EnumConsentStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.ConsentStatus | EnumConsentStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumConsentStatusFilter<$PrismaModel> | $Enums.ConsentStatus
+  export type EnumLgpdConsentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.LgpdConsentStatus | EnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLgpdConsentStatusFilter<$PrismaModel> | $Enums.LgpdConsentStatus
   }
 
-  export type LgpdConsentUserIdTenantIdConsentVersionCompoundUniqueInput = {
+  export type LgpdConsentUserIdConsentVersionCompoundUniqueInput = {
     userId: string
-    tenantId: string
     consentVersion: string
   }
 
   export type LgpdConsentCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    tenantId?: SortOrder
     consentTerms?: SortOrder
     consentMarketing?: SortOrder
     consentDataSharing?: SortOrder
@@ -63525,13 +63486,12 @@ export namespace Prisma {
     withdrawnAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    organizationId?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type LgpdConsentMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    tenantId?: SortOrder
     consentTerms?: SortOrder
     consentMarketing?: SortOrder
     consentDataSharing?: SortOrder
@@ -63544,13 +63504,12 @@ export namespace Prisma {
     withdrawnAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    organizationId?: SortOrder
+    deletedAt?: SortOrder
   }
 
   export type LgpdConsentMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    tenantId?: SortOrder
     consentTerms?: SortOrder
     consentMarketing?: SortOrder
     consentDataSharing?: SortOrder
@@ -63563,17 +63522,17 @@ export namespace Prisma {
     withdrawnAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    organizationId?: SortOrder
+    deletedAt?: SortOrder
   }
 
-  export type EnumConsentStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ConsentStatus | EnumConsentStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumConsentStatusWithAggregatesFilter<$PrismaModel> | $Enums.ConsentStatus
+  export type EnumLgpdConsentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LgpdConsentStatus | EnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLgpdConsentStatusWithAggregatesFilter<$PrismaModel> | $Enums.LgpdConsentStatus
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumConsentStatusFilter<$PrismaModel>
-    _max?: NestedEnumConsentStatusFilter<$PrismaModel>
+    _min?: NestedEnumLgpdConsentStatusFilter<$PrismaModel>
+    _max?: NestedEnumLgpdConsentStatusFilter<$PrismaModel>
   }
 
   export type BigIntFilter<$PrismaModel = never> = {
@@ -64021,6 +63980,12 @@ export namespace Prisma {
     connect?: TokenWhereUniqueInput | TokenWhereUniqueInput[]
   }
 
+  export type UserProfileCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
+    connect?: UserProfileWhereUniqueInput
+  }
+
   export type OtpCreateNestedManyWithoutUserInput = {
     create?: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput> | OtpCreateWithoutUserInput[] | OtpUncheckedCreateWithoutUserInput[]
     connectOrCreate?: OtpCreateOrConnectWithoutUserInput | OtpCreateOrConnectWithoutUserInput[]
@@ -64047,12 +64012,6 @@ export namespace Prisma {
     connectOrCreate?: LgpdConsentCreateOrConnectWithoutUserInput | LgpdConsentCreateOrConnectWithoutUserInput[]
     createMany?: LgpdConsentCreateManyUserInputEnvelope
     connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-  }
-
-  export type UserProfileCreateNestedOneWithoutUserInput = {
-    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
-    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
-    connect?: UserProfileWhereUniqueInput
   }
 
   export type LeadCreateNestedManyWithoutUserInput = {
@@ -64083,6 +64042,12 @@ export namespace Prisma {
     connect?: TokenWhereUniqueInput | TokenWhereUniqueInput[]
   }
 
+  export type UserProfileUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
+    connect?: UserProfileWhereUniqueInput
+  }
+
   export type OtpUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput> | OtpCreateWithoutUserInput[] | OtpUncheckedCreateWithoutUserInput[]
     connectOrCreate?: OtpCreateOrConnectWithoutUserInput | OtpCreateOrConnectWithoutUserInput[]
@@ -64111,12 +64076,6 @@ export namespace Prisma {
     connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
   }
 
-  export type UserProfileUncheckedCreateNestedOneWithoutUserInput = {
-    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
-    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
-    connect?: UserProfileWhereUniqueInput
-  }
-
   export type LeadUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<LeadCreateWithoutUserInput, LeadUncheckedCreateWithoutUserInput> | LeadCreateWithoutUserInput[] | LeadUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LeadCreateOrConnectWithoutUserInput | LeadCreateOrConnectWithoutUserInput[]
@@ -64126,10 +64085,6 @@ export namespace Prisma {
 
   export type StringFieldUpdateOperationsInput = {
     set?: string
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -64180,6 +64135,16 @@ export namespace Prisma {
     update?: TokenUpdateWithWhereUniqueWithoutUserInput | TokenUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: TokenUpdateManyWithWhereWithoutUserInput | TokenUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: TokenScalarWhereInput | TokenScalarWhereInput[]
+  }
+
+  export type UserProfileUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
+    upsert?: UserProfileUpsertWithoutUserInput
+    disconnect?: UserProfileWhereInput | boolean
+    delete?: UserProfileWhereInput | boolean
+    connect?: UserProfileWhereUniqueInput
+    update?: XOR<XOR<UserProfileUpdateToOneWithWhereWithoutUserInput, UserProfileUpdateWithoutUserInput>, UserProfileUncheckedUpdateWithoutUserInput>
   }
 
   export type OtpUpdateManyWithoutUserNestedInput = {
@@ -64238,16 +64203,6 @@ export namespace Prisma {
     deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
   }
 
-  export type UserProfileUpdateOneWithoutUserNestedInput = {
-    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
-    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
-    upsert?: UserProfileUpsertWithoutUserInput
-    disconnect?: UserProfileWhereInput | boolean
-    delete?: UserProfileWhereInput | boolean
-    connect?: UserProfileWhereUniqueInput
-    update?: XOR<XOR<UserProfileUpdateToOneWithWhereWithoutUserInput, UserProfileUpdateWithoutUserInput>, UserProfileUncheckedUpdateWithoutUserInput>
-  }
-
   export type LeadUpdateManyWithoutUserNestedInput = {
     create?: XOR<LeadCreateWithoutUserInput, LeadUncheckedCreateWithoutUserInput> | LeadCreateWithoutUserInput[] | LeadUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LeadCreateOrConnectWithoutUserInput | LeadCreateOrConnectWithoutUserInput[]
@@ -64302,6 +64257,16 @@ export namespace Prisma {
     update?: TokenUpdateWithWhereUniqueWithoutUserInput | TokenUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: TokenUpdateManyWithWhereWithoutUserInput | TokenUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: TokenScalarWhereInput | TokenScalarWhereInput[]
+  }
+
+  export type UserProfileUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
+    upsert?: UserProfileUpsertWithoutUserInput
+    disconnect?: UserProfileWhereInput | boolean
+    delete?: UserProfileWhereInput | boolean
+    connect?: UserProfileWhereUniqueInput
+    update?: XOR<XOR<UserProfileUpdateToOneWithWhereWithoutUserInput, UserProfileUpdateWithoutUserInput>, UserProfileUncheckedUpdateWithoutUserInput>
   }
 
   export type OtpUncheckedUpdateManyWithoutUserNestedInput = {
@@ -64360,16 +64325,6 @@ export namespace Prisma {
     deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
   }
 
-  export type UserProfileUncheckedUpdateOneWithoutUserNestedInput = {
-    create?: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
-    connectOrCreate?: UserProfileCreateOrConnectWithoutUserInput
-    upsert?: UserProfileUpsertWithoutUserInput
-    disconnect?: UserProfileWhereInput | boolean
-    delete?: UserProfileWhereInput | boolean
-    connect?: UserProfileWhereUniqueInput
-    update?: XOR<XOR<UserProfileUpdateToOneWithWhereWithoutUserInput, UserProfileUpdateWithoutUserInput>, UserProfileUncheckedUpdateWithoutUserInput>
-  }
-
   export type LeadUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<LeadCreateWithoutUserInput, LeadUncheckedCreateWithoutUserInput> | LeadCreateWithoutUserInput[] | LeadUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LeadCreateOrConnectWithoutUserInput | LeadCreateOrConnectWithoutUserInput[]
@@ -64390,8 +64345,16 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type EnumTokenTypeFieldUpdateOperationsInput = {
+    set?: $Enums.TokenType
+  }
+
   export type EnumProviderTypeFieldUpdateOperationsInput = {
     set?: $Enums.ProviderType
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -64400,10 +64363,6 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type NullableEnumTokenTypeFieldUpdateOperationsInput = {
-    set?: $Enums.TokenType | null
   }
 
   export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
@@ -64456,10 +64415,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type EnumTokenTypeFieldUpdateOperationsInput = {
-    set?: $Enums.TokenType
-  }
-
   export type UserUpdateOneRequiredWithoutTokensNestedInput = {
     create?: XOR<UserCreateWithoutTokensInput, UserUncheckedCreateWithoutTokensInput>
     connectOrCreate?: UserCreateOrConnectWithoutTokensInput
@@ -64506,11 +64461,11 @@ export namespace Prisma {
     connect?: OrganizationWhereUniqueInput | OrganizationWhereUniqueInput[]
   }
 
-  export type LgpdConsentCreateNestedManyWithoutTenantInput = {
-    create?: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput> | LgpdConsentCreateWithoutTenantInput[] | LgpdConsentUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutTenantInput | LgpdConsentCreateOrConnectWithoutTenantInput[]
-    createMany?: LgpdConsentCreateManyTenantInputEnvelope
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
+  export type LeadCreateNestedManyWithoutTenantInput = {
+    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
+    createMany?: LeadCreateManyTenantInputEnvelope
+    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
   }
 
   export type AddressCreateNestedManyWithoutTenantInput = {
@@ -64518,13 +64473,6 @@ export namespace Prisma {
     connectOrCreate?: AddressCreateOrConnectWithoutTenantInput | AddressCreateOrConnectWithoutTenantInput[]
     createMany?: AddressCreateManyTenantInputEnvelope
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
-  }
-
-  export type LeadCreateNestedManyWithoutTenantInput = {
-    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
-    createMany?: LeadCreateManyTenantInputEnvelope
-    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
   }
 
   export type MembershipUncheckedCreateNestedManyWithoutTenantInput = {
@@ -64541,11 +64489,11 @@ export namespace Prisma {
     connect?: OrganizationWhereUniqueInput | OrganizationWhereUniqueInput[]
   }
 
-  export type LgpdConsentUncheckedCreateNestedManyWithoutTenantInput = {
-    create?: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput> | LgpdConsentCreateWithoutTenantInput[] | LgpdConsentUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutTenantInput | LgpdConsentCreateOrConnectWithoutTenantInput[]
-    createMany?: LgpdConsentCreateManyTenantInputEnvelope
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
+  export type LeadUncheckedCreateNestedManyWithoutTenantInput = {
+    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
+    createMany?: LeadCreateManyTenantInputEnvelope
+    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
   }
 
   export type AddressUncheckedCreateNestedManyWithoutTenantInput = {
@@ -64553,13 +64501,6 @@ export namespace Prisma {
     connectOrCreate?: AddressCreateOrConnectWithoutTenantInput | AddressCreateOrConnectWithoutTenantInput[]
     createMany?: AddressCreateManyTenantInputEnvelope
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
-  }
-
-  export type LeadUncheckedCreateNestedManyWithoutTenantInput = {
-    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
-    createMany?: LeadCreateManyTenantInputEnvelope
-    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
   }
 
   export type EnumTenantStatusFieldUpdateOperationsInput = {
@@ -64594,18 +64535,18 @@ export namespace Prisma {
     deleteMany?: OrganizationScalarWhereInput | OrganizationScalarWhereInput[]
   }
 
-  export type LgpdConsentUpdateManyWithoutTenantNestedInput = {
-    create?: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput> | LgpdConsentCreateWithoutTenantInput[] | LgpdConsentUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutTenantInput | LgpdConsentCreateOrConnectWithoutTenantInput[]
-    upsert?: LgpdConsentUpsertWithWhereUniqueWithoutTenantInput | LgpdConsentUpsertWithWhereUniqueWithoutTenantInput[]
-    createMany?: LgpdConsentCreateManyTenantInputEnvelope
-    set?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    disconnect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    delete?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    update?: LgpdConsentUpdateWithWhereUniqueWithoutTenantInput | LgpdConsentUpdateWithWhereUniqueWithoutTenantInput[]
-    updateMany?: LgpdConsentUpdateManyWithWhereWithoutTenantInput | LgpdConsentUpdateManyWithWhereWithoutTenantInput[]
-    deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
+  export type LeadUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
+    upsert?: LeadUpsertWithWhereUniqueWithoutTenantInput | LeadUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: LeadCreateManyTenantInputEnvelope
+    set?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    disconnect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    delete?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    update?: LeadUpdateWithWhereUniqueWithoutTenantInput | LeadUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: LeadUpdateManyWithWhereWithoutTenantInput | LeadUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: LeadScalarWhereInput | LeadScalarWhereInput[]
   }
 
   export type AddressUpdateManyWithoutTenantNestedInput = {
@@ -64620,20 +64561,6 @@ export namespace Prisma {
     update?: AddressUpdateWithWhereUniqueWithoutTenantInput | AddressUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: AddressUpdateManyWithWhereWithoutTenantInput | AddressUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: AddressScalarWhereInput | AddressScalarWhereInput[]
-  }
-
-  export type LeadUpdateManyWithoutTenantNestedInput = {
-    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
-    upsert?: LeadUpsertWithWhereUniqueWithoutTenantInput | LeadUpsertWithWhereUniqueWithoutTenantInput[]
-    createMany?: LeadCreateManyTenantInputEnvelope
-    set?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    disconnect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    delete?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    update?: LeadUpdateWithWhereUniqueWithoutTenantInput | LeadUpdateWithWhereUniqueWithoutTenantInput[]
-    updateMany?: LeadUpdateManyWithWhereWithoutTenantInput | LeadUpdateManyWithWhereWithoutTenantInput[]
-    deleteMany?: LeadScalarWhereInput | LeadScalarWhereInput[]
   }
 
   export type MembershipUncheckedUpdateManyWithoutTenantNestedInput = {
@@ -64664,18 +64591,18 @@ export namespace Prisma {
     deleteMany?: OrganizationScalarWhereInput | OrganizationScalarWhereInput[]
   }
 
-  export type LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput = {
-    create?: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput> | LgpdConsentCreateWithoutTenantInput[] | LgpdConsentUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutTenantInput | LgpdConsentCreateOrConnectWithoutTenantInput[]
-    upsert?: LgpdConsentUpsertWithWhereUniqueWithoutTenantInput | LgpdConsentUpsertWithWhereUniqueWithoutTenantInput[]
-    createMany?: LgpdConsentCreateManyTenantInputEnvelope
-    set?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    disconnect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    delete?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    update?: LgpdConsentUpdateWithWhereUniqueWithoutTenantInput | LgpdConsentUpdateWithWhereUniqueWithoutTenantInput[]
-    updateMany?: LgpdConsentUpdateManyWithWhereWithoutTenantInput | LgpdConsentUpdateManyWithWhereWithoutTenantInput[]
-    deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
+  export type LeadUncheckedUpdateManyWithoutTenantNestedInput = {
+    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
+    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
+    upsert?: LeadUpsertWithWhereUniqueWithoutTenantInput | LeadUpsertWithWhereUniqueWithoutTenantInput[]
+    createMany?: LeadCreateManyTenantInputEnvelope
+    set?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    disconnect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    delete?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
+    update?: LeadUpdateWithWhereUniqueWithoutTenantInput | LeadUpdateWithWhereUniqueWithoutTenantInput[]
+    updateMany?: LeadUpdateManyWithWhereWithoutTenantInput | LeadUpdateManyWithWhereWithoutTenantInput[]
+    deleteMany?: LeadScalarWhereInput | LeadScalarWhereInput[]
   }
 
   export type AddressUncheckedUpdateManyWithoutTenantNestedInput = {
@@ -64690,20 +64617,6 @@ export namespace Prisma {
     update?: AddressUpdateWithWhereUniqueWithoutTenantInput | AddressUpdateWithWhereUniqueWithoutTenantInput[]
     updateMany?: AddressUpdateManyWithWhereWithoutTenantInput | AddressUpdateManyWithWhereWithoutTenantInput[]
     deleteMany?: AddressScalarWhereInput | AddressScalarWhereInput[]
-  }
-
-  export type LeadUncheckedUpdateManyWithoutTenantNestedInput = {
-    create?: XOR<LeadCreateWithoutTenantInput, LeadUncheckedCreateWithoutTenantInput> | LeadCreateWithoutTenantInput[] | LeadUncheckedCreateWithoutTenantInput[]
-    connectOrCreate?: LeadCreateOrConnectWithoutTenantInput | LeadCreateOrConnectWithoutTenantInput[]
-    upsert?: LeadUpsertWithWhereUniqueWithoutTenantInput | LeadUpsertWithWhereUniqueWithoutTenantInput[]
-    createMany?: LeadCreateManyTenantInputEnvelope
-    set?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    disconnect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    delete?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    connect?: LeadWhereUniqueInput | LeadWhereUniqueInput[]
-    update?: LeadUpdateWithWhereUniqueWithoutTenantInput | LeadUpdateWithWhereUniqueWithoutTenantInput[]
-    updateMany?: LeadUpdateManyWithWhereWithoutTenantInput | LeadUpdateManyWithWhereWithoutTenantInput[]
-    deleteMany?: LeadScalarWhereInput | LeadScalarWhereInput[]
   }
 
   export type TenantCreateNestedOneWithoutOrganizationsInput = {
@@ -64820,13 +64733,6 @@ export namespace Prisma {
     connectOrCreate?: CampaignItemCreateOrConnectWithoutOrganizationInput | CampaignItemCreateOrConnectWithoutOrganizationInput[]
     createMany?: CampaignItemCreateManyOrganizationInputEnvelope
     connect?: CampaignItemWhereUniqueInput | CampaignItemWhereUniqueInput[]
-  }
-
-  export type LgpdConsentCreateNestedManyWithoutOrganizationInput = {
-    create?: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput> | LgpdConsentCreateWithoutOrganizationInput[] | LgpdConsentUncheckedCreateWithoutOrganizationInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutOrganizationInput | LgpdConsentCreateOrConnectWithoutOrganizationInput[]
-    createMany?: LgpdConsentCreateManyOrganizationInputEnvelope
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
   }
 
   export type ConnectionLogCreateNestedManyWithoutOrganizationInput = {
@@ -64960,13 +64866,6 @@ export namespace Prisma {
     connect?: CampaignItemWhereUniqueInput | CampaignItemWhereUniqueInput[]
   }
 
-  export type LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput = {
-    create?: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput> | LgpdConsentCreateWithoutOrganizationInput[] | LgpdConsentUncheckedCreateWithoutOrganizationInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutOrganizationInput | LgpdConsentCreateOrConnectWithoutOrganizationInput[]
-    createMany?: LgpdConsentCreateManyOrganizationInputEnvelope
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-  }
-
   export type ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput = {
     create?: XOR<ConnectionLogCreateWithoutOrganizationInput, ConnectionLogUncheckedCreateWithoutOrganizationInput> | ConnectionLogCreateWithoutOrganizationInput[] | ConnectionLogUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: ConnectionLogCreateOrConnectWithoutOrganizationInput | ConnectionLogCreateOrConnectWithoutOrganizationInput[]
@@ -64992,12 +64891,10 @@ export namespace Prisma {
     set?: $Enums.OrganizationStatus
   }
 
-  export type TenantUpdateOneWithoutOrganizationsNestedInput = {
+  export type TenantUpdateOneRequiredWithoutOrganizationsNestedInput = {
     create?: XOR<TenantCreateWithoutOrganizationsInput, TenantUncheckedCreateWithoutOrganizationsInput>
     connectOrCreate?: TenantCreateOrConnectWithoutOrganizationsInput
     upsert?: TenantUpsertWithoutOrganizationsInput
-    disconnect?: TenantWhereInput | boolean
-    delete?: TenantWhereInput | boolean
     connect?: TenantWhereUniqueInput
     update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutOrganizationsInput, TenantUpdateWithoutOrganizationsInput>, TenantUncheckedUpdateWithoutOrganizationsInput>
   }
@@ -65216,20 +65113,6 @@ export namespace Prisma {
     update?: CampaignItemUpdateWithWhereUniqueWithoutOrganizationInput | CampaignItemUpdateWithWhereUniqueWithoutOrganizationInput[]
     updateMany?: CampaignItemUpdateManyWithWhereWithoutOrganizationInput | CampaignItemUpdateManyWithWhereWithoutOrganizationInput[]
     deleteMany?: CampaignItemScalarWhereInput | CampaignItemScalarWhereInput[]
-  }
-
-  export type LgpdConsentUpdateManyWithoutOrganizationNestedInput = {
-    create?: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput> | LgpdConsentCreateWithoutOrganizationInput[] | LgpdConsentUncheckedCreateWithoutOrganizationInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutOrganizationInput | LgpdConsentCreateOrConnectWithoutOrganizationInput[]
-    upsert?: LgpdConsentUpsertWithWhereUniqueWithoutOrganizationInput | LgpdConsentUpsertWithWhereUniqueWithoutOrganizationInput[]
-    createMany?: LgpdConsentCreateManyOrganizationInputEnvelope
-    set?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    disconnect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    delete?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    update?: LgpdConsentUpdateWithWhereUniqueWithoutOrganizationInput | LgpdConsentUpdateWithWhereUniqueWithoutOrganizationInput[]
-    updateMany?: LgpdConsentUpdateManyWithWhereWithoutOrganizationInput | LgpdConsentUpdateManyWithWhereWithoutOrganizationInput[]
-    deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
   }
 
   export type ConnectionLogUpdateManyWithoutOrganizationNestedInput = {
@@ -65490,20 +65373,6 @@ export namespace Prisma {
     deleteMany?: CampaignItemScalarWhereInput | CampaignItemScalarWhereInput[]
   }
 
-  export type LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput = {
-    create?: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput> | LgpdConsentCreateWithoutOrganizationInput[] | LgpdConsentUncheckedCreateWithoutOrganizationInput[]
-    connectOrCreate?: LgpdConsentCreateOrConnectWithoutOrganizationInput | LgpdConsentCreateOrConnectWithoutOrganizationInput[]
-    upsert?: LgpdConsentUpsertWithWhereUniqueWithoutOrganizationInput | LgpdConsentUpsertWithWhereUniqueWithoutOrganizationInput[]
-    createMany?: LgpdConsentCreateManyOrganizationInputEnvelope
-    set?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    disconnect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    delete?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    connect?: LgpdConsentWhereUniqueInput | LgpdConsentWhereUniqueInput[]
-    update?: LgpdConsentUpdateWithWhereUniqueWithoutOrganizationInput | LgpdConsentUpdateWithWhereUniqueWithoutOrganizationInput[]
-    updateMany?: LgpdConsentUpdateManyWithWhereWithoutOrganizationInput | LgpdConsentUpdateManyWithWhereWithoutOrganizationInput[]
-    deleteMany?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
-  }
-
   export type ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput = {
     create?: XOR<ConnectionLogCreateWithoutOrganizationInput, ConnectionLogUncheckedCreateWithoutOrganizationInput> | ConnectionLogCreateWithoutOrganizationInput[] | ConnectionLogUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: ConnectionLogCreateOrConnectWithoutOrganizationInput | ConnectionLogCreateOrConnectWithoutOrganizationInput[]
@@ -65564,26 +65433,26 @@ export namespace Prisma {
     connect?: OrganizationWhereUniqueInput
   }
 
-  export type AddressCreateNestedManyWithoutMembershipInput = {
-    create?: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput> | AddressCreateWithoutMembershipInput[] | AddressUncheckedCreateWithoutMembershipInput[]
-    connectOrCreate?: AddressCreateOrConnectWithoutMembershipInput | AddressCreateOrConnectWithoutMembershipInput[]
-    createMany?: AddressCreateManyMembershipInputEnvelope
+  export type AddressCreateNestedManyWithoutMemberInput = {
+    create?: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput> | AddressCreateWithoutMemberInput[] | AddressUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: AddressCreateOrConnectWithoutMemberInput | AddressCreateOrConnectWithoutMemberInput[]
+    createMany?: AddressCreateManyMemberInputEnvelope
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
   }
 
-  export type AddressUncheckedCreateNestedManyWithoutMembershipInput = {
-    create?: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput> | AddressCreateWithoutMembershipInput[] | AddressUncheckedCreateWithoutMembershipInput[]
-    connectOrCreate?: AddressCreateOrConnectWithoutMembershipInput | AddressCreateOrConnectWithoutMembershipInput[]
-    createMany?: AddressCreateManyMembershipInputEnvelope
+  export type AddressUncheckedCreateNestedManyWithoutMemberInput = {
+    create?: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput> | AddressCreateWithoutMemberInput[] | AddressUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: AddressCreateOrConnectWithoutMemberInput | AddressCreateOrConnectWithoutMemberInput[]
+    createMany?: AddressCreateManyMemberInputEnvelope
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
   }
 
-  export type EnumMemberShipRoleFieldUpdateOperationsInput = {
-    set?: $Enums.MemberShipRole
+  export type EnumMembershipRoleFieldUpdateOperationsInput = {
+    set?: $Enums.MembershipRole
   }
 
-  export type EnumMemberShipStatusFieldUpdateOperationsInput = {
-    set?: $Enums.MemberShipStatus
+  export type EnumMembershipStatusFieldUpdateOperationsInput = {
+    set?: $Enums.MembershipStatus
   }
 
   export type TenantUpdateOneRequiredWithoutMembershipsNestedInput = {
@@ -65612,31 +65481,31 @@ export namespace Prisma {
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutMembershipsInput, OrganizationUpdateWithoutMembershipsInput>, OrganizationUncheckedUpdateWithoutMembershipsInput>
   }
 
-  export type AddressUpdateManyWithoutMembershipNestedInput = {
-    create?: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput> | AddressCreateWithoutMembershipInput[] | AddressUncheckedCreateWithoutMembershipInput[]
-    connectOrCreate?: AddressCreateOrConnectWithoutMembershipInput | AddressCreateOrConnectWithoutMembershipInput[]
-    upsert?: AddressUpsertWithWhereUniqueWithoutMembershipInput | AddressUpsertWithWhereUniqueWithoutMembershipInput[]
-    createMany?: AddressCreateManyMembershipInputEnvelope
+  export type AddressUpdateManyWithoutMemberNestedInput = {
+    create?: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput> | AddressCreateWithoutMemberInput[] | AddressUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: AddressCreateOrConnectWithoutMemberInput | AddressCreateOrConnectWithoutMemberInput[]
+    upsert?: AddressUpsertWithWhereUniqueWithoutMemberInput | AddressUpsertWithWhereUniqueWithoutMemberInput[]
+    createMany?: AddressCreateManyMemberInputEnvelope
     set?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     disconnect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     delete?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
-    update?: AddressUpdateWithWhereUniqueWithoutMembershipInput | AddressUpdateWithWhereUniqueWithoutMembershipInput[]
-    updateMany?: AddressUpdateManyWithWhereWithoutMembershipInput | AddressUpdateManyWithWhereWithoutMembershipInput[]
+    update?: AddressUpdateWithWhereUniqueWithoutMemberInput | AddressUpdateWithWhereUniqueWithoutMemberInput[]
+    updateMany?: AddressUpdateManyWithWhereWithoutMemberInput | AddressUpdateManyWithWhereWithoutMemberInput[]
     deleteMany?: AddressScalarWhereInput | AddressScalarWhereInput[]
   }
 
-  export type AddressUncheckedUpdateManyWithoutMembershipNestedInput = {
-    create?: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput> | AddressCreateWithoutMembershipInput[] | AddressUncheckedCreateWithoutMembershipInput[]
-    connectOrCreate?: AddressCreateOrConnectWithoutMembershipInput | AddressCreateOrConnectWithoutMembershipInput[]
-    upsert?: AddressUpsertWithWhereUniqueWithoutMembershipInput | AddressUpsertWithWhereUniqueWithoutMembershipInput[]
-    createMany?: AddressCreateManyMembershipInputEnvelope
+  export type AddressUncheckedUpdateManyWithoutMemberNestedInput = {
+    create?: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput> | AddressCreateWithoutMemberInput[] | AddressUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: AddressCreateOrConnectWithoutMemberInput | AddressCreateOrConnectWithoutMemberInput[]
+    upsert?: AddressUpsertWithWhereUniqueWithoutMemberInput | AddressUpsertWithWhereUniqueWithoutMemberInput[]
+    createMany?: AddressCreateManyMemberInputEnvelope
     set?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     disconnect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     delete?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
     connect?: AddressWhereUniqueInput | AddressWhereUniqueInput[]
-    update?: AddressUpdateWithWhereUniqueWithoutMembershipInput | AddressUpdateWithWhereUniqueWithoutMembershipInput[]
-    updateMany?: AddressUpdateManyWithWhereWithoutMembershipInput | AddressUpdateManyWithWhereWithoutMembershipInput[]
+    update?: AddressUpdateWithWhereUniqueWithoutMemberInput | AddressUpdateWithWhereUniqueWithoutMemberInput[]
+    updateMany?: AddressUpdateManyWithWhereWithoutMemberInput | AddressUpdateManyWithWhereWithoutMemberInput[]
     deleteMany?: AddressScalarWhereInput | AddressScalarWhereInput[]
   }
 
@@ -66708,20 +66577,8 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type TenantCreateNestedOneWithoutLgpdConsentsInput = {
-    create?: XOR<TenantCreateWithoutLgpdConsentsInput, TenantUncheckedCreateWithoutLgpdConsentsInput>
-    connectOrCreate?: TenantCreateOrConnectWithoutLgpdConsentsInput
-    connect?: TenantWhereUniqueInput
-  }
-
-  export type OrganizationCreateNestedOneWithoutLgpdConsentsInput = {
-    create?: XOR<OrganizationCreateWithoutLgpdConsentsInput, OrganizationUncheckedCreateWithoutLgpdConsentsInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutLgpdConsentsInput
-    connect?: OrganizationWhereUniqueInput
-  }
-
-  export type EnumConsentStatusFieldUpdateOperationsInput = {
-    set?: $Enums.ConsentStatus
+  export type EnumLgpdConsentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.LgpdConsentStatus
   }
 
   export type UserUpdateOneRequiredWithoutLgpdConsentsNestedInput = {
@@ -66730,24 +66587,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutLgpdConsentsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutLgpdConsentsInput, UserUpdateWithoutLgpdConsentsInput>, UserUncheckedUpdateWithoutLgpdConsentsInput>
-  }
-
-  export type TenantUpdateOneRequiredWithoutLgpdConsentsNestedInput = {
-    create?: XOR<TenantCreateWithoutLgpdConsentsInput, TenantUncheckedCreateWithoutLgpdConsentsInput>
-    connectOrCreate?: TenantCreateOrConnectWithoutLgpdConsentsInput
-    upsert?: TenantUpsertWithoutLgpdConsentsInput
-    connect?: TenantWhereUniqueInput
-    update?: XOR<XOR<TenantUpdateToOneWithWhereWithoutLgpdConsentsInput, TenantUpdateWithoutLgpdConsentsInput>, TenantUncheckedUpdateWithoutLgpdConsentsInput>
-  }
-
-  export type OrganizationUpdateOneWithoutLgpdConsentsNestedInput = {
-    create?: XOR<OrganizationCreateWithoutLgpdConsentsInput, OrganizationUncheckedCreateWithoutLgpdConsentsInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutLgpdConsentsInput
-    upsert?: OrganizationUpsertWithoutLgpdConsentsInput
-    disconnect?: OrganizationWhereInput | boolean
-    delete?: OrganizationWhereInput | boolean
-    connect?: OrganizationWhereUniqueInput
-    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutLgpdConsentsInput, OrganizationUpdateWithoutLgpdConsentsInput>, OrganizationUncheckedUpdateWithoutLgpdConsentsInput>
   }
 
   export type OrganizationCreateNestedOneWithoutConnectionLogsInput = {
@@ -66945,10 +66784,10 @@ export namespace Prisma {
     not?: NestedUuidFilter<$PrismaModel> | string
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+  export type NestedStringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -66956,7 +66795,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+    not?: NestedStringFilter<$PrismaModel> | string
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -67006,7 +66845,7 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type NestedStringFilter<$PrismaModel = never> = {
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
     notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -67017,7 +66856,97 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringFilter<$PrismaModel> | string
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTokenTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTokenTypeFilter<$PrismaModel> | $Enums.TokenType
+  }
+
+  export type NestedEnumProviderTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProviderTypeFilter<$PrismaModel> | $Enums.ProviderType
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.TokenType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTokenTypeFilter<$PrismaModel>
+    _max?: NestedEnumTokenTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumProviderTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProviderTypeWithAggregatesFilter<$PrismaModel> | $Enums.ProviderType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProviderTypeFilter<$PrismaModel>
+    _max?: NestedEnumProviderTypeFilter<$PrismaModel>
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -67035,86 +66964,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedEnumProviderTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumProviderTypeFilter<$PrismaModel> | $Enums.ProviderType
-  }
-
-  export type NestedEnumTokenTypeNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTokenTypeNullableFilter<$PrismaModel> | $Enums.TokenType | null
-  }
-
-  export type NestedEnumProviderTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ProviderType | EnumProviderTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ProviderType[] | ListEnumProviderTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumProviderTypeWithAggregatesFilter<$PrismaModel> | $Enums.ProviderType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumProviderTypeFilter<$PrismaModel>
-    _max?: NestedEnumProviderTypeFilter<$PrismaModel>
-  }
-
-  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[] | ListStringFieldRefInput<$PrismaModel>
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedStringFilter<$PrismaModel>
-    _max?: NestedStringFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -67142,16 +66991,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedEnumTokenTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTokenTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.TokenType | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumTokenTypeNullableFilter<$PrismaModel>
-    _max?: NestedEnumTokenTypeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumDocumentTypeNullableFilter<$PrismaModel = never> = {
@@ -67186,23 +67025,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserProfileStatusFilter<$PrismaModel>
     _max?: NestedEnumUserProfileStatusFilter<$PrismaModel>
-  }
-
-  export type NestedEnumTokenTypeFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumTokenTypeFilter<$PrismaModel> | $Enums.TokenType
-  }
-
-  export type NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TokenType | EnumTokenTypeFieldRefInput<$PrismaModel>
-    in?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    notIn?: $Enums.TokenType[] | ListEnumTokenTypeFieldRefInput<$PrismaModel>
-    not?: NestedEnumTokenTypeWithAggregatesFilter<$PrismaModel> | $Enums.TokenType
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumTokenTypeFilter<$PrismaModel>
-    _max?: NestedEnumTokenTypeFilter<$PrismaModel>
   }
 
   export type NestedUuidNullableFilter<$PrismaModel = never> = {
@@ -67291,38 +67113,38 @@ export namespace Prisma {
     _max?: NestedEnumOrganizationStatusFilter<$PrismaModel>
   }
 
-  export type NestedEnumMemberShipRoleFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipRole | EnumMemberShipRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipRoleFilter<$PrismaModel> | $Enums.MemberShipRole
+  export type NestedEnumMembershipRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipRole | EnumMembershipRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipRoleFilter<$PrismaModel> | $Enums.MembershipRole
   }
 
-  export type NestedEnumMemberShipStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipStatus | EnumMemberShipStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipStatusFilter<$PrismaModel> | $Enums.MemberShipStatus
+  export type NestedEnumMembershipStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipStatus | EnumMembershipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipStatusFilter<$PrismaModel> | $Enums.MembershipStatus
   }
 
-  export type NestedEnumMemberShipRoleWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipRole | EnumMemberShipRoleFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipRole[] | ListEnumMemberShipRoleFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipRoleWithAggregatesFilter<$PrismaModel> | $Enums.MemberShipRole
+  export type NestedEnumMembershipRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipRole | EnumMembershipRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipRole[] | ListEnumMembershipRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipRoleWithAggregatesFilter<$PrismaModel> | $Enums.MembershipRole
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMemberShipRoleFilter<$PrismaModel>
-    _max?: NestedEnumMemberShipRoleFilter<$PrismaModel>
+    _min?: NestedEnumMembershipRoleFilter<$PrismaModel>
+    _max?: NestedEnumMembershipRoleFilter<$PrismaModel>
   }
 
-  export type NestedEnumMemberShipStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MemberShipStatus | EnumMemberShipStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MemberShipStatus[] | ListEnumMemberShipStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMemberShipStatusWithAggregatesFilter<$PrismaModel> | $Enums.MemberShipStatus
+  export type NestedEnumMembershipStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MembershipStatus | EnumMembershipStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MembershipStatus[] | ListEnumMembershipStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMembershipStatusWithAggregatesFilter<$PrismaModel> | $Enums.MembershipStatus
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMemberShipStatusFilter<$PrismaModel>
-    _max?: NestedEnumMemberShipStatusFilter<$PrismaModel>
+    _min?: NestedEnumMembershipStatusFilter<$PrismaModel>
+    _max?: NestedEnumMembershipStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumAddressTypeNullableFilter<$PrismaModel = never> = {
@@ -67672,21 +67494,21 @@ export namespace Prisma {
     _max?: NestedEnumLeadStatusFilter<$PrismaModel>
   }
 
-  export type NestedEnumConsentStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.ConsentStatus | EnumConsentStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumConsentStatusFilter<$PrismaModel> | $Enums.ConsentStatus
+  export type NestedEnumLgpdConsentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.LgpdConsentStatus | EnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLgpdConsentStatusFilter<$PrismaModel> | $Enums.LgpdConsentStatus
   }
 
-  export type NestedEnumConsentStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ConsentStatus | EnumConsentStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ConsentStatus[] | ListEnumConsentStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumConsentStatusWithAggregatesFilter<$PrismaModel> | $Enums.ConsentStatus
+  export type NestedEnumLgpdConsentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LgpdConsentStatus | EnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LgpdConsentStatus[] | ListEnumLgpdConsentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLgpdConsentStatusWithAggregatesFilter<$PrismaModel> | $Enums.LgpdConsentStatus
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumConsentStatusFilter<$PrismaModel>
-    _max?: NestedEnumConsentStatusFilter<$PrismaModel>
+    _min?: NestedEnumLgpdConsentStatusFilter<$PrismaModel>
+    _max?: NestedEnumLgpdConsentStatusFilter<$PrismaModel>
   }
 
   export type NestedBigIntFilter<$PrismaModel = never> = {
@@ -67786,13 +67608,12 @@ export namespace Prisma {
 
   export type AccountCreateWithoutUserInput = {
     id?: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -67803,13 +67624,12 @@ export namespace Prisma {
 
   export type AccountUncheckedCreateWithoutUserInput = {
     id?: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -67832,12 +67652,22 @@ export namespace Prisma {
     id?: string
     sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
   }
 
   export type SessionUncheckedCreateWithoutUserInput = {
     id?: string
     sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
   }
 
   export type SessionCreateOrConnectWithoutUserInput = {
@@ -67854,10 +67684,12 @@ export namespace Prisma {
     id?: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -67865,10 +67697,12 @@ export namespace Prisma {
     id?: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -67879,182 +67713,6 @@ export namespace Prisma {
 
   export type TokenCreateManyUserInputEnvelope = {
     data: TokenCreateManyUserInput | TokenCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type OtpCreateWithoutUserInput = {
-    id?: string
-    phone: string
-    codeHash: string
-    expiresAt: Date | string
-    attempts?: number
-    usedAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type OtpUncheckedCreateWithoutUserInput = {
-    id?: string
-    phone: string
-    codeHash: string
-    expiresAt: Date | string
-    attempts?: number
-    usedAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type OtpCreateOrConnectWithoutUserInput = {
-    where: OtpWhereUniqueInput
-    create: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput>
-  }
-
-  export type OtpCreateManyUserInputEnvelope = {
-    data: OtpCreateManyUserInput | OtpCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type MembershipCreateWithoutUserInput = {
-    id?: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
-    joinedAt?: Date | string | null
-    invitedEmail?: string | null
-    invitedById?: string | null
-    expiresAt?: Date | string | null
-    removedAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tenant: TenantCreateNestedOneWithoutMembershipsInput
-    organization?: OrganizationCreateNestedOneWithoutMembershipsInput
-    addresses?: AddressCreateNestedManyWithoutMembershipInput
-  }
-
-  export type MembershipUncheckedCreateWithoutUserInput = {
-    id?: string
-    tenantId: string
-    organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
-    joinedAt?: Date | string | null
-    invitedEmail?: string | null
-    invitedById?: string | null
-    expiresAt?: Date | string | null
-    removedAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    addresses?: AddressUncheckedCreateNestedManyWithoutMembershipInput
-  }
-
-  export type MembershipCreateOrConnectWithoutUserInput = {
-    where: MembershipWhereUniqueInput
-    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-  }
-
-  export type MembershipCreateManyUserInputEnvelope = {
-    data: MembershipCreateManyUserInput | MembershipCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AddressCreateWithoutUserInput = {
-    id?: string
-    AddressType?: $Enums.AddressType | null
-    street?: string | null
-    addressNumber?: string | null
-    complement?: string | null
-    neighborhood?: string | null
-    reference?: string | null
-    zipCode?: string | null
-    country?: string | null
-    isPrimary?: boolean | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutAddressesInput
-    organization?: OrganizationCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
-    city?: CityCreateNestedOneWithoutAddressesInput
-    state?: StateCreateNestedOneWithoutAddressesInput
-  }
-
-  export type AddressUncheckedCreateWithoutUserInput = {
-    id?: string
-    tenantId?: string | null
-    organizationId?: string | null
-    membershipId?: string | null
-    AddressType?: $Enums.AddressType | null
-    street?: string | null
-    addressNumber?: string | null
-    complement?: string | null
-    neighborhood?: string | null
-    reference?: string | null
-    cityId?: string | null
-    stateId?: string | null
-    zipCode?: string | null
-    country?: string | null
-    isPrimary?: boolean | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-  }
-
-  export type AddressCreateOrConnectWithoutUserInput = {
-    where: AddressWhereUniqueInput
-    create: XOR<AddressCreateWithoutUserInput, AddressUncheckedCreateWithoutUserInput>
-  }
-
-  export type AddressCreateManyUserInputEnvelope = {
-    data: AddressCreateManyUserInput | AddressCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type LgpdConsentCreateWithoutUserInput = {
-    id?: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    tenant: TenantCreateNestedOneWithoutLgpdConsentsInput
-    organization?: OrganizationCreateNestedOneWithoutLgpdConsentsInput
-  }
-
-  export type LgpdConsentUncheckedCreateWithoutUserInput = {
-    id?: string
-    tenantId: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    organizationId?: string | null
-  }
-
-  export type LgpdConsentCreateOrConnectWithoutUserInput = {
-    where: LgpdConsentWhereUniqueInput
-    create: XOR<LgpdConsentCreateWithoutUserInput, LgpdConsentUncheckedCreateWithoutUserInput>
-  }
-
-  export type LgpdConsentCreateManyUserInputEnvelope = {
-    data: LgpdConsentCreateManyUserInput | LgpdConsentCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -68095,6 +67753,180 @@ export namespace Prisma {
   export type UserProfileCreateOrConnectWithoutUserInput = {
     where: UserProfileWhereUniqueInput
     create: XOR<UserProfileCreateWithoutUserInput, UserProfileUncheckedCreateWithoutUserInput>
+  }
+
+  export type OtpCreateWithoutUserInput = {
+    id?: string
+    phone: string
+    codeHash: string
+    expiredAt: Date | string
+    attempts?: number
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type OtpUncheckedCreateWithoutUserInput = {
+    id?: string
+    phone: string
+    codeHash: string
+    expiredAt: Date | string
+    attempts?: number
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type OtpCreateOrConnectWithoutUserInput = {
+    where: OtpWhereUniqueInput
+    create: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput>
+  }
+
+  export type OtpCreateManyUserInputEnvelope = {
+    data: OtpCreateManyUserInput | OtpCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MembershipCreateWithoutUserInput = {
+    id?: string
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
+    joinedAt?: Date | string | null
+    invitedEmail?: string | null
+    invitedById?: string | null
+    expiredAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    tenant: TenantCreateNestedOneWithoutMembershipsInput
+    organization?: OrganizationCreateNestedOneWithoutMembershipsInput
+    addresses?: AddressCreateNestedManyWithoutMemberInput
+  }
+
+  export type MembershipUncheckedCreateWithoutUserInput = {
+    id?: string
+    tenantId: string
+    organizationId?: string | null
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
+    joinedAt?: Date | string | null
+    invitedEmail?: string | null
+    invitedById?: string | null
+    expiredAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    addresses?: AddressUncheckedCreateNestedManyWithoutMemberInput
+  }
+
+  export type MembershipCreateOrConnectWithoutUserInput = {
+    where: MembershipWhereUniqueInput
+    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+  }
+
+  export type MembershipCreateManyUserInputEnvelope = {
+    data: MembershipCreateManyUserInput | MembershipCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AddressCreateWithoutUserInput = {
+    id?: string
+    AddressType?: $Enums.AddressType | null
+    street?: string | null
+    addressNumber?: string | null
+    complement?: string | null
+    neighborhood?: string | null
+    reference?: string | null
+    zipCode?: string | null
+    country?: string | null
+    isPrimary?: boolean | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    tenant?: TenantCreateNestedOneWithoutAddressesInput
+    organization?: OrganizationCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
+    city?: CityCreateNestedOneWithoutAddressesInput
+    state?: StateCreateNestedOneWithoutAddressesInput
+  }
+
+  export type AddressUncheckedCreateWithoutUserInput = {
+    id?: string
+    tenantId?: string | null
+    organizationId?: string | null
+    memberId?: string | null
+    AddressType?: $Enums.AddressType | null
+    street?: string | null
+    addressNumber?: string | null
+    complement?: string | null
+    neighborhood?: string | null
+    reference?: string | null
+    cityId?: string | null
+    stateId?: string | null
+    zipCode?: string | null
+    country?: string | null
+    isPrimary?: boolean | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type AddressCreateOrConnectWithoutUserInput = {
+    where: AddressWhereUniqueInput
+    create: XOR<AddressCreateWithoutUserInput, AddressUncheckedCreateWithoutUserInput>
+  }
+
+  export type AddressCreateManyUserInputEnvelope = {
+    data: AddressCreateManyUserInput | AddressCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type LgpdConsentCreateWithoutUserInput = {
+    id?: string
+    consentTerms: boolean
+    consentMarketing: boolean
+    consentDataSharing: boolean
+    consentAnalytics: boolean
+    ipAddress: string
+    macAddress?: string | null
+    userAgent: string
+    consentVersion: string
+    status?: $Enums.LgpdConsentStatus
+    withdrawnAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type LgpdConsentUncheckedCreateWithoutUserInput = {
+    id?: string
+    consentTerms: boolean
+    consentMarketing: boolean
+    consentDataSharing: boolean
+    consentAnalytics: boolean
+    ipAddress: string
+    macAddress?: string | null
+    userAgent: string
+    consentVersion: string
+    status?: $Enums.LgpdConsentStatus
+    withdrawnAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type LgpdConsentCreateOrConnectWithoutUserInput = {
+    where: LgpdConsentWhereUniqueInput
+    create: XOR<LgpdConsentCreateWithoutUserInput, LgpdConsentUncheckedCreateWithoutUserInput>
+  }
+
+  export type LgpdConsentCreateManyUserInputEnvelope = {
+    data: LgpdConsentCreateManyUserInput | LgpdConsentCreateManyUserInput[]
+    skipDuplicates?: boolean
   }
 
   export type LeadCreateWithoutUserInput = {
@@ -68169,13 +68001,12 @@ export namespace Prisma {
     NOT?: AccountScalarWhereInput | AccountScalarWhereInput[]
     id?: UuidFilter<"Account"> | string
     userId?: UuidFilter<"Account"> | string
-    providerType?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
-    provider?: StringFilter<"Account"> | string
+    tokenType?: EnumTokenTypeFilter<"Account"> | $Enums.TokenType
+    provider?: EnumProviderTypeFilter<"Account"> | $Enums.ProviderType
     providerAccountId?: StringFilter<"Account"> | string
     refreshToken?: StringNullableFilter<"Account"> | string | null
     accessToken?: StringNullableFilter<"Account"> | string | null
     expiresAt?: IntNullableFilter<"Account"> | number | null
-    tokenType?: EnumTokenTypeNullableFilter<"Account"> | $Enums.TokenType | null
     scope?: StringNullableFilter<"Account"> | string | null
     idToken?: StringNullableFilter<"Account"> | string | null
     sessionState?: StringNullableFilter<"Account"> | string | null
@@ -68205,9 +68036,14 @@ export namespace Prisma {
     OR?: SessionScalarWhereInput[]
     NOT?: SessionScalarWhereInput | SessionScalarWhereInput[]
     id?: UuidFilter<"Session"> | string
-    sessionToken?: StringFilter<"Session"> | string
     userId?: UuidFilter<"Session"> | string
+    sessionToken?: StringFilter<"Session"> | string
     expires?: DateTimeFilter<"Session"> | Date | string
+    ipAddress?: StringNullableFilter<"Session"> | string | null
+    userAgent?: StringNullableFilter<"Session"> | string | null
+    createdAt?: DateTimeFilter<"Session"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Session"> | Date | string | null
   }
 
   export type TokenUpsertWithWhereUniqueWithoutUserInput = {
@@ -68234,158 +68070,13 @@ export namespace Prisma {
     userId?: UuidFilter<"Token"> | string
     type?: EnumTokenTypeFilter<"Token"> | $Enums.TokenType
     valueHash?: StringFilter<"Token"> | string
-    expiresAt?: DateTimeFilter<"Token"> | Date | string
+    expiredAt?: DateTimeFilter<"Token"> | Date | string
     revokedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
+    ipAddress?: StringNullableFilter<"Token"> | string | null
+    userAgent?: StringNullableFilter<"Token"> | string | null
     createdAt?: DateTimeFilter<"Token"> | Date | string
-    updatedAt?: DateTimeFilter<"Token"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Token"> | Date | string | null
-  }
-
-  export type OtpUpsertWithWhereUniqueWithoutUserInput = {
-    where: OtpWhereUniqueInput
-    update: XOR<OtpUpdateWithoutUserInput, OtpUncheckedUpdateWithoutUserInput>
-    create: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput>
-  }
-
-  export type OtpUpdateWithWhereUniqueWithoutUserInput = {
-    where: OtpWhereUniqueInput
-    data: XOR<OtpUpdateWithoutUserInput, OtpUncheckedUpdateWithoutUserInput>
-  }
-
-  export type OtpUpdateManyWithWhereWithoutUserInput = {
-    where: OtpScalarWhereInput
-    data: XOR<OtpUpdateManyMutationInput, OtpUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type OtpScalarWhereInput = {
-    AND?: OtpScalarWhereInput | OtpScalarWhereInput[]
-    OR?: OtpScalarWhereInput[]
-    NOT?: OtpScalarWhereInput | OtpScalarWhereInput[]
-    id?: UuidFilter<"Otp"> | string
-    userId?: UuidNullableFilter<"Otp"> | string | null
-    phone?: StringFilter<"Otp"> | string
-    codeHash?: StringFilter<"Otp"> | string
-    expiresAt?: DateTimeFilter<"Otp"> | Date | string
-    attempts?: IntFilter<"Otp"> | number
-    usedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
-    createdAt?: DateTimeFilter<"Otp"> | Date | string
-    updatedAt?: DateTimeFilter<"Otp"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
-  }
-
-  export type MembershipUpsertWithWhereUniqueWithoutUserInput = {
-    where: MembershipWhereUniqueInput
-    update: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
-    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-  }
-
-  export type MembershipUpdateWithWhereUniqueWithoutUserInput = {
-    where: MembershipWhereUniqueInput
-    data: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
-  }
-
-  export type MembershipUpdateManyWithWhereWithoutUserInput = {
-    where: MembershipScalarWhereInput
-    data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type MembershipScalarWhereInput = {
-    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    OR?: MembershipScalarWhereInput[]
-    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    id?: UuidFilter<"Membership"> | string
-    userId?: UuidFilter<"Membership"> | string
-    tenantId?: UuidFilter<"Membership"> | string
-    organizationId?: UuidNullableFilter<"Membership"> | string | null
-    role?: EnumMemberShipRoleFilter<"Membership"> | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFilter<"Membership"> | $Enums.MemberShipStatus
-    joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
-    invitedEmail?: StringNullableFilter<"Membership"> | string | null
-    invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
-    removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
-    createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
-  }
-
-  export type AddressUpsertWithWhereUniqueWithoutUserInput = {
-    where: AddressWhereUniqueInput
-    update: XOR<AddressUpdateWithoutUserInput, AddressUncheckedUpdateWithoutUserInput>
-    create: XOR<AddressCreateWithoutUserInput, AddressUncheckedCreateWithoutUserInput>
-  }
-
-  export type AddressUpdateWithWhereUniqueWithoutUserInput = {
-    where: AddressWhereUniqueInput
-    data: XOR<AddressUpdateWithoutUserInput, AddressUncheckedUpdateWithoutUserInput>
-  }
-
-  export type AddressUpdateManyWithWhereWithoutUserInput = {
-    where: AddressScalarWhereInput
-    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type AddressScalarWhereInput = {
-    AND?: AddressScalarWhereInput | AddressScalarWhereInput[]
-    OR?: AddressScalarWhereInput[]
-    NOT?: AddressScalarWhereInput | AddressScalarWhereInput[]
-    id?: UuidFilter<"Address"> | string
-    userId?: UuidNullableFilter<"Address"> | string | null
-    tenantId?: UuidNullableFilter<"Address"> | string | null
-    organizationId?: UuidNullableFilter<"Address"> | string | null
-    membershipId?: UuidNullableFilter<"Address"> | string | null
-    AddressType?: EnumAddressTypeNullableFilter<"Address"> | $Enums.AddressType | null
-    street?: StringNullableFilter<"Address"> | string | null
-    addressNumber?: StringNullableFilter<"Address"> | string | null
-    complement?: StringNullableFilter<"Address"> | string | null
-    neighborhood?: StringNullableFilter<"Address"> | string | null
-    reference?: StringNullableFilter<"Address"> | string | null
-    cityId?: UuidNullableFilter<"Address"> | string | null
-    stateId?: UuidNullableFilter<"Address"> | string | null
-    zipCode?: StringNullableFilter<"Address"> | string | null
-    country?: StringNullableFilter<"Address"> | string | null
-    isPrimary?: BoolNullableFilter<"Address"> | boolean | null
-    createdAt?: DateTimeFilter<"Address"> | Date | string
-    updatedAt?: DateTimeNullableFilter<"Address"> | Date | string | null
-    deletedAt?: DateTimeNullableFilter<"Address"> | Date | string | null
-  }
-
-  export type LgpdConsentUpsertWithWhereUniqueWithoutUserInput = {
-    where: LgpdConsentWhereUniqueInput
-    update: XOR<LgpdConsentUpdateWithoutUserInput, LgpdConsentUncheckedUpdateWithoutUserInput>
-    create: XOR<LgpdConsentCreateWithoutUserInput, LgpdConsentUncheckedCreateWithoutUserInput>
-  }
-
-  export type LgpdConsentUpdateWithWhereUniqueWithoutUserInput = {
-    where: LgpdConsentWhereUniqueInput
-    data: XOR<LgpdConsentUpdateWithoutUserInput, LgpdConsentUncheckedUpdateWithoutUserInput>
-  }
-
-  export type LgpdConsentUpdateManyWithWhereWithoutUserInput = {
-    where: LgpdConsentScalarWhereInput
-    data: XOR<LgpdConsentUpdateManyMutationInput, LgpdConsentUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type LgpdConsentScalarWhereInput = {
-    AND?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
-    OR?: LgpdConsentScalarWhereInput[]
-    NOT?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
-    id?: UuidFilter<"LgpdConsent"> | string
-    userId?: UuidFilter<"LgpdConsent"> | string
-    tenantId?: UuidFilter<"LgpdConsent"> | string
-    consentTerms?: BoolFilter<"LgpdConsent"> | boolean
-    consentMarketing?: BoolFilter<"LgpdConsent"> | boolean
-    consentDataSharing?: BoolFilter<"LgpdConsent"> | boolean
-    consentAnalytics?: BoolFilter<"LgpdConsent"> | boolean
-    ipAddress?: StringFilter<"LgpdConsent"> | string
-    macAddress?: StringNullableFilter<"LgpdConsent"> | string | null
-    userAgent?: StringFilter<"LgpdConsent"> | string
-    consentVersion?: StringFilter<"LgpdConsent"> | string
-    status?: EnumConsentStatusFilter<"LgpdConsent"> | $Enums.ConsentStatus
-    withdrawnAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
-    createdAt?: DateTimeFilter<"LgpdConsent"> | Date | string
-    updatedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
-    organizationId?: UuidNullableFilter<"LgpdConsent"> | string | null
   }
 
   export type UserProfileUpsertWithoutUserInput = {
@@ -68433,6 +68124,152 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type OtpUpsertWithWhereUniqueWithoutUserInput = {
+    where: OtpWhereUniqueInput
+    update: XOR<OtpUpdateWithoutUserInput, OtpUncheckedUpdateWithoutUserInput>
+    create: XOR<OtpCreateWithoutUserInput, OtpUncheckedCreateWithoutUserInput>
+  }
+
+  export type OtpUpdateWithWhereUniqueWithoutUserInput = {
+    where: OtpWhereUniqueInput
+    data: XOR<OtpUpdateWithoutUserInput, OtpUncheckedUpdateWithoutUserInput>
+  }
+
+  export type OtpUpdateManyWithWhereWithoutUserInput = {
+    where: OtpScalarWhereInput
+    data: XOR<OtpUpdateManyMutationInput, OtpUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type OtpScalarWhereInput = {
+    AND?: OtpScalarWhereInput | OtpScalarWhereInput[]
+    OR?: OtpScalarWhereInput[]
+    NOT?: OtpScalarWhereInput | OtpScalarWhereInput[]
+    id?: UuidFilter<"Otp"> | string
+    userId?: UuidNullableFilter<"Otp"> | string | null
+    phone?: StringFilter<"Otp"> | string
+    codeHash?: StringFilter<"Otp"> | string
+    expiredAt?: DateTimeFilter<"Otp"> | Date | string
+    attempts?: IntFilter<"Otp"> | number
+    usedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
+    createdAt?: DateTimeFilter<"Otp"> | Date | string
+    updatedAt?: DateTimeFilter<"Otp"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Otp"> | Date | string | null
+  }
+
+  export type MembershipUpsertWithWhereUniqueWithoutUserInput = {
+    where: MembershipWhereUniqueInput
+    update: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
+    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+  }
+
+  export type MembershipUpdateWithWhereUniqueWithoutUserInput = {
+    where: MembershipWhereUniqueInput
+    data: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
+  }
+
+  export type MembershipUpdateManyWithWhereWithoutUserInput = {
+    where: MembershipScalarWhereInput
+    data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type MembershipScalarWhereInput = {
+    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    OR?: MembershipScalarWhereInput[]
+    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    id?: UuidFilter<"Membership"> | string
+    userId?: UuidFilter<"Membership"> | string
+    tenantId?: UuidFilter<"Membership"> | string
+    organizationId?: UuidNullableFilter<"Membership"> | string | null
+    role?: EnumMembershipRoleFilter<"Membership"> | $Enums.MembershipRole
+    status?: EnumMembershipStatusFilter<"Membership"> | $Enums.MembershipStatus
+    joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    invitedEmail?: StringNullableFilter<"Membership"> | string | null
+    invitedById?: UuidNullableFilter<"Membership"> | string | null
+    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    createdAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+  }
+
+  export type AddressUpsertWithWhereUniqueWithoutUserInput = {
+    where: AddressWhereUniqueInput
+    update: XOR<AddressUpdateWithoutUserInput, AddressUncheckedUpdateWithoutUserInput>
+    create: XOR<AddressCreateWithoutUserInput, AddressUncheckedCreateWithoutUserInput>
+  }
+
+  export type AddressUpdateWithWhereUniqueWithoutUserInput = {
+    where: AddressWhereUniqueInput
+    data: XOR<AddressUpdateWithoutUserInput, AddressUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AddressUpdateManyWithWhereWithoutUserInput = {
+    where: AddressScalarWhereInput
+    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AddressScalarWhereInput = {
+    AND?: AddressScalarWhereInput | AddressScalarWhereInput[]
+    OR?: AddressScalarWhereInput[]
+    NOT?: AddressScalarWhereInput | AddressScalarWhereInput[]
+    id?: UuidFilter<"Address"> | string
+    userId?: UuidNullableFilter<"Address"> | string | null
+    tenantId?: UuidNullableFilter<"Address"> | string | null
+    organizationId?: UuidNullableFilter<"Address"> | string | null
+    memberId?: UuidNullableFilter<"Address"> | string | null
+    AddressType?: EnumAddressTypeNullableFilter<"Address"> | $Enums.AddressType | null
+    street?: StringNullableFilter<"Address"> | string | null
+    addressNumber?: StringNullableFilter<"Address"> | string | null
+    complement?: StringNullableFilter<"Address"> | string | null
+    neighborhood?: StringNullableFilter<"Address"> | string | null
+    reference?: StringNullableFilter<"Address"> | string | null
+    cityId?: UuidNullableFilter<"Address"> | string | null
+    stateId?: UuidNullableFilter<"Address"> | string | null
+    zipCode?: StringNullableFilter<"Address"> | string | null
+    country?: StringNullableFilter<"Address"> | string | null
+    isPrimary?: BoolNullableFilter<"Address"> | boolean | null
+    createdAt?: DateTimeFilter<"Address"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"Address"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"Address"> | Date | string | null
+  }
+
+  export type LgpdConsentUpsertWithWhereUniqueWithoutUserInput = {
+    where: LgpdConsentWhereUniqueInput
+    update: XOR<LgpdConsentUpdateWithoutUserInput, LgpdConsentUncheckedUpdateWithoutUserInput>
+    create: XOR<LgpdConsentCreateWithoutUserInput, LgpdConsentUncheckedCreateWithoutUserInput>
+  }
+
+  export type LgpdConsentUpdateWithWhereUniqueWithoutUserInput = {
+    where: LgpdConsentWhereUniqueInput
+    data: XOR<LgpdConsentUpdateWithoutUserInput, LgpdConsentUncheckedUpdateWithoutUserInput>
+  }
+
+  export type LgpdConsentUpdateManyWithWhereWithoutUserInput = {
+    where: LgpdConsentScalarWhereInput
+    data: XOR<LgpdConsentUpdateManyMutationInput, LgpdConsentUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type LgpdConsentScalarWhereInput = {
+    AND?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
+    OR?: LgpdConsentScalarWhereInput[]
+    NOT?: LgpdConsentScalarWhereInput | LgpdConsentScalarWhereInput[]
+    id?: UuidFilter<"LgpdConsent"> | string
+    userId?: UuidFilter<"LgpdConsent"> | string
+    consentTerms?: BoolFilter<"LgpdConsent"> | boolean
+    consentMarketing?: BoolFilter<"LgpdConsent"> | boolean
+    consentDataSharing?: BoolFilter<"LgpdConsent"> | boolean
+    consentAnalytics?: BoolFilter<"LgpdConsent"> | boolean
+    ipAddress?: StringFilter<"LgpdConsent"> | string
+    macAddress?: StringNullableFilter<"LgpdConsent"> | string | null
+    userAgent?: StringFilter<"LgpdConsent"> | string
+    consentVersion?: StringFilter<"LgpdConsent"> | string
+    status?: EnumLgpdConsentStatusFilter<"LgpdConsent"> | $Enums.LgpdConsentStatus
+    withdrawnAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
+    createdAt?: DateTimeFilter<"LgpdConsent"> | Date | string
+    updatedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
+    deletedAt?: DateTimeNullableFilter<"LgpdConsent"> | Date | string | null
+  }
+
   export type LeadUpsertWithWhereUniqueWithoutUserInput = {
     where: LeadWhereUniqueInput
     update: XOR<LeadUpdateWithoutUserInput, LeadUncheckedUpdateWithoutUserInput>
@@ -68475,37 +68312,37 @@ export namespace Prisma {
 
   export type UserCreateWithoutAccountsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -68527,73 +68364,73 @@ export namespace Prisma {
 
   export type UserUpdateWithoutAccountsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -68615,45 +68452,45 @@ export namespace Prisma {
 
   export type UserUpdateWithoutSessionsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutProfileInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -68669,9 +68506,9 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutProfileInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -68703,9 +68540,9 @@ export namespace Prisma {
 
   export type UserUpdateWithoutProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -68721,9 +68558,9 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -68739,37 +68576,37 @@ export namespace Prisma {
 
   export type UserCreateWithoutTokensInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTokensInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -68791,73 +68628,73 @@ export namespace Prisma {
 
   export type UserUpdateWithoutTokensInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTokensInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutOtpsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOtpsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -68879,72 +68716,72 @@ export namespace Prisma {
 
   export type UserUpdateWithoutOtpsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOtpsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type MembershipCreateWithoutTenantInput = {
     id?: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     user: UserCreateNestedOneWithoutMembershipsInput
     organization?: OrganizationCreateNestedOneWithoutMembershipsInput
-    addresses?: AddressCreateNestedManyWithoutMembershipInput
+    addresses?: AddressCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipUncheckedCreateWithoutTenantInput = {
     id?: string
     userId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    addresses?: AddressUncheckedCreateNestedManyWithoutMembershipInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipCreateOrConnectWithoutTenantInput = {
@@ -68961,10 +68798,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -68986,7 +68819,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -68996,10 +68828,6 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -69021,7 +68849,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -69034,104 +68861,6 @@ export namespace Prisma {
 
   export type OrganizationCreateManyTenantInputEnvelope = {
     data: OrganizationCreateManyTenantInput | OrganizationCreateManyTenantInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type LgpdConsentCreateWithoutTenantInput = {
-    id?: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    user: UserCreateNestedOneWithoutLgpdConsentsInput
-    organization?: OrganizationCreateNestedOneWithoutLgpdConsentsInput
-  }
-
-  export type LgpdConsentUncheckedCreateWithoutTenantInput = {
-    id?: string
-    userId: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    organizationId?: string | null
-  }
-
-  export type LgpdConsentCreateOrConnectWithoutTenantInput = {
-    where: LgpdConsentWhereUniqueInput
-    create: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput>
-  }
-
-  export type LgpdConsentCreateManyTenantInputEnvelope = {
-    data: LgpdConsentCreateManyTenantInput | LgpdConsentCreateManyTenantInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AddressCreateWithoutTenantInput = {
-    id?: string
-    AddressType?: $Enums.AddressType | null
-    street?: string | null
-    addressNumber?: string | null
-    complement?: string | null
-    neighborhood?: string | null
-    reference?: string | null
-    zipCode?: string | null
-    country?: string | null
-    isPrimary?: boolean | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-    user?: UserCreateNestedOneWithoutAddressesInput
-    organization?: OrganizationCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
-    city?: CityCreateNestedOneWithoutAddressesInput
-    state?: StateCreateNestedOneWithoutAddressesInput
-  }
-
-  export type AddressUncheckedCreateWithoutTenantInput = {
-    id?: string
-    userId?: string | null
-    organizationId?: string | null
-    membershipId?: string | null
-    AddressType?: $Enums.AddressType | null
-    street?: string | null
-    addressNumber?: string | null
-    complement?: string | null
-    neighborhood?: string | null
-    reference?: string | null
-    cityId?: string | null
-    stateId?: string | null
-    zipCode?: string | null
-    country?: string | null
-    isPrimary?: boolean | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-  }
-
-  export type AddressCreateOrConnectWithoutTenantInput = {
-    where: AddressWhereUniqueInput
-    create: XOR<AddressCreateWithoutTenantInput, AddressUncheckedCreateWithoutTenantInput>
-  }
-
-  export type AddressCreateManyTenantInputEnvelope = {
-    data: AddressCreateManyTenantInput | AddressCreateManyTenantInput[]
     skipDuplicates?: boolean
   }
 
@@ -69185,6 +68914,58 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AddressCreateWithoutTenantInput = {
+    id?: string
+    AddressType?: $Enums.AddressType | null
+    street?: string | null
+    addressNumber?: string | null
+    complement?: string | null
+    neighborhood?: string | null
+    reference?: string | null
+    zipCode?: string | null
+    country?: string | null
+    isPrimary?: boolean | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+    user?: UserCreateNestedOneWithoutAddressesInput
+    organization?: OrganizationCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
+    city?: CityCreateNestedOneWithoutAddressesInput
+    state?: StateCreateNestedOneWithoutAddressesInput
+  }
+
+  export type AddressUncheckedCreateWithoutTenantInput = {
+    id?: string
+    userId?: string | null
+    organizationId?: string | null
+    memberId?: string | null
+    AddressType?: $Enums.AddressType | null
+    street?: string | null
+    addressNumber?: string | null
+    complement?: string | null
+    neighborhood?: string | null
+    reference?: string | null
+    cityId?: string | null
+    stateId?: string | null
+    zipCode?: string | null
+    country?: string | null
+    isPrimary?: boolean | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type AddressCreateOrConnectWithoutTenantInput = {
+    where: AddressWhereUniqueInput
+    create: XOR<AddressCreateWithoutTenantInput, AddressUncheckedCreateWithoutTenantInput>
+  }
+
+  export type AddressCreateManyTenantInputEnvelope = {
+    data: AddressCreateManyTenantInput | AddressCreateManyTenantInput[]
+    skipDuplicates?: boolean
+  }
+
   export type MembershipUpsertWithWhereUniqueWithoutTenantInput = {
     where: MembershipWhereUniqueInput
     update: XOR<MembershipUpdateWithoutTenantInput, MembershipUncheckedUpdateWithoutTenantInput>
@@ -69222,50 +69003,14 @@ export namespace Prisma {
     OR?: OrganizationScalarWhereInput[]
     NOT?: OrganizationScalarWhereInput | OrganizationScalarWhereInput[]
     id?: UuidFilter<"Organization"> | string
-    tenantId?: UuidNullableFilter<"Organization"> | string | null
+    tenantId?: UuidFilter<"Organization"> | string
     name?: StringFilter<"Organization"> | string
     slug?: StringFilter<"Organization"> | string
-    documentType?: EnumDocumentTypeNullableFilter<"Organization"> | $Enums.DocumentType | null
-    documentNumber?: StringNullableFilter<"Organization"> | string | null
-    contactEmail?: StringNullableFilter<"Organization"> | string | null
-    phone?: StringNullableFilter<"Organization"> | string | null
     logoUrl?: StringNullableFilter<"Organization"> | string | null
     status?: EnumOrganizationStatusFilter<"Organization"> | $Enums.OrganizationStatus
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Organization"> | Date | string | null
-  }
-
-  export type LgpdConsentUpsertWithWhereUniqueWithoutTenantInput = {
-    where: LgpdConsentWhereUniqueInput
-    update: XOR<LgpdConsentUpdateWithoutTenantInput, LgpdConsentUncheckedUpdateWithoutTenantInput>
-    create: XOR<LgpdConsentCreateWithoutTenantInput, LgpdConsentUncheckedCreateWithoutTenantInput>
-  }
-
-  export type LgpdConsentUpdateWithWhereUniqueWithoutTenantInput = {
-    where: LgpdConsentWhereUniqueInput
-    data: XOR<LgpdConsentUpdateWithoutTenantInput, LgpdConsentUncheckedUpdateWithoutTenantInput>
-  }
-
-  export type LgpdConsentUpdateManyWithWhereWithoutTenantInput = {
-    where: LgpdConsentScalarWhereInput
-    data: XOR<LgpdConsentUpdateManyMutationInput, LgpdConsentUncheckedUpdateManyWithoutTenantInput>
-  }
-
-  export type AddressUpsertWithWhereUniqueWithoutTenantInput = {
-    where: AddressWhereUniqueInput
-    update: XOR<AddressUpdateWithoutTenantInput, AddressUncheckedUpdateWithoutTenantInput>
-    create: XOR<AddressCreateWithoutTenantInput, AddressUncheckedCreateWithoutTenantInput>
-  }
-
-  export type AddressUpdateWithWhereUniqueWithoutTenantInput = {
-    where: AddressWhereUniqueInput
-    data: XOR<AddressUpdateWithoutTenantInput, AddressUncheckedUpdateWithoutTenantInput>
-  }
-
-  export type AddressUpdateManyWithWhereWithoutTenantInput = {
-    where: AddressScalarWhereInput
-    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutTenantInput>
   }
 
   export type LeadUpsertWithWhereUniqueWithoutTenantInput = {
@@ -69284,40 +69029,52 @@ export namespace Prisma {
     data: XOR<LeadUpdateManyMutationInput, LeadUncheckedUpdateManyWithoutTenantInput>
   }
 
+  export type AddressUpsertWithWhereUniqueWithoutTenantInput = {
+    where: AddressWhereUniqueInput
+    update: XOR<AddressUpdateWithoutTenantInput, AddressUncheckedUpdateWithoutTenantInput>
+    create: XOR<AddressCreateWithoutTenantInput, AddressUncheckedCreateWithoutTenantInput>
+  }
+
+  export type AddressUpdateWithWhereUniqueWithoutTenantInput = {
+    where: AddressWhereUniqueInput
+    data: XOR<AddressUpdateWithoutTenantInput, AddressUncheckedUpdateWithoutTenantInput>
+  }
+
+  export type AddressUpdateManyWithWhereWithoutTenantInput = {
+    where: AddressScalarWhereInput
+    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutTenantInput>
+  }
+
   export type TenantCreateWithoutOrganizationsInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutTenantInput
-    addresses?: AddressCreateNestedManyWithoutTenantInput
     leads?: LeadCreateNestedManyWithoutTenantInput
+    addresses?: AddressCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutOrganizationsInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipUncheckedCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutTenantInput
-    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
     leads?: LeadUncheckedCreateNestedManyWithoutTenantInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutOrganizationsInput = {
@@ -69327,36 +69084,36 @@ export namespace Prisma {
 
   export type MembershipCreateWithoutOrganizationInput = {
     id?: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutMembershipsInput
     user: UserCreateNestedOneWithoutMembershipsInput
-    addresses?: AddressCreateNestedManyWithoutMembershipInput
+    addresses?: AddressCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipUncheckedCreateWithoutOrganizationInput = {
     id?: string
     userId: string
     tenantId: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    addresses?: AddressUncheckedCreateNestedManyWithoutMembershipInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type MembershipCreateOrConnectWithoutOrganizationInput = {
@@ -69385,7 +69142,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     user?: UserCreateNestedOneWithoutAddressesInput
     tenant?: TenantCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
     city?: CityCreateNestedOneWithoutAddressesInput
     state?: StateCreateNestedOneWithoutAddressesInput
   }
@@ -69394,7 +69151,7 @@ export namespace Prisma {
     id?: string
     userId?: string | null
     tenantId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -69650,7 +69407,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -69665,7 +69422,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -69741,7 +69498,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -69762,7 +69519,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -69955,52 +69712,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type LgpdConsentCreateWithoutOrganizationInput = {
-    id?: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    user: UserCreateNestedOneWithoutLgpdConsentsInput
-    tenant: TenantCreateNestedOneWithoutLgpdConsentsInput
-  }
-
-  export type LgpdConsentUncheckedCreateWithoutOrganizationInput = {
-    id?: string
-    userId: string
-    tenantId: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-  }
-
-  export type LgpdConsentCreateOrConnectWithoutOrganizationInput = {
-    where: LgpdConsentWhereUniqueInput
-    create: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput>
-  }
-
-  export type LgpdConsentCreateManyOrganizationInputEnvelope = {
-    data: LgpdConsentCreateManyOrganizationInput | LgpdConsentCreateManyOrganizationInput[]
-    skipDuplicates?: boolean
-  }
-
   export type ConnectionLogCreateWithoutOrganizationInput = {
     id?: string
     username: string
@@ -70146,36 +69857,32 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUpdateManyWithoutTenantNestedInput
     leads?: LeadUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutOrganizationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUncheckedUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
     leads?: LeadUncheckedUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type MembershipUpsertWithWhereUniqueWithoutOrganizationInput = {
@@ -70459,7 +70166,7 @@ export namespace Prisma {
     code?: StringFilter<"Voucher"> | string
     status?: EnumVoucherStatusFilter<"Voucher"> | $Enums.VoucherStatus
     usedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Voucher"> | Date | string | null
@@ -70536,7 +70243,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFilter<"Subscription"> | Date | string
     currentPeriodEnd?: DateTimeFilter<"Subscription"> | Date | string
     canceledAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
-    expiresAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
+    expiredAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     deletedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Subscription"> | Date | string | null
@@ -70687,22 +70394,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"CampaignItem"> | Date | string
   }
 
-  export type LgpdConsentUpsertWithWhereUniqueWithoutOrganizationInput = {
-    where: LgpdConsentWhereUniqueInput
-    update: XOR<LgpdConsentUpdateWithoutOrganizationInput, LgpdConsentUncheckedUpdateWithoutOrganizationInput>
-    create: XOR<LgpdConsentCreateWithoutOrganizationInput, LgpdConsentUncheckedCreateWithoutOrganizationInput>
-  }
-
-  export type LgpdConsentUpdateWithWhereUniqueWithoutOrganizationInput = {
-    where: LgpdConsentWhereUniqueInput
-    data: XOR<LgpdConsentUpdateWithoutOrganizationInput, LgpdConsentUncheckedUpdateWithoutOrganizationInput>
-  }
-
-  export type LgpdConsentUpdateManyWithWhereWithoutOrganizationInput = {
-    where: LgpdConsentScalarWhereInput
-    data: XOR<LgpdConsentUpdateManyMutationInput, LgpdConsentUncheckedUpdateManyWithoutOrganizationInput>
-  }
-
   export type ConnectionLogUpsertWithWhereUniqueWithoutOrganizationInput = {
     where: ConnectionLogWhereUniqueInput
     update: XOR<ConnectionLogUpdateWithoutOrganizationInput, ConnectionLogUncheckedUpdateWithoutOrganizationInput>
@@ -70793,36 +70484,32 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     organizations?: OrganizationCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutTenantInput
-    addresses?: AddressCreateNestedManyWithoutTenantInput
     leads?: LeadCreateNestedManyWithoutTenantInput
+    addresses?: AddressCreateNestedManyWithoutTenantInput
   }
 
   export type TenantUncheckedCreateWithoutMembershipsInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     organizations?: OrganizationUncheckedCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutTenantInput
-    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
     leads?: LeadUncheckedCreateNestedManyWithoutTenantInput
+    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
   }
 
   export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -70832,37 +70519,37 @@ export namespace Prisma {
 
   export type UserCreateWithoutMembershipsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -70875,16 +70562,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
     vpnPeers?: OrganizationVpnPeerCreateNestedManyWithoutOrganizationInput
@@ -70900,7 +70583,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -70908,13 +70590,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutMembershipsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -70935,7 +70613,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -70946,7 +70623,7 @@ export namespace Prisma {
     create: XOR<OrganizationCreateWithoutMembershipsInput, OrganizationUncheckedCreateWithoutMembershipsInput>
   }
 
-  export type AddressCreateWithoutMembershipInput = {
+  export type AddressCreateWithoutMemberInput = {
     id?: string
     AddressType?: $Enums.AddressType | null
     street?: string | null
@@ -70967,7 +70644,7 @@ export namespace Prisma {
     state?: StateCreateNestedOneWithoutAddressesInput
   }
 
-  export type AddressUncheckedCreateWithoutMembershipInput = {
+  export type AddressUncheckedCreateWithoutMemberInput = {
     id?: string
     userId?: string | null
     tenantId?: string | null
@@ -70988,13 +70665,13 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type AddressCreateOrConnectWithoutMembershipInput = {
+  export type AddressCreateOrConnectWithoutMemberInput = {
     where: AddressWhereUniqueInput
-    create: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput>
+    create: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput>
   }
 
-  export type AddressCreateManyMembershipInputEnvelope = {
-    data: AddressCreateManyMembershipInput | AddressCreateManyMembershipInput[]
+  export type AddressCreateManyMemberInputEnvelope = {
+    data: AddressCreateManyMemberInput | AddressCreateManyMemberInput[]
     skipDuplicates?: boolean
   }
 
@@ -71013,36 +70690,32 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     organizations?: OrganizationUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUpdateManyWithoutTenantNestedInput
     leads?: LeadUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUpdateManyWithoutTenantNestedInput
   }
 
   export type TenantUncheckedUpdateWithoutMembershipsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     organizations?: OrganizationUncheckedUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
     leads?: LeadUncheckedUpdateManyWithoutTenantNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserUpsertWithoutMembershipsInput = {
@@ -71058,37 +70731,37 @@ export namespace Prisma {
 
   export type UserUpdateWithoutMembershipsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -71107,16 +70780,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
     vpnPeers?: OrganizationVpnPeerUpdateManyWithoutOrganizationNestedInput
@@ -71132,7 +70801,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -71140,13 +70808,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutMembershipsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71167,61 +70831,60 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
-  export type AddressUpsertWithWhereUniqueWithoutMembershipInput = {
+  export type AddressUpsertWithWhereUniqueWithoutMemberInput = {
     where: AddressWhereUniqueInput
-    update: XOR<AddressUpdateWithoutMembershipInput, AddressUncheckedUpdateWithoutMembershipInput>
-    create: XOR<AddressCreateWithoutMembershipInput, AddressUncheckedCreateWithoutMembershipInput>
+    update: XOR<AddressUpdateWithoutMemberInput, AddressUncheckedUpdateWithoutMemberInput>
+    create: XOR<AddressCreateWithoutMemberInput, AddressUncheckedCreateWithoutMemberInput>
   }
 
-  export type AddressUpdateWithWhereUniqueWithoutMembershipInput = {
+  export type AddressUpdateWithWhereUniqueWithoutMemberInput = {
     where: AddressWhereUniqueInput
-    data: XOR<AddressUpdateWithoutMembershipInput, AddressUncheckedUpdateWithoutMembershipInput>
+    data: XOR<AddressUpdateWithoutMemberInput, AddressUncheckedUpdateWithoutMemberInput>
   }
 
-  export type AddressUpdateManyWithWhereWithoutMembershipInput = {
+  export type AddressUpdateManyWithWhereWithoutMemberInput = {
     where: AddressScalarWhereInput
-    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutMembershipInput>
+    data: XOR<AddressUpdateManyMutationInput, AddressUncheckedUpdateManyWithoutMemberInput>
   }
 
   export type UserCreateWithoutAddressesInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAddressesInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -71234,17 +70897,15 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipCreateNestedManyWithoutTenantInput
     organizations?: OrganizationCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutTenantInput
     leads?: LeadCreateNestedManyWithoutTenantInput
   }
 
@@ -71252,17 +70913,15 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipUncheckedCreateNestedManyWithoutTenantInput
     organizations?: OrganizationUncheckedCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutTenantInput
     leads?: LeadUncheckedCreateNestedManyWithoutTenantInput
   }
 
@@ -71275,16 +70934,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
     vpnPeers?: OrganizationVpnPeerCreateNestedManyWithoutOrganizationInput
@@ -71300,7 +70955,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -71308,13 +70962,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutAddressesInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -71335,7 +70985,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -71348,15 +70997,15 @@ export namespace Prisma {
 
   export type MembershipCreateWithoutAddressesInput = {
     id?: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     tenant: TenantCreateNestedOneWithoutMembershipsInput
     user: UserCreateNestedOneWithoutMembershipsInput
@@ -71368,15 +71017,15 @@ export namespace Prisma {
     userId: string
     tenantId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -71448,37 +71097,37 @@ export namespace Prisma {
 
   export type UserUpdateWithoutAddressesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAddressesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -71497,17 +71146,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutTenantNestedInput
     leads?: LeadUpdateManyWithoutTenantNestedInput
   }
 
@@ -71515,17 +71162,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUncheckedUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUncheckedUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput
     leads?: LeadUncheckedUpdateManyWithoutTenantNestedInput
   }
 
@@ -71544,16 +71189,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
     vpnPeers?: OrganizationVpnPeerUpdateManyWithoutOrganizationNestedInput
@@ -71569,7 +71210,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -71577,13 +71217,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutAddressesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -71604,7 +71240,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -71623,15 +71258,15 @@ export namespace Prisma {
 
   export type MembershipUpdateWithoutAddressesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutMembershipsNestedInput
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
@@ -71643,15 +71278,15 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -71764,7 +71399,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutAddressesInput
     tenant?: TenantCreateNestedOneWithoutAddressesInput
     organization?: OrganizationCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
     city?: CityCreateNestedOneWithoutAddressesInput
   }
 
@@ -71773,7 +71408,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -71886,7 +71521,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutAddressesInput
     tenant?: TenantCreateNestedOneWithoutAddressesInput
     organization?: OrganizationCreateNestedOneWithoutAddressesInput
-    membership?: MembershipCreateNestedOneWithoutAddressesInput
+    member?: MembershipCreateNestedOneWithoutAddressesInput
     state?: StateCreateNestedOneWithoutAddressesInput
   }
 
@@ -71895,7 +71530,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -71972,16 +71607,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     vpnPeers?: OrganizationVpnPeerCreateNestedManyWithoutOrganizationInput
@@ -71997,7 +71628,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72005,13 +71635,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutOrganizationConfigsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72032,7 +71658,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72058,16 +71683,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     vpnPeers?: OrganizationVpnPeerUpdateManyWithoutOrganizationNestedInput
@@ -72083,7 +71704,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -72091,13 +71711,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutOrganizationConfigsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72118,7 +71734,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -72128,16 +71743,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -72153,7 +71764,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72161,13 +71771,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutVpnPeersInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72188,7 +71794,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72214,16 +71819,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -72239,7 +71840,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -72247,13 +71847,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutVpnPeersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72274,7 +71870,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -72284,16 +71879,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -72309,7 +71900,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72317,13 +71907,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutMercadoPagoConfigInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72344,7 +71930,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72370,16 +71955,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -72395,7 +71976,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -72403,13 +71983,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutMercadoPagoConfigInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72430,7 +72006,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -72440,16 +72015,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -72465,7 +72036,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72473,13 +72043,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutEfiConfigInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72500,7 +72066,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72526,16 +72091,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -72551,7 +72112,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -72559,13 +72119,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutEfiConfigInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72586,7 +72142,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -72596,16 +72151,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -72621,7 +72172,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72629,13 +72179,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutMikrotiksInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72656,7 +72202,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72708,7 +72253,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -72723,7 +72268,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -72754,16 +72299,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -72779,7 +72320,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -72787,13 +72327,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutMikrotiksInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -72814,7 +72350,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -72856,16 +72391,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -72881,7 +72412,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -72889,13 +72419,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutHotspotPlansInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -72916,7 +72442,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -72932,7 +72457,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -72947,7 +72472,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -72978,16 +72503,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -73003,7 +72524,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -73011,13 +72531,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutHotspotPlansInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73038,7 +72554,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -73064,16 +72579,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -73089,7 +72600,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -73097,13 +72607,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutHotspotUsersInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -73124,7 +72630,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -73191,16 +72696,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -73216,7 +72717,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -73224,13 +72724,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutHotspotUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73251,7 +72747,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -73308,16 +72803,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -73333,7 +72824,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -73341,13 +72831,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutVouchersInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -73368,7 +72854,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -73468,16 +72953,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -73493,7 +72974,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -73501,13 +72981,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutVouchersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73528,7 +73004,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -73624,16 +73099,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -73649,7 +73120,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -73657,13 +73127,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutSubscriptionPlansInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -73684,7 +73150,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -73707,7 +73172,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -73728,7 +73193,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -73760,16 +73225,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -73785,7 +73246,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -73793,13 +73253,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutSubscriptionPlansInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73820,7 +73276,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -73846,16 +73301,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -73871,7 +73322,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -73879,13 +73329,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutSubscriptionsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -73906,7 +73352,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -74021,16 +73466,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -74046,7 +73487,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -74054,13 +73494,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutSubscriptionsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74081,7 +73517,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -74156,16 +73591,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -74181,7 +73612,6 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -74189,13 +73619,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutPaymentsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -74216,7 +73642,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -74239,7 +73664,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -74261,7 +73686,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -74287,16 +73712,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -74312,7 +73733,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -74320,13 +73740,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutPaymentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74347,7 +73763,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -74376,7 +73791,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -74398,7 +73813,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -74486,16 +73901,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -74511,7 +73922,6 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -74519,13 +73929,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutPortalsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -74546,7 +73952,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -74664,16 +74069,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -74689,7 +74090,6 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -74697,13 +74097,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutPortalsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74724,7 +74120,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -74818,16 +74213,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -74843,7 +74234,6 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutOrganizationInput
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -74851,13 +74241,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutCampaignsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -74878,7 +74264,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutOrganizationInput
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -75000,16 +74385,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -75025,7 +74406,6 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutOrganizationNestedInput
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -75033,13 +74413,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutCampaignsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75060,7 +74436,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -75102,16 +74477,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -75127,7 +74498,6 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutOrganizationInput
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
@@ -75135,13 +74505,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedCreateWithoutCampaignItemsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -75162,7 +74528,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutOrganizationInput
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
@@ -75217,16 +74582,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -75242,7 +74603,6 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutOrganizationNestedInput
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -75250,13 +74610,9 @@ export namespace Prisma {
 
   export type OrganizationUncheckedUpdateWithoutCampaignItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75277,7 +74633,6 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -75320,38 +74675,38 @@ export namespace Prisma {
 
   export type UserCreateWithoutLeadsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLeadsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
     lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLeadsInput = {
@@ -75363,16 +74718,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -75389,20 +74740,15 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutLeadsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -75424,7 +74770,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
   }
@@ -75438,17 +74783,15 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipCreateNestedManyWithoutTenantInput
     organizations?: OrganizationCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutTenantInput
     addresses?: AddressCreateNestedManyWithoutTenantInput
   }
 
@@ -75456,17 +74799,15 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
     documentNumber?: string | null
     contactEmail?: string | null
     phone?: string | null
     status?: $Enums.TenantStatus
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     memberships?: MembershipUncheckedCreateNestedManyWithoutTenantInput
     organizations?: OrganizationUncheckedCreateNestedManyWithoutTenantInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutTenantInput
     addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
   }
 
@@ -75488,38 +74829,38 @@ export namespace Prisma {
 
   export type UserUpdateWithoutLeadsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLeadsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
     lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type OrganizationUpsertWithoutLeadsInput = {
@@ -75537,16 +74878,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -75563,20 +74900,15 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutLeadsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75598,7 +74930,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
   }
@@ -75618,17 +74949,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutTenantNestedInput
     addresses?: AddressUpdateManyWithoutTenantNestedInput
   }
 
@@ -75636,175 +74965,57 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
     documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
     contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     memberships?: MembershipUncheckedUpdateManyWithoutTenantNestedInput
     organizations?: OrganizationUncheckedUpdateManyWithoutTenantNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutTenantNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
   }
 
   export type UserCreateWithoutLgpdConsentsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     sessions?: SessionCreateNestedManyWithoutUserInput
     tokens?: TokenCreateNestedManyWithoutUserInput
+    profile?: UserProfileCreateNestedOneWithoutUserInput
     otps?: OtpCreateNestedManyWithoutUserInput
     memberships?: MembershipCreateNestedManyWithoutUserInput
     addresses?: AddressCreateNestedManyWithoutUserInput
-    profile?: UserProfileCreateNestedOneWithoutUserInput
     leads?: LeadCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLgpdConsentsInput = {
     id?: string
-    email?: string | null
+    email: string
     emailVerified?: Date | string | null
-    passwordHash?: string | null
+    passwordHash: string
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     tokens?: TokenUncheckedCreateNestedManyWithoutUserInput
+    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     otps?: OtpUncheckedCreateNestedManyWithoutUserInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
     addresses?: AddressUncheckedCreateNestedManyWithoutUserInput
-    profile?: UserProfileUncheckedCreateNestedOneWithoutUserInput
     leads?: LeadUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLgpdConsentsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutLgpdConsentsInput, UserUncheckedCreateWithoutLgpdConsentsInput>
-  }
-
-  export type TenantCreateWithoutLgpdConsentsInput = {
-    id?: string
-    name: string
-    slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
-    status?: $Enums.TenantStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    memberships?: MembershipCreateNestedManyWithoutTenantInput
-    organizations?: OrganizationCreateNestedManyWithoutTenantInput
-    addresses?: AddressCreateNestedManyWithoutTenantInput
-    leads?: LeadCreateNestedManyWithoutTenantInput
-  }
-
-  export type TenantUncheckedCreateWithoutLgpdConsentsInput = {
-    id?: string
-    name: string
-    slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
-    status?: $Enums.TenantStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    memberships?: MembershipUncheckedCreateNestedManyWithoutTenantInput
-    organizations?: OrganizationUncheckedCreateNestedManyWithoutTenantInput
-    addresses?: AddressUncheckedCreateNestedManyWithoutTenantInput
-    leads?: LeadUncheckedCreateNestedManyWithoutTenantInput
-  }
-
-  export type TenantCreateOrConnectWithoutLgpdConsentsInput = {
-    where: TenantWhereUniqueInput
-    create: XOR<TenantCreateWithoutLgpdConsentsInput, TenantUncheckedCreateWithoutLgpdConsentsInput>
-  }
-
-  export type OrganizationCreateWithoutLgpdConsentsInput = {
-    id?: string
-    name: string
-    slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
-    logoUrl?: string | null
-    status?: $Enums.OrganizationStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
-    memberships?: MembershipCreateNestedManyWithoutOrganizationInput
-    addresses?: AddressCreateNestedManyWithoutOrganizationInput
-    organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
-    vpnPeers?: OrganizationVpnPeerCreateNestedManyWithoutOrganizationInput
-    mercadoPagoConfig?: MercadoPagoConfigCreateNestedOneWithoutOrganizationInput
-    efiConfig?: EfiConfigCreateNestedOneWithoutOrganizationInput
-    mikrotiks?: MikrotikCreateNestedManyWithoutOrganizationInput
-    hotspotPlans?: HotspotPlanCreateNestedManyWithoutOrganizationInput
-    hotspotUsers?: HotspotUserCreateNestedManyWithoutOrganizationInput
-    vouchers?: VoucherCreateNestedManyWithoutOrganizationInput
-    subscriptionPlans?: SubscriptionPlanCreateNestedManyWithoutOrganizationInput
-    subscriptions?: SubscriptionCreateNestedManyWithoutOrganizationInput
-    payments?: PaymentCreateNestedManyWithoutOrganizationInput
-    portals?: PortalCreateNestedManyWithoutOrganizationInput
-    campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
-    campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
-    whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
-    leads?: LeadCreateNestedManyWithoutOrganizationInput
-  }
-
-  export type OrganizationUncheckedCreateWithoutLgpdConsentsInput = {
-    id?: string
-    tenantId?: string | null
-    name: string
-    slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
-    logoUrl?: string | null
-    status?: $Enums.OrganizationStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-    memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
-    addresses?: AddressUncheckedCreateNestedManyWithoutOrganizationInput
-    organizationConfigs?: OrganizationConfigUncheckedCreateNestedManyWithoutOrganizationInput
-    vpnPeers?: OrganizationVpnPeerUncheckedCreateNestedManyWithoutOrganizationInput
-    mercadoPagoConfig?: MercadoPagoConfigUncheckedCreateNestedOneWithoutOrganizationInput
-    efiConfig?: EfiConfigUncheckedCreateNestedOneWithoutOrganizationInput
-    mikrotiks?: MikrotikUncheckedCreateNestedManyWithoutOrganizationInput
-    hotspotPlans?: HotspotPlanUncheckedCreateNestedManyWithoutOrganizationInput
-    hotspotUsers?: HotspotUserUncheckedCreateNestedManyWithoutOrganizationInput
-    vouchers?: VoucherUncheckedCreateNestedManyWithoutOrganizationInput
-    subscriptionPlans?: SubscriptionPlanUncheckedCreateNestedManyWithoutOrganizationInput
-    subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutOrganizationInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutOrganizationInput
-    portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
-    campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
-    campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
-    whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
-    leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
-  }
-
-  export type OrganizationCreateOrConnectWithoutLgpdConsentsInput = {
-    where: OrganizationWhereUniqueInput
-    create: XOR<OrganizationCreateWithoutLgpdConsentsInput, OrganizationUncheckedCreateWithoutLgpdConsentsInput>
   }
 
   export type UserUpsertWithoutLgpdConsentsInput = {
@@ -75820,182 +75031,50 @@ export namespace Prisma {
 
   export type UserUpdateWithoutLgpdConsentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     sessions?: SessionUpdateManyWithoutUserNestedInput
     tokens?: TokenUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUpdateOneWithoutUserNestedInput
     otps?: OtpUpdateManyWithoutUserNestedInput
     memberships?: MembershipUpdateManyWithoutUserNestedInput
     addresses?: AddressUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUpdateOneWithoutUserNestedInput
     leads?: LeadUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLgpdConsentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     tokens?: TokenUncheckedUpdateManyWithoutUserNestedInput
+    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     otps?: OtpUncheckedUpdateManyWithoutUserNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
     addresses?: AddressUncheckedUpdateManyWithoutUserNestedInput
-    profile?: UserProfileUncheckedUpdateOneWithoutUserNestedInput
     leads?: LeadUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type TenantUpsertWithoutLgpdConsentsInput = {
-    update: XOR<TenantUpdateWithoutLgpdConsentsInput, TenantUncheckedUpdateWithoutLgpdConsentsInput>
-    create: XOR<TenantCreateWithoutLgpdConsentsInput, TenantUncheckedCreateWithoutLgpdConsentsInput>
-    where?: TenantWhereInput
-  }
-
-  export type TenantUpdateToOneWithWhereWithoutLgpdConsentsInput = {
-    where?: TenantWhereInput
-    data: XOR<TenantUpdateWithoutLgpdConsentsInput, TenantUncheckedUpdateWithoutLgpdConsentsInput>
-  }
-
-  export type TenantUpdateWithoutLgpdConsentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    memberships?: MembershipUpdateManyWithoutTenantNestedInput
-    organizations?: OrganizationUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUpdateManyWithoutTenantNestedInput
-    leads?: LeadUpdateManyWithoutTenantNestedInput
-  }
-
-  export type TenantUncheckedUpdateWithoutLgpdConsentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    memberships?: MembershipUncheckedUpdateManyWithoutTenantNestedInput
-    organizations?: OrganizationUncheckedUpdateManyWithoutTenantNestedInput
-    addresses?: AddressUncheckedUpdateManyWithoutTenantNestedInput
-    leads?: LeadUncheckedUpdateManyWithoutTenantNestedInput
-  }
-
-  export type OrganizationUpsertWithoutLgpdConsentsInput = {
-    update: XOR<OrganizationUpdateWithoutLgpdConsentsInput, OrganizationUncheckedUpdateWithoutLgpdConsentsInput>
-    create: XOR<OrganizationCreateWithoutLgpdConsentsInput, OrganizationUncheckedCreateWithoutLgpdConsentsInput>
-    where?: OrganizationWhereInput
-  }
-
-  export type OrganizationUpdateToOneWithWhereWithoutLgpdConsentsInput = {
-    where?: OrganizationWhereInput
-    data: XOR<OrganizationUpdateWithoutLgpdConsentsInput, OrganizationUncheckedUpdateWithoutLgpdConsentsInput>
-  }
-
-  export type OrganizationUpdateWithoutLgpdConsentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
-    memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
-    addresses?: AddressUpdateManyWithoutOrganizationNestedInput
-    organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
-    vpnPeers?: OrganizationVpnPeerUpdateManyWithoutOrganizationNestedInput
-    mercadoPagoConfig?: MercadoPagoConfigUpdateOneWithoutOrganizationNestedInput
-    efiConfig?: EfiConfigUpdateOneWithoutOrganizationNestedInput
-    mikrotiks?: MikrotikUpdateManyWithoutOrganizationNestedInput
-    hotspotPlans?: HotspotPlanUpdateManyWithoutOrganizationNestedInput
-    hotspotUsers?: HotspotUserUpdateManyWithoutOrganizationNestedInput
-    vouchers?: VoucherUpdateManyWithoutOrganizationNestedInput
-    subscriptionPlans?: SubscriptionPlanUpdateManyWithoutOrganizationNestedInput
-    subscriptions?: SubscriptionUpdateManyWithoutOrganizationNestedInput
-    payments?: PaymentUpdateManyWithoutOrganizationNestedInput
-    portals?: PortalUpdateManyWithoutOrganizationNestedInput
-    campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
-    campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
-    whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
-    leads?: LeadUpdateManyWithoutOrganizationNestedInput
-  }
-
-  export type OrganizationUncheckedUpdateWithoutLgpdConsentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: StringFieldUpdateOperationsInput | string
-    slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
-    addresses?: AddressUncheckedUpdateManyWithoutOrganizationNestedInput
-    organizationConfigs?: OrganizationConfigUncheckedUpdateManyWithoutOrganizationNestedInput
-    vpnPeers?: OrganizationVpnPeerUncheckedUpdateManyWithoutOrganizationNestedInput
-    mercadoPagoConfig?: MercadoPagoConfigUncheckedUpdateOneWithoutOrganizationNestedInput
-    efiConfig?: EfiConfigUncheckedUpdateOneWithoutOrganizationNestedInput
-    mikrotiks?: MikrotikUncheckedUpdateManyWithoutOrganizationNestedInput
-    hotspotPlans?: HotspotPlanUncheckedUpdateManyWithoutOrganizationNestedInput
-    hotspotUsers?: HotspotUserUncheckedUpdateManyWithoutOrganizationNestedInput
-    vouchers?: VoucherUncheckedUpdateManyWithoutOrganizationNestedInput
-    subscriptionPlans?: SubscriptionPlanUncheckedUpdateManyWithoutOrganizationNestedInput
-    subscriptions?: SubscriptionUncheckedUpdateManyWithoutOrganizationNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutOrganizationNestedInput
-    portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
-    campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
-    campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
-    whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
-    leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationCreateWithoutConnectionLogsInput = {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -76012,20 +75091,15 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutConnectionLogsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -76047,7 +75121,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     whatsappLogs?: WhatsappLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
   }
@@ -76072,16 +75145,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -76098,20 +75167,15 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutConnectionLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76133,7 +75197,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
   }
@@ -76142,16 +75205,12 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
-    tenant?: TenantCreateNestedOneWithoutOrganizationsInput
+    tenant: TenantCreateNestedOneWithoutOrganizationsInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     addresses?: AddressCreateNestedManyWithoutOrganizationInput
     organizationConfigs?: OrganizationConfigCreateNestedManyWithoutOrganizationInput
@@ -76168,20 +75227,15 @@ export namespace Prisma {
     portals?: PortalCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogCreateNestedManyWithoutOrganizationInput
     leads?: LeadCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutWhatsappLogsInput = {
     id?: string
-    tenantId?: string | null
+    tenantId: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
     createdAt?: Date | string
@@ -76203,7 +75257,6 @@ export namespace Prisma {
     portals?: PortalUncheckedCreateNestedManyWithoutOrganizationInput
     campaigns?: CampaignUncheckedCreateNestedManyWithoutOrganizationInput
     campaignItems?: CampaignItemUncheckedCreateNestedManyWithoutOrganizationInput
-    lgpdConsents?: LgpdConsentUncheckedCreateNestedManyWithoutOrganizationInput
     connectionLogs?: ConnectionLogUncheckedCreateNestedManyWithoutOrganizationInput
     leads?: LeadUncheckedCreateNestedManyWithoutOrganizationInput
   }
@@ -76285,16 +75338,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneWithoutOrganizationsNestedInput
+    tenant?: TenantUpdateOneRequiredWithoutOrganizationsNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     addresses?: AddressUpdateManyWithoutOrganizationNestedInput
     organizationConfigs?: OrganizationConfigUpdateManyWithoutOrganizationNestedInput
@@ -76311,20 +75360,15 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutWhatsappLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: NullableStringFieldUpdateOperationsInput | string | null
+    tenantId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76346,7 +75390,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
   }
@@ -76611,13 +75654,12 @@ export namespace Prisma {
 
   export type AccountCreateManyUserInput = {
     id?: string
-    providerType?: $Enums.ProviderType
-    provider: string
+    tokenType?: $Enums.TokenType
+    provider?: $Enums.ProviderType
     providerAccountId: string
     refreshToken?: string | null
     accessToken?: string | null
     expiresAt?: number | null
-    tokenType?: $Enums.TokenType | null
     scope?: string | null
     idToken?: string | null
     sessionState?: string | null
@@ -76630,16 +75672,23 @@ export namespace Prisma {
     id?: string
     sessionToken: string
     expires: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
   }
 
   export type TokenCreateManyUserInput = {
     id?: string
     type?: $Enums.TokenType
     valueHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     revokedAt?: Date | string | null
+    ipAddress?: string | null
+    userAgent?: string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -76647,7 +75696,7 @@ export namespace Prisma {
     id?: string
     phone: string
     codeHash: string
-    expiresAt: Date | string
+    expiredAt: Date | string
     attempts?: number
     usedAt?: Date | string | null
     createdAt?: Date | string
@@ -76659,15 +75708,15 @@ export namespace Prisma {
     id?: string
     tenantId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -76675,7 +75724,7 @@ export namespace Prisma {
     id?: string
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -76694,7 +75743,6 @@ export namespace Prisma {
 
   export type LgpdConsentCreateManyUserInput = {
     id?: string
-    tenantId: string
     consentTerms: boolean
     consentMarketing: boolean
     consentDataSharing: boolean
@@ -76703,11 +75751,11 @@ export namespace Prisma {
     macAddress?: string | null
     userAgent: string
     consentVersion: string
-    status?: $Enums.ConsentStatus
+    status?: $Enums.LgpdConsentStatus
     withdrawnAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
-    organizationId?: string | null
+    deletedAt?: Date | string | null
   }
 
   export type LeadCreateManyUserInput = {
@@ -76732,13 +75780,12 @@ export namespace Prisma {
 
   export type AccountUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76749,13 +75796,12 @@ export namespace Prisma {
 
   export type AccountUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76766,13 +75812,12 @@ export namespace Prisma {
 
   export type AccountUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    providerType?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
-    provider?: StringFieldUpdateOperationsInput | string
+    tokenType?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
+    provider?: EnumProviderTypeFieldUpdateOperationsInput | $Enums.ProviderType
     providerAccountId?: StringFieldUpdateOperationsInput | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     accessToken?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableIntFieldUpdateOperationsInput | number | null
-    tokenType?: NullableEnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
     idToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionState?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76785,28 +75830,45 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SessionUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     sessionToken?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TokenUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -76814,10 +75876,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -76825,10 +75889,12 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumTokenTypeFieldUpdateOperationsInput | $Enums.TokenType
     valueHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -76836,7 +75902,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76848,7 +75914,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76860,7 +75926,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     codeHash?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     attempts?: IntFieldUpdateOperationsInput | number
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76870,51 +75936,51 @@ export namespace Prisma {
 
   export type MembershipUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutMembershipsNestedInput
     organization?: OrganizationUpdateOneWithoutMembershipsNestedInput
-    addresses?: AddressUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    addresses?: AddressUncheckedUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -76934,7 +76000,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneWithoutAddressesNestedInput
     organization?: OrganizationUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
     city?: CityUpdateOneWithoutAddressesNestedInput
     state?: StateUpdateOneWithoutAddressesNestedInput
   }
@@ -76943,7 +76009,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76964,7 +76030,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76991,17 +76057,15 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tenant?: TenantUpdateOneRequiredWithoutLgpdConsentsNestedInput
-    organization?: OrganizationUpdateOneWithoutLgpdConsentsNestedInput
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LgpdConsentUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
     consentTerms?: BoolFieldUpdateOperationsInput | boolean
     consentMarketing?: BoolFieldUpdateOperationsInput | boolean
     consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
@@ -77010,16 +76074,15 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LgpdConsentUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
     consentTerms?: BoolFieldUpdateOperationsInput | boolean
     consentMarketing?: BoolFieldUpdateOperationsInput | boolean
     consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
@@ -77028,11 +76091,11 @@ export namespace Prisma {
     macAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: StringFieldUpdateOperationsInput | string
     consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
+    status?: EnumLgpdConsentStatusFieldUpdateOperationsInput | $Enums.LgpdConsentStatus
     withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LeadUpdateWithoutUserInput = {
@@ -77099,15 +76162,15 @@ export namespace Prisma {
     id?: string
     userId: string
     organizationId?: string | null
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -77115,51 +76178,8 @@ export namespace Prisma {
     id?: string
     name: string
     slug: string
-    documentType?: $Enums.DocumentType | null
-    documentNumber?: string | null
-    contactEmail?: string | null
-    phone?: string | null
     logoUrl?: string | null
     status?: $Enums.OrganizationStatus
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    deletedAt?: Date | string | null
-  }
-
-  export type LgpdConsentCreateManyTenantInput = {
-    id?: string
-    userId: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-    organizationId?: string | null
-  }
-
-  export type AddressCreateManyTenantInput = {
-    id?: string
-    userId?: string | null
-    organizationId?: string | null
-    membershipId?: string | null
-    AddressType?: $Enums.AddressType | null
-    street?: string | null
-    addressNumber?: string | null
-    complement?: string | null
-    neighborhood?: string | null
-    reference?: string | null
-    cityId?: string | null
-    stateId?: string | null
-    zipCode?: string | null
-    country?: string | null
-    isPrimary?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -77185,53 +76205,74 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
+  export type AddressCreateManyTenantInput = {
+    id?: string
+    userId?: string | null
+    organizationId?: string | null
+    memberId?: string | null
+    AddressType?: $Enums.AddressType | null
+    street?: string | null
+    addressNumber?: string | null
+    complement?: string | null
+    neighborhood?: string | null
+    reference?: string | null
+    cityId?: string | null
+    stateId?: string | null
+    zipCode?: string | null
+    country?: string | null
+    isPrimary?: boolean | null
+    createdAt?: Date | string
+    updatedAt?: Date | string | null
+    deletedAt?: Date | string | null
+  }
+
   export type MembershipUpdateWithoutTenantInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     organization?: OrganizationUpdateOneWithoutMembershipsNestedInput
-    addresses?: AddressUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateWithoutTenantInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    addresses?: AddressUncheckedUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateManyWithoutTenantInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -77239,10 +76280,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77264,7 +76301,6 @@ export namespace Prisma {
     portals?: PortalUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUpdateManyWithoutOrganizationNestedInput
@@ -77274,10 +76310,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -77299,7 +76331,6 @@ export namespace Prisma {
     portals?: PortalUncheckedUpdateManyWithoutOrganizationNestedInput
     campaigns?: CampaignUncheckedUpdateManyWithoutOrganizationNestedInput
     campaignItems?: CampaignItemUncheckedUpdateManyWithoutOrganizationNestedInput
-    lgpdConsents?: LgpdConsentUncheckedUpdateManyWithoutOrganizationNestedInput
     connectionLogs?: ConnectionLogUncheckedUpdateManyWithoutOrganizationNestedInput
     whatsappLogs?: WhatsappLogUncheckedUpdateManyWithoutOrganizationNestedInput
     leads?: LeadUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -77309,129 +76340,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
-    documentType?: NullableEnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType | null
-    documentNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumOrganizationStatusFieldUpdateOperationsInput | $Enums.OrganizationStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type LgpdConsentUpdateWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    user?: UserUpdateOneRequiredWithoutLgpdConsentsNestedInput
-    organization?: OrganizationUpdateOneWithoutLgpdConsentsNestedInput
-  }
-
-  export type LgpdConsentUncheckedUpdateWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type LgpdConsentUncheckedUpdateManyWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type AddressUpdateWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
-    street?: NullableStringFieldUpdateOperationsInput | string | null
-    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    complement?: NullableStringFieldUpdateOperationsInput | string | null
-    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
-    reference?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    user?: UserUpdateOneWithoutAddressesNestedInput
-    organization?: OrganizationUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
-    city?: CityUpdateOneWithoutAddressesNestedInput
-    state?: StateUpdateOneWithoutAddressesNestedInput
-  }
-
-  export type AddressUncheckedUpdateWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: NullableStringFieldUpdateOperationsInput | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
-    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
-    street?: NullableStringFieldUpdateOperationsInput | string | null
-    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    complement?: NullableStringFieldUpdateOperationsInput | string | null
-    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
-    reference?: NullableStringFieldUpdateOperationsInput | string | null
-    cityId?: NullableStringFieldUpdateOperationsInput | string | null
-    stateId?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AddressUncheckedUpdateManyWithoutTenantInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: NullableStringFieldUpdateOperationsInput | string | null
-    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
-    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
-    street?: NullableStringFieldUpdateOperationsInput | string | null
-    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    complement?: NullableStringFieldUpdateOperationsInput | string | null
-    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
-    reference?: NullableStringFieldUpdateOperationsInput | string | null
-    cityId?: NullableStringFieldUpdateOperationsInput | string | null
-    stateId?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -77497,19 +76407,82 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type AddressUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
+    street?: NullableStringFieldUpdateOperationsInput | string | null
+    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    complement?: NullableStringFieldUpdateOperationsInput | string | null
+    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneWithoutAddressesNestedInput
+    organization?: OrganizationUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
+    city?: CityUpdateOneWithoutAddressesNestedInput
+    state?: StateUpdateOneWithoutAddressesNestedInput
+  }
+
+  export type AddressUncheckedUpdateWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
+    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
+    street?: NullableStringFieldUpdateOperationsInput | string | null
+    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    complement?: NullableStringFieldUpdateOperationsInput | string | null
+    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    cityId?: NullableStringFieldUpdateOperationsInput | string | null
+    stateId?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AddressUncheckedUpdateManyWithoutTenantInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
+    AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
+    street?: NullableStringFieldUpdateOperationsInput | string | null
+    addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    complement?: NullableStringFieldUpdateOperationsInput | string | null
+    neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    cityId?: NullableStringFieldUpdateOperationsInput | string | null
+    stateId?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    isPrimary?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type MembershipCreateManyOrganizationInput = {
     id?: string
     userId: string
     tenantId: string
-    role?: $Enums.MemberShipRole
-    status?: $Enums.MemberShipStatus
+    role?: $Enums.MembershipRole
+    status?: $Enums.MembershipStatus
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
-    updatedAt?: Date | string
+    updatedAt?: Date | string | null
     deletedAt?: Date | string | null
   }
 
@@ -77517,7 +76490,7 @@ export namespace Prisma {
     id?: string
     userId?: string | null
     tenantId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -77599,7 +76572,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -77636,7 +76609,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -77707,24 +76680,6 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type LgpdConsentCreateManyOrganizationInput = {
-    id?: string
-    userId: string
-    tenantId: string
-    consentTerms: boolean
-    consentMarketing: boolean
-    consentDataSharing: boolean
-    consentAnalytics: boolean
-    ipAddress: string
-    macAddress?: string | null
-    userAgent: string
-    consentVersion: string
-    status?: $Enums.ConsentStatus
-    withdrawnAt?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string | null
-  }
-
   export type ConnectionLogCreateManyOrganizationInput = {
     id?: string
     username: string
@@ -77777,51 +76732,51 @@ export namespace Prisma {
 
   export type MembershipUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tenant?: TenantUpdateOneRequiredWithoutMembershipsNestedInput
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
-    addresses?: AddressUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    addresses?: AddressUncheckedUpdateManyWithoutMembershipNestedInput
+    addresses?: AddressUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type MembershipUncheckedUpdateManyWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     tenantId?: StringFieldUpdateOperationsInput | string
-    role?: EnumMemberShipRoleFieldUpdateOperationsInput | $Enums.MemberShipRole
-    status?: EnumMemberShipStatusFieldUpdateOperationsInput | $Enums.MemberShipStatus
+    role?: EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+    status?: EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -77841,7 +76796,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneWithoutAddressesNestedInput
     tenant?: TenantUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
     city?: CityUpdateOneWithoutAddressesNestedInput
     state?: StateUpdateOneWithoutAddressesNestedInput
   }
@@ -77850,7 +76805,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77871,7 +76826,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78073,7 +77028,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78088,7 +77043,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78101,7 +77056,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78175,7 +77130,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78196,7 +77151,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78216,7 +77171,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -78423,60 +77378,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type LgpdConsentUpdateWithoutOrganizationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    user?: UserUpdateOneRequiredWithoutLgpdConsentsNestedInput
-    tenant?: TenantUpdateOneRequiredWithoutLgpdConsentsNestedInput
-  }
-
-  export type LgpdConsentUncheckedUpdateWithoutOrganizationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type LgpdConsentUncheckedUpdateManyWithoutOrganizationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    tenantId?: StringFieldUpdateOperationsInput | string
-    consentTerms?: BoolFieldUpdateOperationsInput | boolean
-    consentMarketing?: BoolFieldUpdateOperationsInput | boolean
-    consentDataSharing?: BoolFieldUpdateOperationsInput | boolean
-    consentAnalytics?: BoolFieldUpdateOperationsInput | boolean
-    ipAddress?: StringFieldUpdateOperationsInput | string
-    macAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: StringFieldUpdateOperationsInput | string
-    consentVersion?: StringFieldUpdateOperationsInput | string
-    status?: EnumConsentStatusFieldUpdateOperationsInput | $Enums.ConsentStatus
-    withdrawnAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
   export type ConnectionLogUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
@@ -78627,7 +77528,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type AddressCreateManyMembershipInput = {
+  export type AddressCreateManyMemberInput = {
     id?: string
     userId?: string | null
     tenantId?: string | null
@@ -78648,7 +77549,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type AddressUpdateWithoutMembershipInput = {
+  export type AddressUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78669,7 +77570,7 @@ export namespace Prisma {
     state?: StateUpdateOneWithoutAddressesNestedInput
   }
 
-  export type AddressUncheckedUpdateWithoutMembershipInput = {
+  export type AddressUncheckedUpdateWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78690,7 +77591,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type AddressUncheckedUpdateManyWithoutMembershipInput = {
+  export type AddressUncheckedUpdateManyWithoutMemberInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78725,7 +77626,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -78787,7 +77688,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutAddressesNestedInput
     tenant?: TenantUpdateOneWithoutAddressesNestedInput
     organization?: OrganizationUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
     city?: CityUpdateOneWithoutAddressesNestedInput
   }
 
@@ -78796,7 +77697,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78817,7 +77718,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78838,7 +77739,7 @@ export namespace Prisma {
     userId?: string | null
     tenantId?: string | null
     organizationId?: string | null
-    membershipId?: string | null
+    memberId?: string | null
     AddressType?: $Enums.AddressType | null
     street?: string | null
     addressNumber?: string | null
@@ -78871,7 +77772,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutAddressesNestedInput
     tenant?: TenantUpdateOneWithoutAddressesNestedInput
     organization?: OrganizationUpdateOneWithoutAddressesNestedInput
-    membership?: MembershipUpdateOneWithoutAddressesNestedInput
+    member?: MembershipUpdateOneWithoutAddressesNestedInput
     state?: StateUpdateOneWithoutAddressesNestedInput
   }
 
@@ -78880,7 +77781,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78901,7 +77802,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     tenantId?: NullableStringFieldUpdateOperationsInput | string | null
     organizationId?: NullableStringFieldUpdateOperationsInput | string | null
-    membershipId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberId?: NullableStringFieldUpdateOperationsInput | string | null
     AddressType?: NullableEnumAddressTypeFieldUpdateOperationsInput | $Enums.AddressType | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     addressNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78937,7 +77838,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -78987,7 +77888,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79002,7 +77903,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79015,7 +77916,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79028,7 +77929,7 @@ export namespace Prisma {
     code: string
     status?: $Enums.VoucherStatus
     usedAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
     deletedAt?: Date | string | null
@@ -79039,7 +77940,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79054,7 +77955,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79067,7 +77968,7 @@ export namespace Prisma {
     code?: StringFieldUpdateOperationsInput | string
     status?: EnumVoucherStatusFieldUpdateOperationsInput | $Enums.VoucherStatus
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79086,7 +77987,7 @@ export namespace Prisma {
     currentPeriodStart: Date | string
     currentPeriodEnd: Date | string
     canceledAt?: Date | string | null
-    expiresAt?: Date | string | null
+    expiredAt?: Date | string | null
     deletedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -79104,7 +78005,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79125,7 +78026,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -79145,7 +78046,7 @@ export namespace Prisma {
     currentPeriodStart?: DateTimeFieldUpdateOperationsInput | Date | string
     currentPeriodEnd?: DateTimeFieldUpdateOperationsInput | Date | string
     canceledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

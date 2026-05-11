@@ -2,7 +2,8 @@ import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
 
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { HotspotUserStatusDto } from "@/shared/enums/hotspot-user-status.enum";
+
+import { HotspotUserStatus } from "@/common/shared/enums/hotspot-user-status.enum";
 import { HotspotUserBlockedError } from "../errors/hotspot-user-blocked.error";
 
 export interface HotsportUserProps {
@@ -12,7 +13,7 @@ export interface HotsportUserProps {
   macAddress: string;
   ipAddress: string;
   passwordHash: string;
-  status: HotspotUserStatusDto;
+  status: HotspotUserStatus;
   createdAt: Date;
   updatedAt: Date | null;
 }
@@ -53,36 +54,36 @@ export class HotsportUserEntity extends BaseAggregate<HotsportUserProps> {
     return this.props.updatedAt;
   }
   activate() {
-    if (this.props.status === HotspotUserStatusDto.BLOCKED) {
+    if (this.props.status === HotspotUserStatus.BLOCKED) {
       throw new HotspotUserBlockedError("");
     }
 
-    if (this.props.status === HotspotUserStatusDto.ACTIVE) return;
-    this.props.status = HotspotUserStatusDto.ACTIVE;
+    if (this.props.status === HotspotUserStatus.ACTIVE) return;
+    this.props.status = HotspotUserStatus.ACTIVE;
     this.touch();
   }
 
   expire() {
-    if (this.props.status === HotspotUserStatusDto.EXPIRED) return;
-    this.props.status = HotspotUserStatusDto.EXPIRED;
+    if (this.props.status === HotspotUserStatus.EXPIRED) return;
+    this.props.status = HotspotUserStatus.EXPIRED;
     this.touch();
   }
 
   block() {
-    if (this.props.status === HotspotUserStatusDto.BLOCKED) return;
-    this.props.status = HotspotUserStatusDto.BLOCKED;
+    if (this.props.status === HotspotUserStatus.BLOCKED) return;
+    this.props.status = HotspotUserStatus.BLOCKED;
     this.touch();
   }
 
   pending() {
-    if (this.props.status === HotspotUserStatusDto.PENDING) return;
-    this.props.status = HotspotUserStatusDto.PENDING;
+    if (this.props.status === HotspotUserStatus.PENDING) return;
+    this.props.status = HotspotUserStatus.PENDING;
     this.touch();
   }
 
   suspended() {
-    if (this.props.status === HotspotUserStatusDto.SUSPENDED) return;
-    this.props.status = HotspotUserStatusDto.SUSPENDED;
+    if (this.props.status === HotspotUserStatus.SUSPENDED) return;
+    this.props.status = HotspotUserStatus.SUSPENDED;
     this.touch();
   }
 
@@ -110,7 +111,7 @@ export class HotsportUserEntity extends BaseAggregate<HotsportUserProps> {
     return new HotsportUserEntity(
       {
         ...props,
-        status: props.status ?? HotspotUserStatusDto.PENDING,
+        status: props.status ?? HotspotUserStatus.PENDING,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
       },

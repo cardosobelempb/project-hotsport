@@ -11,7 +11,7 @@ import {
   AccountUpdateResponseSchema,
   CreateAccountSchema,
   UpdateAccountSchema,
-} from "../schemas/account.shema";
+} from "../../infrastructure/http/schemas/account.schema";
 
 export type AccountDto = z.infer<typeof AccountSchema>;
 export type CreateAccountDto = z.infer<typeof CreateAccountSchema>;

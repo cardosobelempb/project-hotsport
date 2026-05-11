@@ -5,14 +5,14 @@ import {
   left,
   right,
 } from "@/common/domain/errors/handle-errors/either";
+import { AlreadyExistsError } from "@/common/domain/errors/usecases/already-exists.error";
 
 import { NotFoundError } from "@/common/domain/errors/usecases/not-founde.rror";
 import { OrganizationRepository } from "@/modulos/identity/domain/repositories/organization.repository";
-import { OrganizationParams } from "@/modulos/organization/application/schemas/organization.shema";
-import { OrganizationAlreadyInactiveError } from "@/modulos/organization/domain/errors/organization-already-inactive.error";
+import { OrganizationParams } from "@/modulos/identity/infrastructure/http/schemas/organization.schema";
 
 export type OrganizationDeactivateUseCaseResponse = Either<
-  BadRequestError | NotFoundError | OrganizationAlreadyInactiveError,
+  BadRequestError | NotFoundError | AlreadyExistsError,
   { message: string }
 >;
 

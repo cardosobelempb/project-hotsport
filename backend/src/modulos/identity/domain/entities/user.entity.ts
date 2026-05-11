@@ -53,7 +53,6 @@ export class UserEntity extends BaseAggregate<UserProps> {
       {
         ...props,
         emailVerified: props.emailVerified ?? new Date(),
-
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

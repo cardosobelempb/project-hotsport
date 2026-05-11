@@ -6,8 +6,7 @@
 
 import { z } from "zod";
 
-import { EntityStatus } from "@/common/shared/enums/entity-status.enum";
-
+import { VoucherStatus } from "@/common/shared/enums/voucher-status.enum";
 import {
   IsoDateTimeInput,
   UUIDString,
@@ -43,7 +42,7 @@ export const VoucherSchema = z
     mikrotikId: UUIDString.nullable(),
     hotspotPlanId: UUIDString.nullable(),
     code: z.string().max(50),
-    status: z.enum(EntityStatus).default(EntityStatus.ACTIVE),
+    status: z.enum(VoucherStatus).default(VoucherStatus.UNUSED),
     usedAt: IsoDateTimeInput.nullable(),
     expiresAt: IsoDateTimeInput.nullable(),
     createdAt: IsoDateTimeInput,

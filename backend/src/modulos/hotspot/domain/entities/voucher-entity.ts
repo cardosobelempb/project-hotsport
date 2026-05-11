@@ -11,7 +11,7 @@ export interface VoucherProps {
   status: VoucherStatus;
   mikrotikId: UUIDVO;
   usedAt: Date | null;
-  expiresAt: Date | null;
+  expiredAt: Date | null;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
@@ -30,8 +30,8 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
     return this.props.usedAt;
   }
 
-  get expiresAt() {
-    return this.props.expiresAt;
+  get expiredAt() {
+    return this.props.expiredAt;
   }
 
   get organizationId() {
@@ -59,7 +59,7 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
   }
 
   get isExpired() {
-    return this.props.expiresAt ? this.props.expiresAt < new Date() : false;
+    return this.props.expiredAt ? this.props.expiredAt < new Date() : false;
   }
 
   get isUsed() {
@@ -75,10 +75,10 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
       });
     }
 
-    if (this.props.expiresAt && this.props.expiresAt < new Date()) {
+    if (this.props.expiredAt && this.props.expiredAt < new Date()) {
       throw new UnprocessableEntityError({
         fieldName: "expiresAt",
-        value: this.props.expiresAt.toISOString(),
+        value: this.props.expiredAt.toISOString(),
         message: "Voucher has expired and cannot be used",
       });
     }
@@ -127,7 +127,7 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
       VoucherProps,
       | "status"
       | "usedAt"
-      | "expiresAt"
+      | "expiredAt"
       | "createdAt"
       | "updatedAt"
       | "deletedAt"
@@ -139,7 +139,7 @@ export class VoucherEntity extends BaseAggregate<VoucherProps> {
         ...props,
         status: props.status ?? VoucherStatus.UNUSED,
         usedAt: props.usedAt ?? null,
-        expiresAt: props.expiresAt ?? null,
+        expiredAt: props.expiredAt ?? null,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

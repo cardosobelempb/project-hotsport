@@ -1,32 +1,50 @@
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { AccountProvider } from "@/shared/enums/account-provider.enum";
-import {
-  AccountOutputDto,
-  AccountRawDto,
-} from "../../application/dto/account/account.dto";
+import { Account as Prismaccount } from "../../../../../generated/prisma";
+
+import { ProviderType } from "@/common/shared/enums/provider-type.enum";
+import { TokenType } from "@/common/shared/enums/token-type.enum";
 import { AccountEntity } from "../entities/account.entity";
 
 export class AccountMapper {
-  static toDomain(raw: AccountRawDto): AccountEntity {
+  static toDomain(raw: Prismaccount): AccountEntity {
     return AccountEntity.create(
       {
-        userId: UUIDVO.create(raw.accountId),
+        userId: UUIDVO.create(raw.userId),
+        provider: raw.provider as ProviderType,
         providerAccountId: UUIDVO.create(raw.providerAccountId),
-        provider: raw.provider as AccountProvider,
-        passwordHash: raw.passwordHash,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+        deletedAt: raw.deletedAt,
       },
       UUIDVO.create(raw.id),
     );
   }
 
-  static toOutput(entity: AccountEntity): AccountOutputDto {
+  static toPersist(entity: AccountEntity) {
     return {
-      id: entity.id.getValue(),
-      accountId: entity.userId.getValue(),
-      provider: entity.provider,
+      id: entity.id.toString(),
+      userId: entity.userId.getValue(),
+      provider: entity.provider as ProviderType,
       providerAccountId: entity.providerAccountId.getValue(),
-      passwordHash: entity.passwordHash,
-      createdAt: entity.createdAt.toISOString(),
+      refreshToken: entity.refreshToken,
+      accessToken: entity.accessToken,
+      expiresAt: entity.expiresAt,
+      tokenType: entity.tokenType as TokenType,
+      scope: entity.scope,
+      idToken: entity.idToken,
+      sessionState: entity.sessionState,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
+
+  static toOutput(entity: AccountEntity) {
+    return {
+      id: entity.id.toString(),
+      userId: entity.userId.getValue(),
+      provider: entity.provider,
+      providerAccountId: entity.providerAccountId.toString(),
     };
   }
 }

@@ -30,6 +30,7 @@ export class UserMapper {
   private static toCoreFields(entity: UserEntity): CreateUserDto {
     return {
       email: entity.email.getValue().value,
+      passwordHash: entity.passwordHash?.getValue(),
     };
   }
 

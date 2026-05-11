@@ -2,16 +2,16 @@ import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { MemberShipRole } from "@/common/shared/enums/member-ship-role.enum";
-import { MemberShipStatus } from "@/common/shared/enums/member-ship-status.enum";
+import { MembershipRole } from "@/common/shared/enums/member-ship-role.enum";
+import { MembershipStatus } from "@/common/shared/enums/member-ship-status.enum";
 
 export interface MemberShipProps {
   userId: UUIDVO;
   tenantId: UUIDVO;
   organizationId: UUIDVO;
   invitedById: UUIDVO;
-  role: MemberShipRole;
-  status: MemberShipStatus;
+  role: MembershipRole;
+  status: MembershipStatus;
   joinedAt: Date | null;
   invitedEmail: EmailVO;
   createdAt: Date;
@@ -21,7 +21,7 @@ export interface MemberShipProps {
   deletedAt: Date | null;
 }
 
-export class MemberShipEntity extends BaseAggregate<MemberShipProps> {
+export class MembershipEntity extends BaseAggregate<MemberShipProps> {
   get userId() {
     return this.props.userId;
   }
@@ -70,6 +70,14 @@ export class MemberShipEntity extends BaseAggregate<MemberShipProps> {
     this.props.updatedAt = new Date();
   }
 
+  get expiresAt() {
+    return this.props.expiresAt;
+  }
+
+  get removedAt() {
+    return this.props.removedAt;
+  }
+
   static create(
     props: Optional<
       MemberShipProps,
@@ -82,7 +90,7 @@ export class MemberShipEntity extends BaseAggregate<MemberShipProps> {
     >,
     id?: UUIDVO,
   ) {
-    return new MemberShipEntity(
+    return new MembershipEntity(
       {
         ...props,
         expiresAt: props.expiresAt ?? null,
