@@ -265,7 +265,7 @@ model Membership {
   joinedAt     DateTime? @map("joined_at")
   invitedEmail String?   @map("invited_email") @db.VarChar(255)
   invitedById  String?   @map("invited_by_id") @db.Uuid
-  expiredAt    DateTime? @map("expired_at")
+  expiresAt    DateTime? @map("expired_at")
   removedAt    DateTime? @map("removed_at")
 
   createdAt DateTime  @default(now()) @map("created_at")

@@ -1,101 +1,69 @@
-import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { MembershipRole } from "@/common/shared/enums/member-ship-role.enum";
 import { MembershipStatus } from "@/common/shared/enums/member-ship-status.enum";
 
-export interface MemberShipProps {
+export interface MembershipProps {
   userId: UUIDVO;
   tenantId: UUIDVO;
-  organizationId: UUIDVO;
-  invitedById: UUIDVO;
+  organizationId: UUIDVO | null;
   role: MembershipRole;
-  status: MembershipStatus;
+  status?: MembershipStatus;
   joinedAt: Date | null;
-  invitedEmail: EmailVO;
-  createdAt: Date;
+  invitedEmail: string | null;
+  invitedById: UUIDVO | null;
   expiresAt: Date | null;
   removedAt: Date | null;
+  createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
 }
 
-export class MembershipEntity extends BaseAggregate<MemberShipProps> {
+export class MembershipEntity extends BaseEntity<MembershipProps> {
   get userId() {
     return this.props.userId;
   }
-
-  get tenantId() {
-    return this.props.tenantId;
-  }
-
-  get organizationId() {
-    return this.props.organizationId;
-  }
-
-  get invitedById() {
-    return this.props.invitedById;
-  }
-
-  get role() {
-    return this.props.role;
-  }
-
   get status() {
-    return this.props.status;
+    return this.props.status ?? MembershipStatus.ACTIVE;
   }
 
-  get joinedAt() {
-    return this.props.joinedAt;
+  activate(): void {
+    this.props.status = MembershipStatus.ACTIVE;
+    this.touch();
+  }
+  suspend(): void {
+    this.props.status = MembershipStatus.SUSPENDED;
+    this.touch();
+  }
+  remove(): void {
+    this.props.status = MembershipStatus.REMOVED;
+    this.props.removedAt = new Date();
+    this.touch();
   }
 
-  get invitedEmail() {
-    return this.props.invitedEmail;
+  isActive(): boolean {
+    return this.status === MembershipStatus.ACTIVE && !this.isDeleted();
+  }
+  isDeleted(): boolean {
+    return this.props.deletedAt !== null;
   }
 
-  get createdAt() {
-    return this.props.createdAt;
-  }
-
-  get updatedAt() {
-    return this.props.updatedAt;
-  }
-
-  get deletedAt() {
-    return this.props.deletedAt;
-  }
-
-  private touch() {
+  private touch(): void {
     this.props.updatedAt = new Date();
-  }
-
-  get expiresAt() {
-    return this.props.expiresAt;
-  }
-
-  get removedAt() {
-    return this.props.removedAt;
   }
 
   static create(
     props: Optional<
-      MemberShipProps,
-      | "createdAt"
-      | "updatedAt"
-      | "deletedAt"
-      | "expiresAt"
-      | "removedAt"
-      | "joinedAt"
+      MembershipProps,
+      "createdAt" | "updatedAt" | "deletedAt" | "status"
     >,
     id?: UUIDVO,
   ) {
     return new MembershipEntity(
       {
         ...props,
-        expiresAt: props.expiresAt ?? null,
-        removedAt: props.removedAt ?? null,
-        joinedAt: props.joinedAt ?? null,
+        status: props.status ?? MembershipStatus.ACTIVE,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

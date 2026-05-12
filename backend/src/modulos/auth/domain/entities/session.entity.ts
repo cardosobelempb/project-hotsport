@@ -1,59 +1,49 @@
-import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
+import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 
 export interface SessionProps {
-  sessionToken: string;
   userId: UUIDVO;
-  expireAt: Date;
+  sessionToken: string;
+  expires: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
 }
 
-export class SessionEntity extends BaseAggregate<SessionProps> {
-  get sessionToken() {
-    return this.props.sessionToken;
-  }
-
+export class SessionEntity extends BaseEntity<SessionProps> {
   get userId() {
     return this.props.userId;
   }
-
-  get sessionId() {
-    return this.props.userId;
+  get expires() {
+    return this.props.expires;
   }
 
-  get expireAt() {
-    return this.props.expireAt;
+  isExpired(): boolean {
+    return new Date() > this.props.expires;
   }
 
-  get createdAt() {
-    return this.props.createdAt;
+  revoke(): void {
+    this.props.expires = new Date(Date.now() - 1000);
+    this.touch();
   }
 
-  get updatedAt() {
-    return this.props.updatedAt;
-  }
-
-  get deletedAt() {
-    return this.props.deletedAt;
-  }
-
-  private touch() {
-    this.props.expireAt = new Date();
+  private touch(): void {
+    this.props.updatedAt = new Date();
   }
 
   static create(
-    props: Optional<SessionProps, "createdAt" | "deletedAt" | "updatedAt">,
+    props: Optional<SessionProps, "createdAt" | "updatedAt" | "deletedAt">,
     id?: UUIDVO,
   ) {
     return new SessionEntity(
       {
         ...props,
         createdAt: props.createdAt ?? new Date(),
-        deletedAt: props.deletedAt ?? null,
         updatedAt: props.updatedAt ?? null,
+        deletedAt: props.deletedAt ?? null,
       },
       id,
     );

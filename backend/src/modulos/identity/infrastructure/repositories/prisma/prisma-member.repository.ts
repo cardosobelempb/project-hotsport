@@ -2,29 +2,25 @@ import {
   Page,
   PageInput,
 } from "@/common/domain/repositories/types/pagination.types";
-import {
-  PrismaDatabase,
-  PrismaRepository,
-} from "@/common/infrastructure/db/prisma-repository";
+import { PrismaDatabase } from "@/common/infrastructure/db/prisma-repository";
 import { TOKENS } from "@/common/shared/container/tokens";
-import { MemberShipEntity } from "@/modulos/identity/domain/entities/member-ship.entity";
 
-import { MemberShipStatus } from "@/common/shared/enums/member-ship-status.enum";
-import { MemberShipRepository } from "@/modulos/identity/domain/repositories/member-ship.repository";
 import { Prisma } from "../../../../../../generated/prisma";
-import { PrismaMemberShipMapper } from "../../mappers/member-ship-prisma.mapper";
 
-export class PrismaMemberRepository
-  extends PrismaRepository
-  implements MemberShipRepository
-{
+import { MembershipRole } from "@/common/shared/enums/member-ship-role.enum";
+import { MembershipStatus } from "@/common/shared/enums/member-ship-status.enum";
+import { MembershipEntity } from "@/modulos/identity/domain/entities/member-ship.entity";
+import { MembershipRepository } from "@/modulos/identity/domain/repositories/member-ship.repository";
+import { PrismaMembershipMapper } from "../../mappers/member-ship-prisma.mapper";
+
+export class PrismaMembershipRepository extends MembershipRepository {
   static inject = [TOKENS.PRISMA_CLIENT];
 
   constructor(prisma: PrismaDatabase) {
     super(prisma);
   }
 
-  async page(params: PageInput): Promise<Page<MemberShipEntity>> {
+  async page(params: PageInput): Promise<Page<MembershipEntity>> {
     const pageNumber = params.page ?? 0;
     const size = params.size ?? 20;
     const skip = pageNumber * size;
@@ -34,18 +30,18 @@ export class PrismaMemberRepository
     ).split(",");
 
     const allowedSortFields: Array<
-      keyof Prisma.MemberShipOrderByWithRelationInput
+      keyof Prisma.MembershipOrderByWithRelationInput
     > = ["userId", "createdAt", "updatedAt", "joinedAt"];
 
     const sortBy = allowedSortFields.includes(
-      rawSortBy as keyof Prisma.MemberShipOrderByWithRelationInput,
+      rawSortBy as keyof Prisma.MembershipOrderByWithRelationInput,
     )
       ? rawSortBy
       : "createdAt";
 
     const sortDir = rawSortDir.toLowerCase() === "asc" ? "asc" : "desc";
 
-    const where: Prisma.MemberShipWhereInput = {};
+    const where: Prisma.MembershipWhereInput = {};
 
     if (params.filter) {
       where.OR = [
@@ -54,8 +50,8 @@ export class PrismaMemberRepository
     }
 
     const [total, memberships] = await this.prisma.$transaction([
-      this.prisma.memberShip.count({ where }),
-      this.prisma.memberShip.findMany({
+      this.prisma.membership.count({ where }),
+      this.prisma.membership.findMany({
         where,
         orderBy: { [sortBy]: sortDir },
         skip,
@@ -64,7 +60,7 @@ export class PrismaMemberRepository
     ]);
 
     return {
-      content: memberships.map(PrismaMemberShipMapper.toDomain),
+      content: memberships.map(PrismaMembershipMapper.toDomain),
       pageable: {
         offset: skip,
         pageNumber,
@@ -93,8 +89,8 @@ export class PrismaMemberRepository
     };
   }
 
-  async findById(id: string): Promise<MemberShipEntity | null> {
-    const member = await this.prisma.memberShip.findUnique({
+  async findById(id: string): Promise<MembershipEntity | null> {
+    const member = await this.prisma.membership.findUnique({
       where: { id },
     });
 
@@ -102,21 +98,21 @@ export class PrismaMemberRepository
       return null;
     }
 
-    return PrismaMemberShipMapper.toDomain(member);
+    return PrismaMembershipMapper.toDomain(member);
   }
-  async findManyByIds(ids: string[]): Promise<MemberShipEntity[]> {
+  async findManyByIds(ids: string[]): Promise<MembershipEntity[]> {
     throw new Error("Method not implemented.");
   }
-  async create(entity: MemberShipEntity): Promise<MemberShipEntity> {
-    const raw = PrismaMemberShipMapper.toPrisma(entity);
-    const created = await this.prisma.memberShip.create({
+  async create(entity: MembershipEntity): Promise<MembershipEntity> {
+    const raw = PrismaMembershipMapper.toPrisma(entity);
+    const created = await this.prisma.membership.create({
       data: raw,
     });
 
-    return PrismaMemberShipMapper.toDomain(created);
+    return PrismaMembershipMapper.toDomain(created);
   }
   async exists(id: string): Promise<boolean> {
-    const member = await this.prisma.memberShip.findUnique({
+    const member = await this.prisma.membership.findUnique({
       where: { id },
       select: { id: true },
     });
@@ -124,43 +120,43 @@ export class PrismaMemberRepository
     return !!member;
   }
 
-  async save(entity: MemberShipEntity): Promise<MemberShipEntity> {
-    const raw = PrismaMemberShipMapper.toPrisma(entity);
-    const updated = await this.prisma.memberShip.update({
+  async save(entity: MembershipEntity): Promise<MembershipEntity> {
+    const raw = PrismaMembershipMapper.toPrisma(entity);
+    const updated = await this.prisma.membership.update({
       where: { id: raw.id },
       data: raw,
     });
 
-    return PrismaMemberShipMapper.toDomain(updated);
+    return PrismaMembershipMapper.toDomain(updated);
   }
-  async delete(entity: MemberShipEntity): Promise<void> {
-    await this.prisma.memberShip.delete({
+  async delete(entity: MembershipEntity): Promise<void> {
+    await this.prisma.membership.delete({
       where: { id: entity.id.getValue() },
     });
   }
 
   async findByOrganizationId(
     organizationId: string,
-  ): Promise<MemberShipEntity[]> {
-    const members = await this.prisma.memberShip.findMany({
+  ): Promise<MembershipEntity[]> {
+    const members = await this.prisma.membership.findMany({
       where: {},
     });
 
-    return members.map(PrismaMemberShipMapper.toDomain);
+    return members.map(PrismaMembershipMapper.toDomain);
   }
-  async findByUserId(userId: string): Promise<MemberShipEntity[]> {
-    const members = await this.prisma.memberShip.findMany({
+  async findByUserId(userId: string): Promise<MembershipEntity[]> {
+    const members = await this.prisma.membership.findMany({
       where: { userId },
     });
 
-    return members.map(PrismaMemberShipMapper.toDomain);
+    return members.map(PrismaMembershipMapper.toDomain);
   }
 
   async countActiveByAccountId(accountId: string): Promise<number> {
-    const count = await this.prisma.memberShip.count({
+    const count = await this.prisma.membership.count({
       where: {
         organizationId: accountId,
-        status: MemberShipStatus.ACTIVE,
+        status: MembershipStatus.ACTIVE,
       },
     });
 
@@ -168,7 +164,7 @@ export class PrismaMemberRepository
   }
 
   async countOwnersByAccountId(accountId: string): Promise<number> {
-    const count = await this.prisma.memberShip.count({
+    const count = await this.prisma.membership.count({
       where: {
         organizationId: accountId,
         role: "OWNER",
@@ -181,8 +177,8 @@ export class PrismaMemberRepository
   async findByUserIdAndAccountId(
     userId: string,
     accountId: string,
-  ): Promise<MemberShipEntity | null> {
-    const member = await this.prisma.memberShip.findFirst({
+  ): Promise<MembershipEntity | null> {
+    const member = await this.prisma.membership.findFirst({
       where: {
         userId,
         organizationId: accountId,
@@ -193,13 +189,13 @@ export class PrismaMemberRepository
       return null;
     }
 
-    return PrismaMemberShipMapper.toDomain(member);
+    return PrismaMembershipMapper.toDomain(member);
   }
 
   async findOwnerByAccountId(
     accountId: string,
-  ): Promise<MemberShipEntity | null> {
-    const member = await this.prisma.memberShip.findFirst({
+  ): Promise<MembershipEntity | null> {
+    const member = await this.prisma.membership.findFirst({
       where: {
         organizationId: accountId,
         role: "OWNER",
@@ -210,14 +206,14 @@ export class PrismaMemberRepository
       return null;
     }
 
-    return PrismaMemberShipMapper.toDomain(member);
+    return PrismaMembershipMapper.toDomain(member);
   }
 
   async existsByUserIdAndAccountId(
     userId: string,
     accountId: string,
   ): Promise<boolean> {
-    const member = await this.prisma.memberShip.findFirst({
+    const member = await this.prisma.membership.findFirst({
       where: {
         userId,
         organizationId: accountId,
@@ -228,11 +224,43 @@ export class PrismaMemberRepository
     return !!member;
   }
 
-  async findManyByUserId(userId: string): Promise<MemberShipEntity[]> {
-    const members = await this.prisma.memberShip.findMany({
+  findByUserAndTenant(
+    userId: string,
+    tenantId: string,
+  ): Promise<MembershipEntity | null> {
+    throw new Error("Method not implemented.");
+  }
+
+  async findManyByUserId(userId: string): Promise<MembershipEntity[]> {
+    const members = await this.prisma.membership.findMany({
       where: { userId },
     });
 
-    return members.map(PrismaMemberShipMapper.toDomain);
+    return members.map(PrismaMembershipMapper.toDomain);
+  }
+
+  findByUserAndOrganization(
+    userId: string,
+    organizationId: string,
+  ): Promise<MembershipEntity | null> {
+    throw new Error("Method not implemented.");
+  }
+  listByOrganization(
+    organizationId: string,
+    filters?: any,
+  ): Promise<MembershipEntity[]> {
+    throw new Error("Method not implemented.");
+  }
+  changeRole(
+    memberId: string,
+    role: MembershipRole,
+  ): Promise<MembershipEntity> {
+    throw new Error("Method not implemented.");
+  }
+  removeMember(memberId: string): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  acceptInvitation(memberId: string): Promise<MembershipEntity> {
+    throw new Error("Method not implemented.");
   }
 }

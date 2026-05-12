@@ -1,15 +1,14 @@
 import { BaseAggregate } from "@/common/domain/entities/base-agregate.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { SlugVO } from "@/common/domain/values-objects/slug/slug.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
 import { OrganizationStatus } from "@/common/shared/enums/organization-status-scope.enum";
 
 export interface OrganizationProps {
   tenantId: UUIDVO;
   name: string;
-  slug: SlugVO;
+  slug: string;
   logoUrl: string | null;
-  status: OrganizationStatus;
+  status?: OrganizationStatus;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
@@ -19,96 +18,55 @@ export class OrganizationEntity extends BaseAggregate<OrganizationProps> {
   get tenantId() {
     return this.props.tenantId;
   }
-
   get name() {
     return this.props.name;
   }
-
   get slug() {
     return this.props.slug;
   }
-
-  get logoUrl() {
-    return this.props.logoUrl;
-  }
-
   get status() {
-    return this.props.status;
+    return this.props.status ?? OrganizationStatus.ACTIVE;
   }
 
-  get createdAt() {
-    return this.props.createdAt;
-  }
-
-  get updatedAt() {
-    return this.props.updatedAt;
-  }
-
-  get deletedAt() {
-    return this.props.deletedAt;
-  }
-
-  private touch() {
-    this.props.updatedAt = new Date();
-  }
-
-  activate() {
-    if (this.props.status === OrganizationStatus.ACTIVE) {
-      return;
-    }
-
+  activate(): void {
     this.props.status = OrganizationStatus.ACTIVE;
     this.touch();
   }
-
-  inactive() {
-    if (this.props.status === OrganizationStatus.INACTIVE) {
-      return;
-    }
-
-    this.props.status = OrganizationStatus.INACTIVE;
+  block(): void {
+    this.props.status = OrganizationStatus.BLOCKED;
     this.touch();
   }
-
-  delete() {
-    if (this.props.status === OrganizationStatus.DELETED) {
-      return;
-    }
-
-    this.props.status = OrganizationStatus.DELETED;
+  softDelete(): void {
     this.props.deletedAt = new Date();
     this.touch();
   }
-
-  changeName(name: string) {
-    if (this.props.name === name) {
-      return;
-    }
-
-    this.props.name = name;
+  restore(): void {
+    this.props.deletedAt = null;
     this.touch();
   }
 
-  changeSlug(slug: SlugVO) {
-    if (this.props.slug.equals(slug)) {
-      return;
-    }
+  isActive(): boolean {
+    return this.status === OrganizationStatus.ACTIVE && !this.isDeleted();
+  }
 
-    this.props.slug = slug;
-    this.touch();
+  isDeleted(): boolean {
+    return this.props.deletedAt !== null;
+  }
+
+  private touch(): void {
+    this.props.updatedAt = new Date();
   }
 
   static create(
     props: Optional<
       OrganizationProps,
-      "status" | "logoUrl" | "createdAt" | "updatedAt" | "deletedAt"
+      "createdAt" | "updatedAt" | "deletedAt" | "status"
     >,
     id?: UUIDVO,
   ) {
     return new OrganizationEntity(
       {
         ...props,
-        logoUrl: props.logoUrl ?? null,
         status: props.status ?? OrganizationStatus.ACTIVE,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,

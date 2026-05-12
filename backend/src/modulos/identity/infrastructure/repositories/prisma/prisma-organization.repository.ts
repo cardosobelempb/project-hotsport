@@ -322,4 +322,65 @@ export class PrismaOrganizationRepository extends OrganizationRepository {
 
     return organizations.map(PrismaOrganizationMapper.toDomain);
   }
+
+  async findWithConfigs(id: string): Promise<OrganizationEntity | null> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id },
+      include: {
+        organizationConfigs: true,
+      },
+    });
+
+    if (!organization) return null;
+
+    return organization
+      ? PrismaOrganizationMapper.toDomain(organization)
+      : null;
+  }
+  async findWithMikrotiks(id: string): Promise<OrganizationEntity | null> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id },
+      include: {
+        mikrotiks: true,
+      },
+    });
+
+    if (!organization) return null;
+
+    return organization
+      ? PrismaOrganizationMapper.toDomain(organization)
+      : null;
+  }
+  async countActiveByTenant(tenantId: string): Promise<number> {
+    const count = await this.prisma.organization.count({
+      where: {
+        tenantId,
+        deletedAt: null,
+        status: OrganizationStatus.ACTIVE,
+      },
+    });
+
+    return count;
+  }
+  async countByTenant(tenantId: string): Promise<number> {
+    const count = await this.prisma.organization.count({
+      where: {
+        tenantId,
+        deletedAt: null,
+      },
+    });
+
+    return count;
+  }
+  async changeStatus(
+    id: string,
+    status: OrganizationStatus,
+  ): Promise<OrganizationEntity> {
+    const organization = await this.prisma.organization.update({
+      where: { id },
+      data: { status },
+    });
+
+    return PrismaOrganizationMapper.toDomain(organization);
+  }
 }

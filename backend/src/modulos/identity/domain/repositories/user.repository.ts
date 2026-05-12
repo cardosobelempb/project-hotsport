@@ -1,42 +1,26 @@
-// domain/user/repositories/user.repository.ts
-
 import { PageRepository } from "@/common/domain/repositories/page-repository";
 import { UserEntity } from "../entities/user.entity";
 
 /**
- * Contrato de persistência do domínio de Usuários.
- *
- * ✅ `this.prisma` disponível aqui — herdado via cadeia:
- *    UserRepository → PageRepository → BaseRepository → PrismaRepository
- *
- * ✅ Sem redeclaração de `prisma`
- * ✅ Sem construtor duplicado
+ * Repositório abstrato de User.
+ * Gerencia operações de usuários do sistema (autenticação, perfil e soft delete).
  */
 export abstract class UserRepository extends PageRepository<UserEntity> {
-  // 👇 this.prisma está acessível aqui sem nenhuma redeclaração
-  // Exemplo de uso em métodos concretos futuros:
-  // protected async exemplo() {
-  //   return this.prisma.user.findMany(); // ✅ funciona normalmente
-  // }
+  // ====================== BUSCAS ======================
+  abstract findActiveById(id: string): Promise<UserEntity | null>;
+  abstract findActiveByEmail(email: string): Promise<UserEntity | null>;
+  abstract findActiveByIdWithProfile(id: string): Promise<UserEntity | null>;
+  abstract findWithRelations(id: string): Promise<UserEntity | null>;
 
-  /** Busca um usuário pelo endereço de e-mail. */
-  abstract findByEmail(email: string): Promise<UserEntity | null>;
+  // ====================== EXISTÊNCIA ======================
+  abstract existsActiveById(id: string): Promise<boolean>;
+  abstract existsActiveByEmail(email: string): Promise<boolean>;
 
-  /** Verifica se já existe um usuário com o e-mail informado. */
-  abstract existsByEmail(email: string): Promise<boolean>;
+  // ====================== CONTAGENS ======================
+  abstract countActiveByTenant(tenantId: string): Promise<number>;
 
-  /** Atualiza o hash da senha do usuário sem retornar a entidade. */
-  abstract updatePasswordHash(
-    userId: string,
-    passwordHash: string,
-  ): Promise<void>;
-
-  /** Marca o e-mail do usuário como verificado. */
-  abstract markEmailAsVerified(userId: string): Promise<void>;
-
-  /**
-   * Remove logicamente o usuário (soft delete).
-   * Prefira este método ao `delete` físico para manter rastreabilidade.
-   */
-  abstract softDelete(userId: string): Promise<void>;
+  // ====================== OUTROS ======================
+  abstract changePassword(id: string, passwordHash: string): Promise<void>;
+  abstract softDelete(id: string): Promise<void>;
+  abstract restore(id: string): Promise<void>;
 }

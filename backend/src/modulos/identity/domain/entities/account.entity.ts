@@ -6,71 +6,41 @@ import { TokenType } from "@/common/shared/enums/token-type.enum";
 
 export interface AccountProps {
   userId: UUIDVO;
-  provider: ProviderType;
-  providerAccountId: UUIDVO;
-  refreshToken: string;
-  accessToken: string;
-  expiresAt: number;
   tokenType: TokenType;
-  scope: string;
-  idToken: string;
-  sessionState: string;
+  provider: ProviderType;
+  providerAccountId: string;
+  refreshToken: string | null;
+  accessToken: string | null;
+  expiresAt: number | null;
+  scope: string | null;
+  idToken: string | null;
+  sessionState: string | null;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
 }
 
 export class AccountEntity extends BaseEntity<AccountProps> {
-  get userId(): UUIDVO {
+  get userId() {
     return this.props.userId;
   }
-
-  get providerAccountId(): UUIDVO {
-    return this.props.providerAccountId;
-  }
-
-  get provider(): string {
+  get provider() {
     return this.props.provider;
   }
-
-  get refreshToken(): string {
-    return this.props.refreshToken;
+  get providerAccountId() {
+    return this.props.providerAccountId;
   }
-
-  get accessToken(): string {
-    return this.props.accessToken;
-  }
-
-  get expiresAt(): number {
+  get expiresAt() {
     return this.props.expiresAt;
   }
 
-  get scope(): string {
-    return this.props.scope;
+  isExpired(): boolean {
+    return this.props.expiresAt ? Date.now() > this.props.expiresAt : false;
   }
 
-  get idToken(): string {
-    return this.props.idToken;
-  }
-
-  get sessionState(): string {
-    return this.props.sessionState;
-  }
-
-  get createdAt(): Date {
-    return this.props.createdAt;
-  }
-
-  get updatedAt(): Date | null {
-    return this.props.updatedAt;
-  }
-
-  get deletedAt(): Date | null {
-    return this.props.deletedAt;
-  }
-
-  get tokenType(): TokenType {
-    return this.props.tokenType as TokenType;
+  revoke(): void {
+    this.props.expiresAt = Date.now();
+    this.touch();
   }
 
   private touch(): void {
@@ -78,32 +48,12 @@ export class AccountEntity extends BaseEntity<AccountProps> {
   }
 
   static create(
-    props: Optional<
-      AccountProps,
-      | "scope"
-      | "idToken"
-      | "sessionState"
-      | "refreshToken"
-      | "accessToken"
-      | "tokenType"
-      | "expiresAt"
-      | "createdAt"
-      | "updatedAt"
-      | "deletedAt"
-    >,
+    props: Optional<AccountProps, "createdAt" | "updatedAt" | "deletedAt">,
     id?: UUIDVO,
   ): AccountEntity {
     return new AccountEntity(
       {
         ...props,
-        accessToken: props.accessToken ?? "",
-        refreshToken: props.refreshToken ?? "",
-        sessionState: props.sessionState ?? "",
-        idToken: props.idToken ?? "",
-        scope: props.scope ?? "",
-        tokenType: props.tokenType ?? TokenType.ACCESS,
-        provider: props.provider ?? ProviderType.CREDENTIALS,
-        expiresAt: props.expiresAt ?? 0,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

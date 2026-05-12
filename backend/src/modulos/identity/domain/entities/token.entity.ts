@@ -1,26 +1,48 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { TokenType } from "@/common/shared/enums/token-type.enum";
 
 export interface TokenProps {
-  refreshToken: string;
-  accessToken: string;
-  expiresAt: Date;
+  userId: UUIDVO;
+  type: TokenType;
+  valueHash: string;
+  expiredAt: Date;
+  revokedAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
   createdAt: Date;
   updatedAt: Date | null;
+  deletedAt: Date | null;
 }
 
 export class TokenEntity extends BaseEntity<TokenProps> {
-  get refreshToken() {
-    return this.props.refreshToken;
+  get userId() {
+    return this.props.userId;
   }
 
-  get accessToken() {
-    return this.props.accessToken;
+  get type() {
+    return this.props.type;
   }
 
-  get expiresAt() {
-    return this.props.expiresAt;
+  get valueHash() {
+    return this.props.valueHash;
+  }
+
+  get expiredAt() {
+    return this.props.expiredAt;
+  }
+
+  get revokedAt() {
+    return this.props.revokedAt;
+  }
+
+  get ipAddress() {
+    return this.props.ipAddress;
+  }
+
+  get userAgent() {
+    return this.props.userAgent;
   }
 
   get createdAt() {
@@ -30,13 +52,8 @@ export class TokenEntity extends BaseEntity<TokenProps> {
   get updatedAt() {
     return this.props.updatedAt;
   }
-
-  get isExpired() {
-    return this.expiresAt < new Date();
-  }
-
-  get isValid() {
-    return !this.isExpired;
+  get deletedAt() {
+    return this.props.deletedAt;
   }
 
   private touch() {
@@ -44,14 +61,19 @@ export class TokenEntity extends BaseEntity<TokenProps> {
   }
 
   static create(
-    props: Optional<TokenProps, "createdAt" | "updatedAt">,
+    props: Optional<
+      TokenProps,
+      "createdAt" | "updatedAt" | "deletedAt" | "revokedAt"
+    >,
     id?: UUIDVO,
   ) {
     return new TokenEntity(
       {
         ...props,
+        revokedAt: props.revokedAt ?? null,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
+        deletedAt: props.deletedAt ?? null,
       },
       id,
     );

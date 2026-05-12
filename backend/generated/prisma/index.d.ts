@@ -16588,7 +16588,7 @@ export namespace Prisma {
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiredAt: Date | null
+    expiresAt: Date | null
     removedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16605,7 +16605,7 @@ export namespace Prisma {
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiredAt: Date | null
+    expiresAt: Date | null
     removedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16622,7 +16622,7 @@ export namespace Prisma {
     joinedAt: number
     invitedEmail: number
     invitedById: number
-    expiredAt: number
+    expiresAt: number
     removedAt: number
     createdAt: number
     updatedAt: number
@@ -16641,7 +16641,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiredAt?: true
+    expiresAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16658,7 +16658,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiredAt?: true
+    expiresAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16675,7 +16675,7 @@ export namespace Prisma {
     joinedAt?: true
     invitedEmail?: true
     invitedById?: true
-    expiredAt?: true
+    expiresAt?: true
     removedAt?: true
     createdAt?: true
     updatedAt?: true
@@ -16765,7 +16765,7 @@ export namespace Prisma {
     joinedAt: Date | null
     invitedEmail: string | null
     invitedById: string | null
-    expiredAt: Date | null
+    expiresAt: Date | null
     removedAt: Date | null
     createdAt: Date
     updatedAt: Date | null
@@ -16799,7 +16799,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiredAt?: boolean
+    expiresAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16821,7 +16821,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiredAt?: boolean
+    expiresAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16841,7 +16841,7 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiredAt?: boolean
+    expiresAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16861,14 +16861,14 @@ export namespace Prisma {
     joinedAt?: boolean
     invitedEmail?: boolean
     invitedById?: boolean
-    expiredAt?: boolean
+    expiresAt?: boolean
     removedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "role" | "status" | "joinedAt" | "invitedEmail" | "invitedById" | "expiredAt" | "removedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
+  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "tenantId" | "organizationId" | "role" | "status" | "joinedAt" | "invitedEmail" | "invitedById" | "expiresAt" | "removedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["membership"]>
   export type MembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -16905,7 +16905,7 @@ export namespace Prisma {
       joinedAt: Date | null
       invitedEmail: string | null
       invitedById: string | null
-      expiredAt: Date | null
+      expiresAt: Date | null
       removedAt: Date | null
       createdAt: Date
       updatedAt: Date | null
@@ -17346,7 +17346,7 @@ export namespace Prisma {
     readonly joinedAt: FieldRef<"Membership", 'DateTime'>
     readonly invitedEmail: FieldRef<"Membership", 'String'>
     readonly invitedById: FieldRef<"Membership", 'String'>
-    readonly expiredAt: FieldRef<"Membership", 'DateTime'>
+    readonly expiresAt: FieldRef<"Membership", 'DateTime'>
     readonly removedAt: FieldRef<"Membership", 'DateTime'>
     readonly createdAt: FieldRef<"Membership", 'DateTime'>
     readonly updatedAt: FieldRef<"Membership", 'DateTime'>
@@ -52721,7 +52721,7 @@ export namespace Prisma {
     joinedAt: 'joinedAt',
     invitedEmail: 'invitedEmail',
     invitedById: 'invitedById',
-    expiredAt: 'expiredAt',
+    expiresAt: 'expiresAt',
     removedAt: 'removedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -54569,7 +54569,7 @@ export namespace Prisma {
     joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableFilter<"Membership"> | string | null
     invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeFilter<"Membership"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
@@ -54590,7 +54590,7 @@ export namespace Prisma {
     joinedAt?: SortOrderInput | SortOrder
     invitedEmail?: SortOrderInput | SortOrder
     invitedById?: SortOrderInput | SortOrder
-    expiredAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     removedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -54615,7 +54615,7 @@ export namespace Prisma {
     joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableFilter<"Membership"> | string | null
     invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeFilter<"Membership"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
@@ -54636,7 +54636,7 @@ export namespace Prisma {
     joinedAt?: SortOrderInput | SortOrder
     invitedEmail?: SortOrderInput | SortOrder
     invitedById?: SortOrderInput | SortOrder
-    expiredAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     removedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrderInput | SortOrder
@@ -54659,7 +54659,7 @@ export namespace Prisma {
     joinedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableWithAggregatesFilter<"Membership"> | string | null
     invitedById?: UuidNullableWithAggregatesFilter<"Membership"> | string | null
-    expiredAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
     updatedAt?: DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
@@ -58120,7 +58120,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -58141,7 +58141,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -58156,7 +58156,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -58177,7 +58177,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -58195,7 +58195,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -58209,7 +58209,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -58226,7 +58226,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -62001,7 +62001,7 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiredAt?: SortOrder
+    expiresAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -62018,7 +62018,7 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiredAt?: SortOrder
+    expiresAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -62035,7 +62035,7 @@ export namespace Prisma {
     joinedAt?: SortOrder
     invitedEmail?: SortOrder
     invitedById?: SortOrder
-    expiredAt?: SortOrder
+    expiresAt?: SortOrder
     removedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -67796,7 +67796,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -67815,7 +67815,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -68185,7 +68185,7 @@ export namespace Prisma {
     joinedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     invitedEmail?: StringNullableFilter<"Membership"> | string | null
     invitedById?: UuidNullableFilter<"Membership"> | string | null
-    expiredAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     removedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
     createdAt?: DateTimeFilter<"Membership"> | Date | string
     updatedAt?: DateTimeNullableFilter<"Membership"> | Date | string | null
@@ -68757,7 +68757,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -68776,7 +68776,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -69089,7 +69089,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -69108,7 +69108,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -71002,7 +71002,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -71022,7 +71022,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -71263,7 +71263,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71283,7 +71283,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -75713,7 +75713,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -75941,7 +75941,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -75960,7 +75960,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -75977,7 +75977,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76167,7 +76167,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -76233,7 +76233,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76252,7 +76252,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76269,7 +76269,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76479,7 +76479,7 @@ export namespace Prisma {
     joinedAt?: Date | string | null
     invitedEmail?: string | null
     invitedById?: string | null
-    expiredAt?: Date | string | null
+    expiresAt?: Date | string | null
     removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string | null
@@ -76737,7 +76737,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76756,7 +76756,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -76773,7 +76773,7 @@ export namespace Prisma {
     joinedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     invitedEmail?: NullableStringFieldUpdateOperationsInput | string | null
     invitedById?: NullableStringFieldUpdateOperationsInput | string | null
-    expiredAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

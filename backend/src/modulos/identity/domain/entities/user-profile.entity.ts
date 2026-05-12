@@ -1,22 +1,20 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
-import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
-import { DocumentType } from "@/common/shared/enums/document-type.enum";
 import { UserProfileStatus } from "@/common/shared/enums/user-profile-status.enum";
 
 export interface UserProfileProps {
   userId: UUIDVO;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  fullName: string;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
+  fullName: string | null;
+  documentType: DocumentType | null;
+  documentNumber: string | null;
+  phone: string | null;
   birthDate: Date | null;
-  phone: PhoneVO;
-  avatarUrl: string;
-  documentNumber: string;
-  documentType: DocumentType;
-  status: UserProfileStatus;
+  avatarUrl: string | null;
+  status?: UserProfileStatus;
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
@@ -26,77 +24,53 @@ export class UserProfileEntity extends BaseEntity<UserProfileProps> {
   get userId() {
     return this.props.userId;
   }
-
-  get firstName() {
-    return this.props.firstName;
-  }
-
-  get lastName() {
-    return this.props.lastName;
-  }
-
   get fullName() {
     return this.props.fullName;
   }
-
-  get displayName() {
-    return this.props.displayName;
-  }
-
-  get birthDate() {
-    return this.props.birthDate;
-  }
-
-  get phone() {
-    return this.props.phone;
-  }
-
-  get avatarUrl() {
-    return this.props.avatarUrl;
-  }
-
-  get documentType() {
-    return this.props.documentType;
-  }
-
-  get documentNumber() {
-    return this.props.documentNumber;
-  }
-
   get status() {
-    return this.props.status;
+    return this.props.status ?? UserProfileStatus.ACTIVE;
   }
 
-  get createdAt() {
-    return this.props.createdAt;
+  activate(): void {
+    this.props.status = UserProfileStatus.ACTIVE;
+    this.touch();
+  }
+  deactivate(): void {
+    this.props.status = UserProfileStatus.INACTIVE;
+    this.touch();
+  }
+  softDelete(): void {
+    this.props.deletedAt = new Date();
+    this.touch();
+  }
+  restore(): void {
+    this.props.deletedAt = null;
+    this.touch();
   }
 
-  get updatedAt() {
-    return this.props.updatedAt;
+  isActive(): boolean {
+    return this.status === UserProfileStatus.ACTIVE && !this.isDeleted();
   }
 
-  get deletedAt() {
-    return this.props.deletedAt;
+  isDeleted(): boolean {
+    return this.props.deletedAt !== null;
+  }
+
+  private touch(): void {
+    this.props.updatedAt = new Date();
   }
 
   static create(
     props: Optional<
       UserProfileProps,
-      | "status"
-      | "documentType"
-      | "createdAt"
-      | "updatedAt"
-      | "deletedAt"
-      | "birthDate"
+      "createdAt" | "updatedAt" | "deletedAt" | "status"
     >,
     id?: UUIDVO,
-  ) {
+  ): UserProfileEntity {
     return new UserProfileEntity(
       {
         ...props,
         status: props.status ?? UserProfileStatus.ACTIVE,
-        birthDate: props.birthDate ?? null,
-        documentType: props.documentType ?? DocumentType.CPF,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
         deletedAt: props.deletedAt ?? null,

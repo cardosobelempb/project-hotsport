@@ -248,7 +248,7 @@ exports.Prisma.MembershipScalarFieldEnum = {
   joinedAt: 'joinedAt',
   invitedEmail: 'invitedEmail',
   invitedById: 'invitedById',
-  expiredAt: 'expiredAt',
+  expiresAt: 'expiresAt',
   removedAt: 'removedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
