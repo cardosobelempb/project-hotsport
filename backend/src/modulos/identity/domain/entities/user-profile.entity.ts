@@ -1,6 +1,8 @@
 import { BaseEntity } from "@/common/domain/entities/base.entity";
 import { Optional } from "@/common/domain/types/Optional";
+import { PhoneVO } from "@/common/domain/values-objects/phone/phone.vo";
 import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { DocumentType } from "@/common/shared/enums/document-type.enum";
 import { UserProfileStatus } from "@/common/shared/enums/user-profile-status.enum";
 
 export interface UserProfileProps {
@@ -11,7 +13,7 @@ export interface UserProfileProps {
   fullName: string | null;
   documentType: DocumentType | null;
   documentNumber: string | null;
-  phone: string | null;
+  phone: PhoneVO | null;
   birthDate: Date | null;
   avatarUrl: string | null;
   status?: UserProfileStatus;
@@ -63,13 +65,14 @@ export class UserProfileEntity extends BaseEntity<UserProfileProps> {
   static create(
     props: Optional<
       UserProfileProps,
-      "createdAt" | "updatedAt" | "deletedAt" | "status"
+      "createdAt" | "updatedAt" | "deletedAt" | "status" | "documentType"
     >,
     id?: UUIDVO,
   ): UserProfileEntity {
     return new UserProfileEntity(
       {
         ...props,
+        documentType: props.documentType ?? DocumentType.CPF,
         status: props.status ?? UserProfileStatus.ACTIVE,
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? null,
