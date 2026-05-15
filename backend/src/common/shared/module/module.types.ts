@@ -4,6 +4,8 @@ export type ClassConstructor<T extends object = object> = new (
   ...args: any[]
 ) => T;
 
+export type ControllerInstance = object;
+
 export type InjectionToken<T = unknown> =
   | ClassConstructor<T & object>
   | string

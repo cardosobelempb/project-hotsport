@@ -1,58 +1,247 @@
 .
-├── backend
-│   ├── db.js
-│   ├── .env
-│   ├── jobs
-│   │   ├── backup.sql
-│   │   ├── estrutura.sql
-│   │   └── verificaExpiracoes.js
-│   ├── middleware
-│   │   └── authMiddleware.js
-│   ├── mikrotik
-│   │   └── api.js
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── routes
-│   │   └── admin.js
-│   ├── server.js
-│   ├── src
-│   │   ├── config
-│   │   │   └── db.js
-│   │   ├── controllers
-│   │   │   ├── authController.js
-│   │   │   ├── dashboardController.js
-│   │   │   ├── lgpdController.js
-│   │   │   ├── mercadoPagoController.js
-│   │   │   ├── mikrotikAPIController.js
-│   │   │   ├── mikrotikController.js
-│   │   │   ├── pagamentoController.js
-│   │   │   ├── pagamentoController.js__
-│   │   │   ├── planController.js
-│   │   │   ├── planPublicController.js
-│   │   │   └── radiusController.js
-│   │   ├── middleware
-│   │   │   └── auth.js
-│   │   ├── models
-│   │   │   ├── Admin.js
-│   │   │   ├── ConfigMercadoPago.js
-│   │   │   ├── EfiConfig.js
-│   │   │   ├── Mikrotik.js
-│   │   │   └── Plan.js
-│   │   ├── routes
-│   │   │   ├── authRoutes.js
-│   │   │   ├── dashboardRoutes.js
-│   │   │   ├── efiRoutes.js
-│   │   │   ├── lgpdRoutes.js
-│   │   │   ├── mercadoPagoRoutes.js
-│   │   │   ├── mikrotikRoutes.js
-│   │   │   ├── pagamentoRoutes.js
-│   │   │   ├── planPublicRoutes.js
-│   │   │   ├── planRoutes.js
-│   │   │   └── radiusRoutes.js
-│   │   └── utils
-│   │       └── mikrotikClient.js
-│   └── user.js
-├── estrutura.txt
+src/modules/
+├── identity/
+│
+│   ├── application/
+│   │   ├── dto/
+│   │   │   ├── input/
+│   │   │   │   ├── user-create.input.ts
+│   │   │   │   ├── user-update-profile.input.ts
+│   │   │   │   ├── account-create.input.ts
+│   │   │   │   └── session-create.input.ts
+│   │   │   │
+│   │   │   └── output/
+│   │   │       ├── user.output.ts
+│   │   │       ├── account.output.ts
+│   │   │       └── session.output.ts
+│   │   │
+│   │   ├── factories/
+│   │   │   ├── user.factory.ts
+│   │   │   ├── user-profile.factory.ts
+│   │   │   ├── account.factory.ts
+│   │   │   └── session.factory.ts
+│   │   │
+│   │   ├── usecases/
+│   │   │   ├── user-create.use-case.ts
+│   │   │   ├── user-update-profile.use-case.ts
+│   │   │   ├── account-link-provider.use-case.ts
+│   │   │   ├── session-create.use-case.ts
+│   │   │   └── __tests__/
+│   │   │
+│   │   └── mappers/
+│   │       └── use-case.mapper.ts
+│   │
+│   ├── domain/
+│   │   ├── entities/
+│   │   │   ├── user.entity.ts
+│   │   │   ├── user-profile.entity.ts
+│   │   │   ├── account.entity.ts
+│   │   │   └── session.entity.ts
+│   │   │
+│   │   ├── repositories/
+│   │   │   ├── user.repository.ts
+│   │   │   ├── account.repository.ts
+│   │   │   └── session.repository.ts
+│   │   │
+│   │   ├── value-objects/
+│   │   │   ├── email.vo.ts
+│   │   │   ├── password-hash.vo.ts
+│   │   │   ├── document-number.vo.ts
+│   │   │   └── phone.vo.ts
+│   │   │
+│   │   └── services/
+│   │       └── user-validator.service.ts
+│   │
+│   ├── infrastructure/
+│   │   ├── database/
+│   │   │   ├── prisma-user.repository.ts
+│   │   │   ├── prisma-account.repository.ts
+│   │   │   └── prisma-session.repository.ts
+│   │   │
+│   │   ├── http/
+│   │   │   ├── controllers/
+│   │   │   │   ├── user.controller.ts
+│   │   │   │   └── __tests__/
+│   │   │   │
+│   │   │   ├── routes/
+│   │   │   │   └── identity.routes.ts
+│   │   │   │
+│   │   │   └── schemas/
+│   │   │       └── user.schema.ts
+│   │   │
+│   │   └── mappers/
+│   │       ├── prisma-user.mapper.ts
+│   │       ├── prisma-user-profile.mapper.ts
+│   │       ├── prisma-account.mapper.ts
+│   │       └── prisma-session.mapper.ts
+│   │
+│   ├── events/
+│   │   ├── handlers/
+│   │   │   └── send-user-created-notification.handler.ts
+│   │   │
+│   │   └── user-created.event.ts
+│   │
+│   └── module.ts
+│
+│
+├── auth/
+│
+│   ├── application/
+│   │   ├── dto/
+│   │   │   ├── input/
+│   │   │   │   ├── login.input.ts
+│   │   │   │   ├── refresh-token.input.ts
+│   │   │   │   ├── request-otp.input.ts
+│   │   │   │   ├── validate-otp.input.ts
+│   │   │   │   ├── request-verification-token.input.ts
+│   │   │   │   └── validate-verification-token.input.ts
+│   │   │   │
+│   │   │   └── output/
+│   │   │       ├── auth.output.ts
+│   │   │       ├── otp.output.ts
+│   │   │       └── verification-token.output.ts
+│   │   │
+│   │   ├── factories/
+│   │   │   ├── token.factory.ts
+│   │   │   ├── otp.factory.ts
+│   │   │   └── verification-token.factory.ts
+│   │   │
+│   │   ├── usecases/
+│   │   │   ├── login.use-case.ts
+│   │   │   ├── refresh-token.use-case.ts
+│   │   │   ├── request-otp.use-case.ts
+│   │   │   ├── validate-otp.use-case.ts
+│   │   │   ├── request-verification-token.use-case.ts
+│   │   │   ├── validate-verification-token.use-case.ts
+│   │   │   └── __tests__/
+│   │   │
+│   │   └── mappers/
+│   │       └── use-case.mapper.ts
+│   │
+│   ├── domain/
+│   │   ├── entities/
+│   │   │   ├── token.entity.ts
+│   │   │   ├── otp.entity.ts
+│   │   │   └── verification-token.entity.ts
+│   │   │
+│   │   ├── repositories/
+│   │   │   ├── token.repository.ts
+│   │   │   ├── otp.repository.ts
+│   │   │   └── verification-token.repository.ts
+│   │   │
+│   │   ├── value-objects/
+│   │   │   ├── token-hash.vo.ts
+│   │   │   ├── otp-code.vo.ts
+│   │   │   └── verification-identifier.vo.ts
+│   │   │
+│   │   └── services/
+│   │       ├── token-validator.service.ts
+│   │       └── otp-validator.service.ts
+│   │
+│   ├── infrastructure/
+│   │   ├── database/
+│   │   │   ├── prisma-token.repository.ts
+│   │   │   ├── prisma-otp.repository.ts
+│   │   │   └── prisma-verification-token.repository.ts
+│   │   │
+│   │   ├── http/
+│   │   │   ├── controllers/
+│   │   │   │   └── auth.controller.ts
+│   │   │   │
+│   │   │   ├── routes/
+│   │   │   │   └── auth.routes.ts
+│   │   │   │
+│   │   │   └── schemas/
+│   │   │       └── auth.schema.ts
+│   │   │
+│   │   └── mappers/
+│   │       ├── prisma-token.mapper.ts
+│   │       ├── prisma-otp.mapper.ts
+│   │       └── prisma-verification-token.mapper.ts
+│   │
+│   ├── events/
+│   │   ├── handlers/
+│   │   │   ├── send-otp.handler.ts
+│   │   │   └── send-verification-token.handler.ts
+│   │   │
+│   │   ├── otp-requested.event.ts
+│   │   └── verification-token-created.event.ts
+│   │
+│   └── module.ts
+│
+│
+├── compliance/
+│
+│   ├── application/
+│   │   ├── dto/
+│   │   │   ├── input/
+│   │   │   │   ├── lgpd-consent-create.input.ts
+│   │   │   │   └── lgpd-consent-withdraw.input.ts
+│   │   │   │
+│   │   │   └── output/
+│   │   │       └── lgpd-consent.output.ts
+│   │   │
+│   │   ├── factories/
+│   │   │   └── lgpd-consent.factory.ts
+│   │   │
+│   │   ├── usecases/
+│   │   │   ├── accept-lgpd-consent.use-case.ts
+│   │   │   ├── withdraw-lgpd-consent.use-case.ts
+│   │   │   └── __tests__/
+│   │   │
+│   │   └── mappers/
+│   │       └── use-case.mapper.ts
+│   │
+│   ├── domain/
+│   │   ├── entities/
+│   │   │   └── lgpd-consent.entity.ts
+│   │   │
+│   │   ├── repositories/
+│   │   │   └── lgpd-consent.repository.ts
+│   │   │
+│   │   ├── value-objects/
+│   │   │   ├── consent-version.vo.ts
+│   │   │   ├── ip-address.vo.ts
+│   │   │   └── user-agent.vo.ts
+│   │   │
+│   │   └── services/
+│   │       └── lgpd-consent-validator.service.ts
+│   │
+│   ├── infrastructure/
+│   │   ├── database/
+│   │   │   └── prisma-lgpd-consent.repository.ts
+│   │   │
+│   │   ├── http/
+│   │   │   ├── controllers/
+│   │   │   │   └── lgpd-consent.controller.ts
+│   │   │   │
+│   │   │   ├── routes/
+│   │   │   │   └── lgpd-consent.routes.ts
+│   │   │   │
+│   │   │   └── schemas/
+│   │   │       └── lgpd-consent.schema.ts
+│   │   │
+│   │   └── mappers/
+│   │       └── prisma-lgpd-consent.mapper.ts
+│   │
+│   ├── events/
+│   │   ├── handlers/
+│   │   │   └── notify-lgpd-consent.handler.ts
+│   │   │
+│   │   ├── lgpd-consent-accepted.event.ts
+│   │   └── lgpd-consent-withdrawn.event.ts
+│   │
+│   └── module.ts
+│
+│
+├── mikrotik/
+├── hotspot/
+├── billing/
+├── portal/
+├── campaign/
+├── lead/
+├── logs/
+└── system/
 └── frontend
     ├── eslint.config.js
     ├── .gitignore

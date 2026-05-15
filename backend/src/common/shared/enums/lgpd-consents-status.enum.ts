@@ -1,4 +1,4 @@
-export enum LgpdConsentStatus {
+export enum LgpdConsentsStatus {
   ACTIVE = "ACTIVE",
   REVOKED = "REVOKED",
   WITHDRAWN = "WITHDRAWN",

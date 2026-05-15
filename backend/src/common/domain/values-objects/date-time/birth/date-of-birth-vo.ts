@@ -1,89 +1,121 @@
+// ============================================================
+// DateOfBirthVO.ts
+// Ajustado para ficar compatível com a BaseVO atual
+// ============================================================
+
 import { BadRequestError } from "@/common/domain/errors/controllers/bad-request.error";
-import { BaseDateOfBirth } from "./base-date-of-birth";
+import { BaseVO } from "../../base.vo";
 
-let dayjs: any;
-try {
-  dayjs = require("dayjs");
-} catch {
-  dayjs = null;
-}
+/**
+ * Data de nascimento com validação de formato e faixa etária.
+ * - Aceita string ou Date
+ * - Valida idade entre 0 e 130 anos
+ * - Retorna string no formato YYYY-MM-DD
+ */
+export class DateOfBirthVO extends BaseVO<Date> {
+  private static readonly MIN_AGE = 0;
+  private static readonly MAX_AGE = 130;
 
-export class DateOfBirthVO extends BaseDateOfBirth {
-  protected readonly date: any; // Dayjs ou Date
+  private constructor(value: Date) {
+    super(value);
+  }
 
-  constructor(input: string | Date) {
-    super();
+  /**
+   * Factory com validação centralizada.
+   */
+  public static create(input: string | Date): DateOfBirthVO {
+    const parsed = DateOfBirthVO.parseInput(input);
 
-    let parsed: any;
-    if (dayjs) {
-      parsed = dayjs(input);
-      if (!parsed.isValid()) {
-        throw new BadRequestError({
-          fieldName: "dateOfBirth",
-          value: input instanceof Date ? input.toISOString() : input,
-          message: "Data de nascimento inválida.",
-        });
-      }
-    } else {
-      parsed = input instanceof Date ? input : new Date(input);
-      if (isNaN(parsed.getTime())) {
-        throw new BadRequestError({
-          fieldName: "dateOfBirth",
-          value: input instanceof Date ? input.toISOString() : input,
-          message: "Data de nascimento inválida.",
-        });
-      }
-    }
-
-    const age = this.calculateAge(parsed);
-    if (!this.isValidAge(age)) {
+    const age = DateOfBirthVO.calculateAge(parsed);
+    if (!DateOfBirthVO.isValidAge(age)) {
       throw new BadRequestError({
         fieldName: "dateOfBirth",
         value: input instanceof Date ? input.toISOString() : input,
-        message: `Idade inválida: ${age} anos. A idade deve ser entre 0 e 130 anos.`,
+        message: `Idade inválida: ${age} anos. A idade deve ser entre ${DateOfBirthVO.MIN_AGE} e ${DateOfBirthVO.MAX_AGE} anos.`,
       });
     }
 
-    this.date = parsed;
+    return new DateOfBirthVO(parsed);
   }
 
-  static create(input: string | Date): DateOfBirthVO {
-    return new DateOfBirthVO(input);
+  /**
+   * Retorna o valor encapsulado.
+   */
+  public getValue(): Date {
+    return this.value;
   }
 
-  getValue(): any {
-    return this.date;
+  /**
+   * Retorna a idade atual calculada.
+   */
+  public getAge(): number {
+    return DateOfBirthVO.calculateAge(this.value);
   }
 
-  toString(): string {
-    if (dayjs) {
-      return this.date.format("YYYY-MM-DD");
+  /**
+   * Formato padrão para exibição e persistência.
+   */
+  public toString(): string  {
+    const datePart = this.value.toISOString().split("T")[0];
+    return datePart || "";
+  }
+
+  /**
+   * BaseVO exige isValid sem parâmetros.
+   */
+  public isValid(): boolean {
+    const age = this.getAge();
+    return (
+      DateOfBirthVO.isValidDate(this.value) && DateOfBirthVO.isValidAge(age)
+    );
+  }
+
+  /**
+   * Validação estática para uso antes de criar o VO.
+   */
+  public static validate(input: string | Date): boolean {
+    try {
+      DateOfBirthVO.create(input);
+      return true;
+    } catch {
+      return false;
     }
-    return this.date.toISOString().split("T")[0];
   }
 
-  isValid(): boolean {
-    if (dayjs) {
-      return this.date.isValid() && this.isValidAge(this.getAge());
+  private static parseInput(input: string | Date): Date {
+    const parsed = input instanceof Date ? new Date(input) : new Date(input);
+
+    if (!DateOfBirthVO.isValidDate(parsed)) {
+      throw new BadRequestError({
+        fieldName: "dateOfBirth",
+        value: input instanceof Date ? input.toISOString() : input,
+        message: "Data de nascimento inválida.",
+      });
     }
-    return !isNaN(this.date.getTime()) && this.isValidAge(this.getAge());
+
+    return parsed;
   }
 
-  getAge(): number {
-    return this.calculateAge(this.date);
+  private static isValidDate(date: Date): boolean {
+    return date instanceof Date && !isNaN(date.getTime());
   }
 
-  private calculateAge(parsed: any): number {
-    if (dayjs) {
-      return dayjs().diff(parsed, "year");
-    } else {
-      const today = new Date();
-      let age = today.getFullYear() - parsed.getFullYear();
-      const m = today.getMonth() - parsed.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < parsed.getDate())) {
-        age--;
-      }
-      return age;
+  private static isValidAge(age: number): boolean {
+    return age >= DateOfBirthVO.MIN_AGE && age <= DateOfBirthVO.MAX_AGE;
+  }
+
+  private static calculateAge(parsed: Date): number {
+    const today = new Date();
+    let age = today.getFullYear() - parsed.getFullYear();
+    const monthDiff = today.getMonth() - parsed.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < parsed.getDate())
+    ) {
+      age--;
     }
+
+    return age;
   }
 }

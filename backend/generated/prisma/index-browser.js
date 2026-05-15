@@ -255,6 +255,25 @@ exports.Prisma.MembershipScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
+exports.Prisma.PermissionScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  description: 'description',
+  module: 'module',
+  action: 'action',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.RolePermissionScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  permissionId: 'permissionId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.AddressScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -876,6 +895,8 @@ exports.Prisma.ModelName = {
   Tenant: 'Tenant',
   Organization: 'Organization',
   Membership: 'Membership',
+  Permission: 'Permission',
+  RolePermission: 'RolePermission',
   Address: 'Address',
   State: 'State',
   City: 'City',

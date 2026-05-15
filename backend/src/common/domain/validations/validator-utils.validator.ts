@@ -1,143 +1,113 @@
-import { MethodNotAllowedError } from "../errors/usecases/method-not-allowed.error";
-import { ValidErrors } from "./valid-errors.validator";
 import { ValidationErrors } from "./validation-errors.validator";
+import { ValidationException } from "./validation.exception.exception";
 import { ValidatorMessage } from "./ValidatorMessage";
 
 export class ValidatorUtils {
   private constructor() {}
 
-  static throwOnError(validErrors: ValidErrors): void {
-    if (validErrors.hasErrors()) {
-      throw new MethodNotAllowedError(ValidErrors.toString());
+  static throwOnError(errors: ValidationErrors): void {
+    if (errors.hasErrors()) {
+      throw new ValidationException({
+        fieldName: "validation",
+        message: errors.toString(),
+      });
     }
-  }
-
-  static validNullOrUndefined(
-    field: unknown,
-    fieldName: string,
-    validErrors: ValidErrors,
-  ): boolean {
-    if (field === null || field === undefined) {
-      validErrors.addErrors(
-        fieldName,
-        `${fieldName}${ValidatorMessage.REQUIRED_FIELD}`,
-      );
-      return false;
-    }
-    return true;
-  }
-
-  static validMinLength(
-    fieldName: string,
-    minLength: number,
-    validErrors: ValidErrors,
-  ): boolean {
-    if (fieldName?.trim().length < minLength) {
-      validErrors.addErrors(
-        fieldName,
-        `${ValidatorMessage.MIN_LENGTH}${minLength} caracteres`,
-      );
-      return false;
-    }
-    return true;
-  }
-
-  static validMaxLength(
-    fieldName: string,
-    maxLength: number,
-    validErrors: ValidErrors,
-  ): boolean {
-    if (fieldName?.trim().length > maxLength) {
-      validErrors.addErrors(
-        fieldName,
-        `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
-      );
-      return false;
-    }
-    return true;
   }
 
   static validateRequired(
+    value: string | null | undefined,
     fieldName: string,
-    validErrors: ValidErrors,
+    errors: ValidationErrors,
   ): boolean {
-    if (!fieldName?.trim()) {
-      validErrors.addErrors(
+    if (!value?.trim()) {
+      errors.addErrors(
         fieldName,
-        `${fieldName}${ValidatorMessage.REQUIRED_FIELD}`,
+        `${fieldName} ${ValidatorMessage.REQUIRED_FIELD}`,
       );
-      return false;
-    }
-    return true;
-  }
 
-  static validateRequiredObject(
-    field: unknown,
-    fieldName: string,
-    validErrors: ValidationErrors,
-  ): boolean {
-    if (field === null || field === undefined) {
-      validErrors.addErrors(fieldName, ValidatorMessage.REQUIRED_FIELD);
       return false;
     }
-    return true;
-  }
 
-  static validateMaxLength(
-    field: string,
-    fieldName: string,
-    maxLength: number,
-    ValidateErrors: ValidationErrors,
-  ): boolean {
-    if (field?.trim().length > maxLength) {
-      ValidateErrors.addErrors(
-        fieldName,
-        `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
-      );
-      return false;
-    }
     return true;
   }
 
   static validateMinLength(
-    field: string,
+    value: string | null | undefined,
     fieldName: string,
     minLength: number,
-    ValidateErrors: ValidationErrors,
+    errors: ValidationErrors,
   ): boolean {
-    if (field?.trim().length < minLength) {
-      ValidateErrors.addErrors(
+    if (!value || value.trim().length < minLength) {
+      errors.addErrors(
         fieldName,
         `${ValidatorMessage.MIN_LENGTH}${minLength} caracteres`,
       );
+
       return false;
     }
+
     return true;
   }
 
-  static validateMaxValueValid(
-    field: number | null,
+  static validateMaxLength(
+    value: string | null | undefined,
     fieldName: string,
-    maxValue: number,
-    ValidateErrors: ValidationErrors,
+    maxLength: number,
+    errors: ValidationErrors,
   ): boolean {
-    if (field !== null && field !== undefined && field > maxValue) {
-      ValidateErrors.addErrors(fieldName, ValidatorMessage.MAX_VALUE);
+    if (value && value.trim().length > maxLength) {
+      errors.addErrors(
+        fieldName,
+        `${ValidatorMessage.MAX_LENGTH}${maxLength} caracteres`,
+      );
+
       return false;
     }
+
     return true;
   }
 
-  static validateMinValueValid(
-    field: number | null,
+  static validateMinValue(
+    value: number | null | undefined,
     fieldName: string,
     minValue: number,
-    ValidateErrors: ValidationErrors,
+    errors: ValidationErrors,
   ): boolean {
-    if (field !== null && field !== undefined && field < minValue) {
-      ValidateErrors.addErrors(fieldName, ValidatorMessage.MIN_VALUE);
+    if (value != null && value < minValue) {
+      errors.addErrors(fieldName, ValidatorMessage.MIN_VALUE);
+
       return false;
     }
+
+    return true;
+  }
+
+  static validateMaxValue(
+    value: number | null | undefined,
+    fieldName: string,
+    maxValue: number,
+    errors: ValidationErrors,
+  ): boolean {
+    if (value != null && value > maxValue) {
+      errors.addErrors(fieldName, ValidatorMessage.MAX_VALUE);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  static validateRequiredObject(
+    value: unknown,
+    fieldName: string,
+    errors: ValidationErrors,
+  ): boolean {
+    if (value == null) {
+      errors.addErrors(fieldName, ValidatorMessage.REQUIRED_FIELD);
+
+      return false;
+    }
+
     return true;
   }
 }

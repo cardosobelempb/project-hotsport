@@ -2,10 +2,10 @@
 
 import type { FastifyJWTOptions } from "@fastify/jwt";
 import type { FastifyInstance } from "fastify";
-import { AuthTokenPayload } from "./types/token.types";
+import { AccessTokenPayload } from "./types/token.types";
 
 export class FastifyJwtService<
-  TPayload extends AuthTokenPayload = AuthTokenPayload,
+  TPayload extends AccessTokenPayload = AccessTokenPayload,
 > {
   constructor(
     private readonly app: FastifyInstance,

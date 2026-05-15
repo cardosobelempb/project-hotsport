@@ -1,0 +1,44 @@
+import { UUIDVO } from "@/common/domain/values-objects/uuidvo/uuid.vo";
+import { User as PrismaUser } from "../../../../../generated/prisma";
+
+import { EmailVO } from "@/common/domain/values-objects/email/email.vo";
+import { PasswordVO } from "@/common/domain/values-objects/password/password.vo";
+import { UserDto } from "../../application/dto/user.dto";
+import { UserEntity } from "../../domain/entities/user.entity";
+
+export class PrismaUserMapper {
+  static toDomain(raw: PrismaUser): UserEntity {
+    return UserEntity.create(
+      {
+        email: EmailVO.create(raw.email || ""),
+        passwordHash: PasswordVO.create(raw.passwordHash),
+      },
+      UUIDVO.create(raw.id),
+    );
+  }
+
+  static toDTO(entity: UserEntity): UserDto {
+    return {
+      id: entity.id.toString(),
+      email: entity.email.getValue().value,
+      passwordHash: entity.passwordHash?.getValue(),
+      emailVerified: entity.emailVerified,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
+
+  static toPrisma(entity: UserEntity): PrismaUser {
+    return {
+      id: entity.id.getValue(),
+
+      email: entity.email.getValue().value,
+      passwordHash: entity.passwordHash?.getValue(),
+      emailVerified: entity.emailVerified,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    };
+  }
+}

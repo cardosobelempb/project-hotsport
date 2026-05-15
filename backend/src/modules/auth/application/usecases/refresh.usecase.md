@@ -1,0 +1,77 @@
+import { CodeError } from "@/common/domain/errors/usecases/code.error";
+import { UnauthorizedError } from "@/common/domain/errors/usecases/unauthorized.error";
+import { BaseHashComparer } from "@/common/domain/shared/base-hash-comparer";
+
+import {
+  Either,
+  left,
+  right,
+} from "@/common/domain/errors/handle-errors/either";
+import { UserRepository } from "@/modulos/identity/domain/repositories/user.repository";
+import { JwtTokenProvider } from "@/providers/token/jwt-token.provider";
+
+import { AccountRepository } from "@/modulos/identity/domain/repositories/account-repository";
+import { SigninSummaryDto } from "../dto/signin.dto";
+
+export interface AuthLoginUseCaseInput {
+  email: string;
+  password: string;
+}
+
+type AuthLoginUseCaseOutput = SigninSummaryDto;
+
+export type AuthLoginUseCaseResult = Either<
+  UnauthorizedError,
+  AuthLoginUseCaseOutput
+>;
+
+export class AuthLoginUseCase {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly accountRepository: AccountRepository,
+    private readonly hashCompare: BaseHashComparer,
+    private readonly jwtTokenUseCase: JwtTokenProvider,
+  ) {}
+
+  async execute({
+    email,
+    password,
+  }: AuthLoginUseCaseInput): Promise<AuthLoginUseCaseResult> {
+    const account = await this.accountRepository.findByEmail(email);
+    if (!account)
+      return left(
+        new UnauthorizedError({
+          fieldName: "account",
+          message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
+        }),
+      );
+
+    const user = await this.userRepository.findById(account.userId.toString());
+    if (!user)
+      return left(
+        new UnauthorizedError({
+          fieldName: "user",
+          message: `${CodeError.UNAUTHORIZED}: Invalid email or password`,
+        }),
+      );
+
+    const { accessToken, refreshToken } =
+      await this.jwtTokenUseCase.generateTokens(user.id.toString());
+
+    return right({
+      user: {
+        id: user.id.toString(),
+        email: user.email.getValue().value,
+        emailVerified: user.emailVerified,
+        status: user.status,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        deletedAt: user.deletedAt,
+      },
+      memberships: [], // TODO: implementar memberships
+      accessToken,
+      refreshToken,
+      expiresIn: 3600, // TODO: pegar do token
+    });
+  }
+}

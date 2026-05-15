@@ -4,7 +4,6 @@
 // import { oerganizationRoutes } from "@/modulos/organization/infrastructure/http/routers/organization.routes";
 // import { userRoutes } from "@/modulos/user/infrastructure/htttp/routes/user.routes";
 
-import { userRoutes } from "@/modulos/identity/infrastructure/http/routes/user.routes";
 import type { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -24,7 +23,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     handler: () => ({ message: "Hello World" }),
   });
 
-  await userRoutes(app);
+  // await userRoutes(app);
 
   // API routes
   // await app.register(categoryRoutes, { prefix: "/api/v1/categories" });

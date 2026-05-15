@@ -287,6 +287,41 @@ model Membership {
   @@map("memberships")
 }
 
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  key         String  @unique @db.VarChar(150)
+  name        String  @db.VarChar(150)
+  description String? @db.VarChar(500)
+  module      String  @db.VarChar(100)
+  action      String  @db.VarChar(50)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  rolePermissions RolePermission[]
+
+  @@index([module])
+  @@index([action])
+  @@index([deletedAt])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String         @id @default(uuid()) @db.Uuid
+  role         MembershipRole
+  permissionId String         @map("permission_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@index([role])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
 model Address {
   id             String  @id @default(uuid()) @db.Uuid
   userId         String? @map("user_id") @db.Uuid
@@ -596,6 +631,7 @@ model Subscription {
   @@index([status])
   @@index([currentPeriodEnd])
   @@index([deletedAt])
+  @@index([expiredAt])
   @@map("subscriptions")
 }
 

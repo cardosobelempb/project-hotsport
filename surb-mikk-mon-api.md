@@ -62,26 +62,56 @@ A ideia é servir como **blueprint reutilizável da implementação**.
 # 🧱 Arquitetura sugerida
 
 ```text
-src/
- ├── modules/
- │   ├── auth/
- │   ├── organization/
- │   ├── users/
- │   ├── members/
- │   ├── mikrotik/
- │   ├── hotspot-plans/
- │   ├── hotspot-users/
- │   ├── vouchers/
- │   ├── sessions/
- │   ├── payments/
- │   ├── lgpd/
- │   └── otp/
- │
- ├── shared/
- │   ├── infra/
- │   ├── errors/
- │   ├── utils/
- │   └── middleware/
+src/modules/
+└── mikrotik/
+    ├── application/                 # Orquestração + Entrada
+    │   ├── dto/                     # Input/Output schemas (Zod)
+    │   │   ├── input/
+    │   │   │   └── MikrotikRegisterInput.ts
+    │   │   └── output/
+    │   │       └── MikrotikOutput.ts
+    │   ├── factories/               # Factory Pattern (CreateEntity)
+    │   │   └── MikrotikFactory.ts
+    │   ├── usecases/                # Use Cases principais
+    │   │   ├── MikrotikRegisterUseCase.ts
+    │   │   ├── MikrotikTestConnectionUseCase.ts
+    │   │   └── __tests__/           # Unit tests (jest)
+    │   └── mappers/                 # Application → Domain
+    │       └── UseCaseMapper.ts
+    │
+    ├── domain/                      # Core Business (pura)
+    │   ├── entities/                # Domain Models
+    │   │   └── Mikrotik.ts
+    │   ├── repositories/            # Interfaces (ports)
+    │   │   └── MikrotikRepository.ts
+    │   ├── value-objects/           # Email, Uuid, etc
+    │   │   └── HostAddress.ts
+    │   └── services/                # Domain Services (complex logic)
+    │       └── MikrotikValidator.ts
+    │
+    ├── infrastructure/              # Adapters (hexagonal ports)
+    │   ├── database/                # Prisma Repos
+    │   │   └── PrismaMikrotikRepository.ts
+    │   ├── http/                    # Controllers + Routes
+    │   │   ├── controllers/
+    │   │   │   ├── MikrotikController.ts
+    │   │   │   └── __tests__/       # E2E tests
+    │   │   ├── routes/
+    │   │   │   └── mikrotik.routes.ts
+    │   │   └── schemas/             # OpenAPI/Yup (se não Zod)
+    │   ├── external/                # Mikrotik API client
+    │   │   └── RouterOsClient.ts
+    │   └── mappers/                 # Domain ↔ Prisma
+    │       └── PrismaMikrotikMapper.ts
+    │
+    ├── events/                      # Domain Events
+    │   ├── handlers/
+    │   │   └── SendMikrotikNotificationHandler.ts
+    │   └── MikrotikRegisteredEvent.ts
+    │
+    └── module.ts                    # Dependency Injection (container)
+
+
 ```
 
 ---

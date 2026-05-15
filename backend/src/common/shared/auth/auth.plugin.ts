@@ -7,7 +7,7 @@ import fp from "fastify-plugin";
 
 export async function authPlugin(app: FastifyInstance) {
   await app.register(fastifyJwt, {
-    secret: env.JWT_ACCESS_SECRET,
+    secret: env.JWT_ACCESS_TOKEN_SECRET,
   });
 }
 
