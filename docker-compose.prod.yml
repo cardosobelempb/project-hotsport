@@ -1,0 +1,149 @@
+# ============================================================
+# docker-compose.prod.yml - PRODUCAO
+# Uso: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#
+# Stack enxuta para Portainer/Traefik externo:
+# - nao sobe MySQL/PostgreSQL/Evolution/Nginx
+# - usa banco MySQL externo via DB_*
+# - usa Evolution externa via EVOLUTION_*
+# - publica HTTP via labels do Traefik
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      target: production
+    image: ${REGISTRY}/backend:${IMAGE_TAG:-latest}
+    container_name: hotspot-backend
+    restart: unless-stopped
+    environment:
+      PORT: ${PORT:-3001}
+      NODE_ENV: production
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-hotspot}
+      WG_EASY_HOST: wg-easy
+      WG_HOST: ${WG_HOST}
+      WG_PASS: ${WG_PASS}
+      WG_PANEL_PORT: ${WG_PANEL_PORT:-51821}
+      WG_VPN_PORT: ${WG_VPN_PORT:-51820}
+      # freeradius compartilha a netns do wg-easy, entao o hostname 'freeradius'
+      # nao existe mais na rede — o health check usa o alias do wg-easy
+      RADIUS_HOST: wg-easy
+      UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_backups:/app/backups
+    networks:
+      - hotspot-internal
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.hotspot-backend.rule=Host(`${DOMAIN_HOTSPOT}`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))
+      - traefik.http.routers.hotspot-backend.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
+      - traefik.http.routers.hotspot-backend.tls=true
+      - traefik.http.routers.hotspot-backend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.hotspot-backend.priority=100
+      - traefik.http.services.hotspot-backend.loadbalancer.server.port=3001
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      target: production
+    image: ${REGISTRY}/frontend:${IMAGE_TAG:-latest}
+    container_name: hotspot-frontend
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.hotspot-frontend.rule=Host(`${DOMAIN_HOTSPOT}`)
+      - traefik.http.routers.hotspot-frontend.entrypoints=${TRAEFIK_ENTRYPOINTS:-websecure}
+      - traefik.http.routers.hotspot-frontend.tls=true
+      - traefik.http.routers.hotspot-frontend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.hotspot-frontend.priority=1
+      - traefik.http.services.hotspot-frontend.loadbalancer.server.port=80
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # Compartilha a network namespace do wg-easy: o RADIUS escuta direto no
+  # 10.8.0.1:1812 do tunel WireGuard, e o IP de origem dos MikroTiks (10.8.0.x)
+  # e preservado — bate com o nasname da tabela `nas`.
+  # ATENCAO: se o wg-easy for recriado, recrie o freeradius junto.
+  freeradius:
+    build:
+      context: .
+      dockerfile: docker/freeradius/Dockerfile
+    image: ${REGISTRY}/freeradius:${IMAGE_TAG:-latest}
+    container_name: hotspot-freeradius
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: ${DB_HOST}
+      MYSQL_PORT: ${DB_PORT:-3306}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    network_mode: "service:wg-easy"
+    depends_on:
+      - wg-easy
+
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:14
+    container_name: hotspot-wireguard
+    restart: unless-stopped
+    env_file:
+      - wg-password.env
+    environment:
+      WG_HOST: ${WG_HOST}
+      PORT: ${WG_PANEL_PORT:-51950}
+      WG_PORT: ${WG_VPN_PORT:-51820}
+    volumes:
+      - wireguard_data:/etc/wireguard
+    ports:
+      - "${WG_VPN_PORT:-51820}:${WG_VPN_PORT:-51820}/udp"
+      - "${WG_PANEL_PORT:-51950}:${WG_PANEL_PORT:-51950}/tcp"
+      # Portas RADIUS publicadas aqui porque o freeradius compartilha esta
+      # network namespace (network_mode: service:wg-easy)
+      - "${RADIUS_AUTH_PORT:-1812}:1812/udp"
+      - "${RADIUS_ACCT_PORT:-1813}:1813/udp"
+      - "${RADIUS_COA_PORT:-3799}:3799/udp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      - hotspot-internal
+
+volumes:
+  backend_uploads:
+  backend_backups:
+  wireguard_data:
+
+networks:
+  hotspot-internal:
+    driver: bridge
+  traefik-public:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik}

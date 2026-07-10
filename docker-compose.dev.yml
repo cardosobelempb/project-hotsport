@@ -1,0 +1,31 @@
+# ============================================================
+# docker-compose.dev.yml — OVERRIDE DEV
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# (portas ja definidas no docker-compose.yml base via variaveis do .env)
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      target: development
+    environment:
+      NODE_ENV: development
+    volumes:
+      # Hot-reload: monta o source local dentro do container
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      target: development
+    environment:
+      NODE_ENV: development
+      VITE_PROXY_TARGET: http://backend:3001
+    volumes:
+      # Hot-reload Vite
+      - ./frontend:/app
+      - /app/node_modules

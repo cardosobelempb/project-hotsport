@@ -1,0 +1,142 @@
+# ============================================================
+# docker-compose.coolify.yml - Deploy via Coolify
+#
+# Ambiente NOVO e separado do stack Traefik/Portainer existente
+# (docker-compose.prod.yml). Nao sobe MySQL/PostgreSQL/Evolution:
+# aponta para instancias externas ja existentes via DB_*/EVOLUTION_*.
+#
+# Como usar no Coolify:
+# 1. Repositorio git conectado ao projeto (Coolify precisa clonar via git).
+# 2. Criar um recurso "Docker Compose" apontando pra este arquivo.
+# 3. Preencher as variaveis de ambiente do projeto no Coolify (ver
+#    .env.coolify.example) - Coolify injeta como ${VAR} na hora do deploy.
+# 4. Configurar dominio (FQDN) por servico na UI do Coolify:
+#      - frontend -> dominio raiz (ex: https://hotspot.seudominio.com)
+#      - backend  -> mesmo dominio + paths /api, /uploads, /hotspot, /emergency
+#    Coolify gera os labels do proxy automaticamente, por isso este arquivo
+#    NAO declara labels Traefik nem rede externa do proxy.
+# 5. Portas de WireGuard/RADIUS nao passam pelo proxy HTTP do Coolify -
+#    precisam estar liberadas no firewall da VPS manualmente.
+#
+# Detalhes completos: docs/COOLIFY-DEPLOY.md
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      target: production
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}
+      SYSTEM_PROTO: https
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-hotspot}
+      WG_EASY_HOST: wg-easy
+      WG_HOST: ${WG_HOST}
+      WG_PASS: ${WG_PASS}
+      WG_PANEL_PORT: ${WG_PANEL_PORT:-51821}
+      WG_VPN_PORT: ${WG_VPN_PORT:-51820}
+      # freeradius compartilha a netns do wg-easy (ver servico abaixo) - o
+      # health check do RADIUS usa o alias do wg-easy, nao "freeradius"
+      RADIUS_HOST: wg-easy
+      UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
+    expose:
+      - "3001"
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_backups:/app/backups
+    networks:
+      - hotspot-internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      target: production
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - hotspot-internal
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # Compartilha a network namespace do wg-easy: o RADIUS escuta direto no
+  # 10.8.0.1:1812 do tunel WireGuard, e o IP de origem dos MikroTiks (10.8.0.x)
+  # e preservado - bate com o nasname da tabela `nas`.
+  # ATENCAO: se o wg-easy for recriado, recrie o freeradius junto.
+  freeradius:
+    build:
+      context: .
+      dockerfile: docker/freeradius/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: ${DB_HOST}
+      MYSQL_PORT: ${DB_PORT:-3306}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    network_mode: "service:wg-easy"
+    depends_on:
+      - wg-easy
+
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:14
+    restart: unless-stopped
+    environment:
+      WG_HOST: ${WG_HOST}
+      PORT: ${WG_PANEL_PORT:-51950}
+      WG_PORT: ${WG_VPN_PORT:-51820}
+      # Diferente do docker-compose.prod.yml (Portainer/Swarm), aqui a hash
+      # bcrypt vai direto por ${WG_PASS_HASH} porque o Coolify roda "docker
+      # compose" puro (nao Swarm) e injeta a variavel via .env gerenciado por
+      # ele - nao existe wg-password.env fisico apos o git clone do Coolify.
+      # Se o login do painel wg-easy falhar apos o deploy, ver alternativa em
+      # docs/COOLIFY-DEPLOY.md (mount de arquivo via Coolify Storage).
+      PASSWORD_HASH: ${WG_PASS_HASH}
+    volumes:
+      - wireguard_data:/etc/wireguard
+    ports:
+      - "${WG_VPN_PORT:-51820}:${WG_VPN_PORT:-51820}/udp"
+      - "${WG_PANEL_PORT:-51950}:${WG_PANEL_PORT:-51950}/tcp"
+      # Portas RADIUS publicadas aqui porque o freeradius compartilha esta
+      # network namespace (network_mode: service:wg-easy)
+      - "${RADIUS_AUTH_PORT:-1812}:1812/udp"
+      - "${RADIUS_ACCT_PORT:-1813}:1813/udp"
+      - "${RADIUS_COA_PORT:-3799}:3799/udp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      - hotspot-internal
+
+volumes:
+  backend_uploads:
+  backend_backups:
+  wireguard_data:
+
+networks:
+  hotspot-internal:
+    driver: bridge

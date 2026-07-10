@@ -1,0 +1,202 @@
+# ============================================================
+# PORTAINER STACK - Hotspot com Traefik externo
+# Modelo Swarm/Portainer seguindo o padrao network_public + deploy.labels
+# ============================================================
+# Variaveis principais:
+#   APP_DOMAIN=hotspot.surb.com.br
+#   BACKEND_IMAGE=surb/backend:production
+#   FRONTEND_IMAGE=surb/frontend:production
+#   FREERADIUS_IMAGE=surb/freeradius:production
+#   DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+#   JWT_SECRET
+#   EVOLUTION_API_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE
+#   WG_HOST, WG_PASS, WG_PASS_HASH, WG_PANEL_PORT, WG_VPN_PORT
+# ============================================================
+
+services:
+  # ============================================
+  # Backend (Node.js API)
+  # ============================================
+  backend:
+    image: ${BACKEND_IMAGE:-surb/backend:production}
+    networks:
+      - network_public
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      SYSTEM_DOMAIN: ${APP_DOMAIN:-hotspot.surb.com.br}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-hotspot}
+      WG_EASY_HOST: ${WG_EASY_HOST}
+      WG_HOST: ${WG_HOST}
+      WG_PASS: ${WG_PASS}
+      WG_PASS_HASH: ${WG_PASS_HASH}
+      WG_PANEL_PORT: ${WG_PANEL_PORT:-51821}
+      WG_VPN_PORT: ${WG_VPN_PORT:-51820}
+      UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_backups:/app/backups
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+      labels:
+        # Traefik - API/arquivos/rotas publicas do backend em HTTPS
+        - traefik.enable=true
+        - traefik.http.routers.hotspot_backend.rule=Host(`${APP_DOMAIN:-hotspot.surb.com.br}`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))
+        - traefik.http.routers.hotspot_backend.entrypoints=websecure
+        - traefik.http.routers.hotspot_backend.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.hotspot_backend.priority=100
+        - traefik.http.routers.hotspot_backend.service=hotspot_backend
+        - traefik.http.services.hotspot_backend.loadbalancer.server.port=3001
+        - traefik.http.services.hotspot_backend.loadbalancer.passHostHeader=true
+        # Middlewares SSL Headers
+        - traefik.http.routers.hotspot_backend.middlewares=hotspot_sslheader
+        - traefik.http.middlewares.hotspot_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -fsS http://127.0.0.1:3001/emergency >/dev/null || exit 1'
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ============================================
+  # Frontend (Vite servido por Nginx interno)
+  # ============================================
+  frontend:
+    image: ${FRONTEND_IMAGE:-surb/frontend:production}
+    networks:
+      - network_public
+    environment:
+      NODE_ENV: production
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+      labels:
+        # Traefik - Roteamento HTTPS
+        - traefik.enable=true
+        - traefik.http.routers.hotspot_frontend.rule=Host(`${APP_DOMAIN:-hotspot.surb.com.br}`)
+        - traefik.http.routers.hotspot_frontend.entrypoints=websecure
+        - traefik.http.routers.hotspot_frontend.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.hotspot_frontend.priority=1
+        - traefik.http.routers.hotspot_frontend.service=hotspot_frontend
+        - traefik.http.services.hotspot_frontend.loadbalancer.server.port=80
+        - traefik.http.services.hotspot_frontend.loadbalancer.passHostHeader=true
+        # Router HTTP -> Redirect para HTTPS
+        - traefik.http.routers.hotspot_frontend_http.rule=Host(`${APP_DOMAIN:-hotspot.surb.com.br}`)
+        - traefik.http.routers.hotspot_frontend_http.entrypoints=web
+        - traefik.http.routers.hotspot_frontend_http.middlewares=hotspot_redirect_https
+        - traefik.http.middlewares.hotspot_redirect_https.redirectscheme.scheme=https
+        - traefik.http.middlewares.hotspot_redirect_https.redirectscheme.permanent=true
+        # Middlewares SSL Headers
+        - traefik.http.middlewares.hotspot_sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.routers.hotspot_frontend.middlewares=hotspot_sslheader
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://127.0.0.1/ || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================
+  # FreeRADIUS
+  # ============================================
+  freeradius:
+    image: ${FREERADIUS_IMAGE:-surb/freeradius:production}
+    networks:
+      - network_public
+    environment:
+      MYSQL_HOST: ${DB_HOST}
+      MYSQL_PORT: ${DB_PORT:-3306}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - '${RADIUS_AUTH_PORT:-1812}:1812/udp'
+      - '${RADIUS_ACCT_PORT:-1813}:1813/udp'
+      - '${RADIUS_COA_PORT:-3799}:3799/udp'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+  # ============================================
+  # WireGuard (wg-easy)
+  # ============================================
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    networks:
+      - network_public
+    environment:
+      WG_HOST: ${WG_HOST}
+      PASSWORD_HASH: ${WG_PASS_HASH}
+      PORT: ${WG_PANEL_PORT:-51821}
+      WG_PORT: ${WG_VPN_PORT:-51820}
+    volumes:
+      - wireguard_data:/etc/wireguard
+    ports:
+      - target: 51820
+        published: ${WG_VPN_PORT}
+        protocol: udp
+        mode: host
+      - target: 51821
+        published: ${WG_PANEL_PORT}
+        protocol: tcp
+        mode: host
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+volumes:
+  backend_uploads:
+  backend_backups:
+  wireguard_data:
+
+networks:
+  network_public:
+    external: true
+    name: network_public

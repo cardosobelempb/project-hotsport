@@ -1,0 +1,25 @@
+# Ambiente
+.env
+.env.dev
+.env.prod
+.env.coolify
+wg-password.env
+backend/.env
+backend/certificados/*.pem
+backend/certificados/*.p12
+backend/tokens/
+
+# Node
+node_modules/
+frontend/dist/
+dist-images/
+
+# WireGuard keys
+infra/wireguard/.wg-easy/
+
+# Credenciais
+hotspot-credenciais.txt
+
+# OS
+.DS_Store
+Thumbs.db
