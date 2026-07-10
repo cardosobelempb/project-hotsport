@@ -264,7 +264,14 @@ export default function WhatsApp() {
           </Button>
         </div>
 
-        {!status?.exists ? (
+        {status?.unavailable ? (
+          /* Evolution API inalcancavel - nao adianta oferecer criar instancia */
+          <div className="text-center py-8">
+            <MessageCircle className="w-16 h-16 mx-auto text-gray-600 opacity-30 mb-4" />
+            <p className="text-gray-400 mb-1">Nao foi possivel conectar com a Evolution API.</p>
+            <p className="text-gray-500 text-sm">Verifique a URL e a API Key em "Configuracao" abaixo.</p>
+          </div>
+        ) : !status?.exists ? (
           /* Instancia nao existe */
           <div className="text-center py-8">
             <MessageCircle className="w-16 h-16 mx-auto text-gray-600 opacity-30 mb-4" />

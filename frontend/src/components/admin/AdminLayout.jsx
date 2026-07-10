@@ -97,7 +97,7 @@ export default function AdminLayout({ children }) {
     sessionStorage.setItem(`wa_aviso_fechado_${slug}`, '1');
   };
 
-  const whatsappDesconectado = whatsappStatus && (!whatsappStatus.exists || whatsappStatus.state !== 'open');
+  const whatsappDesconectado = whatsappStatus && !whatsappStatus.unavailable && (!whatsappStatus.exists || whatsappStatus.state !== 'open');
   const mostrarAvisoWhatsapp = whatsappDesconectado && !whatsappAvisoFechado && !location.pathname.includes('/whatsapp');
 
   const handleLogout = () => {
@@ -215,6 +215,7 @@ export default function AdminLayout({ children }) {
               src={empresa?.logo_url || '/logo-forum.jpg'}
               alt="Logo da empresa"
               className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-700 bg-[#0d1117] flex-shrink-0"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/logo-forum.jpg'; }}
             />
             <div className="min-w-0 flex-1">
               <p className="text-sm text-white font-semibold truncate">{empresa?.nome || user?.empresa_nome || 'Empresa'}</p>

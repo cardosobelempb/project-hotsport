@@ -136,6 +136,14 @@ async function getInstanceStatus(req, res) {
     });
   } catch (err) {
     console.error("Erro ao buscar status da instancia:", err?.response?.data || err.message);
+    // Evolution API fora do ar/inalcancavel nao e um erro do sistema - e um
+    // estado normal (nao configurado ainda, ou servico externo indisponivel).
+    // Responde 200 pro frontend nao tratar como falha (evita spam de erro
+    // no console em dev, onde a Evolution API geralmente nao esta rodando).
+    const CONN_ERRORS = ["ECONNREFUSED", "ENOTFOUND", "ETIMEDOUT", "ECONNABORTED"];
+    if (CONN_ERRORS.includes(err.code)) {
+      return res.json({ exists: false, unavailable: true, instance_name: null });
+    }
     res.status(500).json({ error: "Erro ao conectar com Evolution API." });
   }
 }
