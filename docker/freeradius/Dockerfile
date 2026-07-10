@@ -11,6 +11,11 @@ COPY freeradius_conf/3.0/ /etc/freeradius/
 
 COPY docker/freeradius/entrypoint.sh /docker-entrypoint-custom.sh
 
+# DIAGNOSTICO TEMPORARIO: RUN inofensivo (nao toca em nada) logo apos o COPY,
+# pra provar se o "exit 255" e' do comando rm em si ou de algo estrutural
+# nesse ponto do build no ambiente do Coolify. Remover depois de confirmado.
+RUN echo "diagnostico: chegou apos o COPY sem erro"
+
 # Separado em 3 RUN (em vez de um && encadeado) de proposito: se algum
 # ambiente de build falhar aqui, o numero da linha no log aponta exatamente
 # qual comando quebrou, sem precisar adivinhar (ja aconteceu de precisar).
