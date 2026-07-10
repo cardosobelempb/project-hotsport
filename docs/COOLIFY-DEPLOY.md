@@ -84,14 +84,36 @@ do `docker/backend/Dockerfile`) — nao precisa rodar nada manualmente.
   endpoint, tambem usado pelo `HEALTHCHECK` do container).
 - Login do painel admin (`https://SEUDOMINIO/`).
 - Painel wg-easy em `http://WG_HOST:WG_PANEL_PORT` com a senha de `WG_PASS`.
-  Se o login falhar, o problema mais provavel e a variavel `PASSWORD_HASH`
-  (ver comentario no `docker-compose.coolify.yml` sobre a diferenca desse
-  stack para o Portainer/Swarm). Alternativa se `${WG_PASS_HASH}` direto no
-  `environment:` nao funcionar nessa versao do Coolify/Compose: usar a
-  funcionalidade de "Storage/File Mount" do Coolify pra escrever um arquivo
-  `wg-password.env` (`PASSWORD_HASH=<hash>`, sem escapar `$`) no diretorio do
-  compose antes do deploy, e trocar `environment: PASSWORD_HASH` por
-  `env_file: wg-password.env` no servico `wg-easy`.
+  Se o login falhar, o problema quase certo e a variavel `WG_PASS_HASH`
+  cadastrada no Coolify sem os `$` dobrados — ver `.env.coolify.example`.
+  Sintoma no log de build/deploy: `The "XXXX" variable is not set. Defaulting
+  to a blank string.` com `XXXX` sendo um pedaco do meio do hash bcrypt.
+
+## Troubleshooting
+
+### Build falha com `resolve : lstat .../docker: no such file or directory`
+
+O Coolify nao encontrou a pasta `docker/` (onde ficam os Dockerfiles) dentro
+do checkout do repositorio, mesmo ela estando commitada. Quase sempre e' o
+campo **"Base Directory"** do recurso no Coolify apontando pra um
+subdiretorio em vez da raiz do repo. Como `docker-compose.coolify.yml` e as
+pastas `docker/`, `backend/`, `frontend/` ficam todas na raiz do projeto:
+
+- Base Directory: `/` (raiz)
+- Docker Compose Location: `docker-compose.coolify.yml`
+
+Se o valor ja estiver `/` e o erro persistir, force um novo clone completo
+(opcao "Force rebuild" / limpar cache de build do recurso no Coolify) — as
+vezes o checkout anterior ficou incompleto de uma tentativa que falhou antes
+do `docker/` existir no repo.
+
+### `The "XXXX" variable is not set. Defaulting to a blank string.` no log de build
+
+Alguma variavel cadastrada no Coolify tem um `$` literal no valor (tipicamente
+`WG_PASS_HASH`, o hash bcrypt do wg-easy) sem estar escapado como `$$`. O
+Compose le `$X` dentro do valor como inicio de outra variavel. Corrigir
+dobrando cada `$` no valor cadastrado na UI do Coolify (ver
+`.env.coolify.example`).
 
 ## Diferencas para o stack Portainer/Swarm existente
 
@@ -100,7 +122,7 @@ do `docker/backend/Dockerfile`) — nao precisa rodar nada manualmente.
 | Orquestrador    | Docker Swarm via Portainer                                         | `docker compose` puro (Coolify)                           |
 | Proxy           | Traefik externo, labels manuais                                    | Proxy do Coolify, dominio via UI                          |
 | Rede do proxy   | `traefik-public` externa                                           | Gerenciada pelo Coolify                                   |
-| Hash wg-easy    | `env_file: wg-password.env` com `$$` escapado (exigencia do Swarm) | `environment: PASSWORD_HASH: ${WG_PASS_HASH}` sem escapar |
+| Hash wg-easy    | `env_file: wg-password.env` com `$$` escapado no arquivo | `environment: PASSWORD_HASH: ${WG_PASS_HASH}` com `$$` escapado no valor da variavel (Coolify UI) |
 | Banco/Evolution | Externos                                                           | Externos (igual)                                          |
 
 O codigo do backend/frontend e identico nos dois — so muda a orquestracao.

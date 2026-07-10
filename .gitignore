@@ -1,12 +1,16 @@
-# Ambiente
+# Ambiente - qualquer .env real fica de fora, so .example e' versionado
 .env
-.env.dev
-.env.prod
-.env.coolify
+.env.*
+!.env.example
+!.env.*.example
 wg-password.env
+!wg-password.env.example
 backend/.env
+!backend/.env.example
 backend/certificados/*.pem
 backend/certificados/*.p12
+backend/certificados/*.key
+backend/certificados/*.crt
 backend/tokens/
 
 # Node

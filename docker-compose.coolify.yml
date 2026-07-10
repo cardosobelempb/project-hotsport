@@ -106,12 +106,14 @@ services:
       WG_HOST: ${WG_HOST}
       PORT: ${WG_PANEL_PORT:-51950}
       WG_PORT: ${WG_VPN_PORT:-51820}
-      # Diferente do docker-compose.prod.yml (Portainer/Swarm), aqui a hash
-      # bcrypt vai direto por ${WG_PASS_HASH} porque o Coolify roda "docker
-      # compose" puro (nao Swarm) e injeta a variavel via .env gerenciado por
-      # ele - nao existe wg-password.env fisico apos o git clone do Coolify.
-      # Se o login do painel wg-easy falhar apos o deploy, ver alternativa em
-      # docs/COOLIFY-DEPLOY.md (mount de arquivo via Coolify Storage).
+      # Nao existe wg-password.env fisico apos o git clone do Coolify (esta no
+      # .gitignore), entao a hash vai via variavel de ambiente comum. MESMA
+      # REGRA do wg-password.env do stack Portainer/Swarm: o valor de
+      # WG_PASS_HASH cadastrado no Coolify precisa ter TODO "$" dobrado para
+      # "$$" (ex: hash "$2a$12$RMEf..." vira "$$2a$$12$$RMEf..." no valor da
+      # variavel) - senao o Compose interpola o "$" do meio do hash como
+      # inicio de outra variavel e zera a senha (warning "variable is not
+      # set" no log de build). Ver .env.coolify.example.
       PASSWORD_HASH: ${WG_PASS_HASH}
     volumes:
       - wireguard_data:/etc/wireguard
