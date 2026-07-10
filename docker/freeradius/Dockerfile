@@ -11,11 +11,13 @@ COPY freeradius_conf/3.0/ /etc/freeradius/
 
 COPY docker/freeradius/entrypoint.sh /docker-entrypoint-custom.sh
 
+# Separado em 3 RUN (em vez de um && encadeado) de proposito: se algum
+# ambiente de build falhar aqui, o numero da linha no log aponta exatamente
+# qual comando quebrou, sem precisar adivinhar (ja aconteceu de precisar).
 # Remove EAP (nao usado com MikroTik PAP) para evitar erro de certificado TLS
-RUN rm -f /etc/freeradius/mods-enabled/eap \
-          /etc/freeradius/sites-enabled/inner-tunnel \
-    && chmod +x /docker-entrypoint-custom.sh \
-    && chown -R freerad:freerad /etc/freeradius/
+RUN rm -f /etc/freeradius/mods-enabled/eap /etc/freeradius/sites-enabled/inner-tunnel
+RUN chmod +x /docker-entrypoint-custom.sh
+RUN chown -R freerad:freerad /etc/freeradius/
 
 EXPOSE 1812/udp 1813/udp 3799/udp
 
