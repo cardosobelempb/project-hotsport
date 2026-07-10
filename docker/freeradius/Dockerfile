@@ -1,18 +1,28 @@
 # ============================================================
 # FreeRADIUS - Dockerfile
 # Context: raiz do projeto (onde fica freeradius_conf/)
+#
+# Base Debian (nao a imagem oficial freeradius/freeradius-server) porque
+# aquela imagem so publica build amd64 - em VPS arm64 (ex: Coolify em host
+# aarch64) todo RUN falha com "exec format error" (nao tem emulacao). O
+# pacote "freeradius" do Debian/Ubuntu e multi-arch nativo e roda a mesma
+# FreeRADIUS 3.x, so muda o caminho da config pra /etc/freeradius/3.0/.
 # ============================================================
-FROM freeradius/freeradius-server:latest
+FROM debian:bookworm-slim
 
-USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    freeradius \
+    freeradius-mysql \
+    freeradius-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia nossa config customizada para /etc/freeradius/ (substituindo defaults da imagem base)
-COPY freeradius_conf/3.0/ /etc/freeradius/
+# Copia nossa config customizada para /etc/freeradius/3.0/ (substituindo defaults do pacote)
+COPY freeradius_conf/3.0/ /etc/freeradius/3.0/
 
 COPY docker/freeradius/entrypoint.sh /docker-entrypoint-custom.sh
 
 # Remove EAP (nao usado com MikroTik PAP) para evitar erro de certificado TLS
-RUN rm -f /etc/freeradius/mods-enabled/eap /etc/freeradius/sites-enabled/inner-tunnel
+RUN rm -f /etc/freeradius/3.0/mods-enabled/eap /etc/freeradius/3.0/sites-enabled/inner-tunnel
 RUN chmod +x /docker-entrypoint-custom.sh
 RUN chown -R freerad:freerad /etc/freeradius/
 
