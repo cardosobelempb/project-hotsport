@@ -5,7 +5,9 @@
 FROM freeradius/freeradius-server:latest
 
 USER root
-RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+# ForceIPv4: builds em VPS/sandboxes com IPv6 mal roteado travam o apt-get
+# tentando os mirrors por IPv6 ate' dar timeout - forcar IPv4 evita isso.
+RUN apt-get update -o Acquire::ForceIPv4=true && apt-get install -y --no-install-recommends \
     default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
