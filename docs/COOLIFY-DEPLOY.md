@@ -2,8 +2,9 @@
 
 Ambiente **novo e separado** do stack Traefik/Portainer que ja roda em producao
 (`docker-compose.prod.yml` + `.env.prod`, dominio `hotspot.surb.com.br`). Este
-guia usa `docker-compose.coolify.yml`, que nao sobe MySQL/PostgreSQL/Evolution
-— aponta para instancias externas ja existentes, igual ao stack atual.
+guia usa `docker-compose.coolify.yml`, que sobe o proprio MySQL dentro do
+compose (self-contained, sem depender de recurso Database separado no
+Coolify) — so a Evolution API (WhatsApp) continua externa, opcional.
 
 ## Pre-requisitos
 
@@ -14,8 +15,9 @@ guia usa `docker-compose.coolify.yml`, que nao sobe MySQL/PostgreSQL/Evolution
 2. **VPS com Coolify instalado**, com o modulo de kernel WireGuard disponivel
    (`modprobe wireguard` funcionando) — os containers `wg-easy`/`freeradius`
    precisam de `NET_ADMIN`/`SYS_MODULE`, ja declarados no compose.
-3. **MySQL e (opcionalmente) Evolution API externos**, acessiveis a partir da
-   VPS do Coolify (rede/firewall liberado do lado do banco).
+3. **Evolution API externa (opcional)**, acessivel a partir da VPS do Coolify
+   se for usar notificacao WhatsApp. O MySQL sobe junto, nao precisa de nada
+   externo pra ele.
 4. Hash bcrypt da senha do painel wg-easy:
    ```bash
    docker run --rm ghcr.io/wg-easy/wg-easy wgpw 'SUA_SENHA'
@@ -34,9 +36,9 @@ guia usa `docker-compose.coolify.yml`, que nao sobe MySQL/PostgreSQL/Evolution
 
 Copiar as chaves de [`.env.coolify.example`](../.env.coolify.example) para a
 aba "Environment Variables" do recurso no Coolify, preenchendo com os valores
-reais (banco externo, Evolution externa, WireGuard). Nunca commitar esses
-valores — o `.gitignore` ja bloqueia `.env.coolify`, `.env`, `.env.dev`,
-`.env.prod` e `wg-password.env`.
+reais (credenciais do MySQL que vai subir junto, Evolution externa se usar,
+WireGuard). Nunca commitar esses valores — o `.gitignore` ja bloqueia
+`.env.coolify`, `.env`, `.env.dev`, `.env.prod` e `wg-password.env`.
 
 ### 3. Dominio por servico
 
@@ -115,6 +117,31 @@ Compose le `$X` dentro do valor como inicio de outra variavel. Corrigir
 dobrando cada `$` no valor cadastrado na UI do Coolify (ver
 `.env.coolify.example`).
 
+### Build falha com `exec /bin/sh: exec format error` (exit code 255)
+
+Incompatibilidade de arquitetura de CPU: a imagem base foi publicada so pra
+uma plataforma (ex: `amd64`) e a VPS e' de outra (ex: `aarch64`/ARM). Nenhum
+binario daquela imagem consegue rodar, entao **qualquer** `RUN` falha com
+esse erro, nao importa o comando - o log pode nem mostrar essa mensagem
+claramente se vier truncado, aparecendo so como `exit code: 255` generico.
+Checar a arquitetura da VPS (`uname -m`) e da imagem
+(`docker manifest inspect --verbose <imagem> | grep architecture`) antes de
+gastar tempo debugando o comando em si. O `docker/freeradius/Dockerfile`
+deste projeto ja foi corrigido nesse sentido (trocado de
+`freeradius/freeradius-server:latest`, amd64-only, para `debian:bookworm-slim`
++ pacote `freeradius` nativo, multi-arch).
+
+### `[migrate] MySQL ainda indisponivel: EAI_AGAIN` no boot do backend
+
+`EAI_AGAIN` e' falha de resolucao de DNS - o container do backend nao
+consegue resolver o hostname de `DB_HOST`. Isso acontece se o backend e o
+MySQL nao estiverem na mesma rede Docker (cada recurso do Coolify normalmente
+ganha rede propria isolada). Este `docker-compose.coolify.yml` ja evita esse
+problema subindo o MySQL como servico `mysql` dentro do proprio compose, na
+mesma rede `hotspot-internal` do backend - `DB_HOST` fica fixo em `mysql`,
+nao e' mais variavel de ambiente. So acontece de novo se alguem apontar
+`DB_HOST` pra um banco fora deste compose sem ajustar a rede.
+
 ## Diferencas para o stack Portainer/Swarm existente
 
 |                 | `docker-compose.prod.yml` (atual)                                  | `docker-compose.coolify.yml` (novo)                       |
@@ -123,12 +150,7 @@ dobrando cada `$` no valor cadastrado na UI do Coolify (ver
 | Proxy           | Traefik externo, labels manuais                                    | Proxy do Coolify, dominio via UI                          |
 | Rede do proxy   | `traefik-public` externa                                           | Gerenciada pelo Coolify                                   |
 | Hash wg-easy    | `env_file: wg-password.env` com `$$` escapado no arquivo | `environment: PASSWORD_HASH: ${WG_PASS_HASH}` com `$$` escapado no valor da variavel (Coolify UI) |
-| Banco/Evolution | Externos                                                           | Externos (igual)                                          |
+| Banco           | Externo (aponta pra MySQL ja existente via `DB_HOST`)     | Sobe junto no compose (servico `mysql`)                   |
+| Evolution       | Externa                                                            | Externa (igual, opcional)                                  |
 
 O codigo do backend/frontend e identico nos dois — so muda a orquestracao.
-
-```mysql
-mysql -u root -p
-CREATE DATABASE hotspot;
-USE nome_do_banco;
-```
