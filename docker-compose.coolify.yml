@@ -135,8 +135,10 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-hotspot}
     network_mode: "service:wg-easy"
     depends_on:
-      - wg-easy
-      - mysql
+      wg-easy:
+        condition: service_started
+      mysql:
+        condition: service_healthy
 
   wg-easy:
     image: ghcr.io/wg-easy/wg-easy:14
