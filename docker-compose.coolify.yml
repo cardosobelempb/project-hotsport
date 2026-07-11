@@ -45,7 +45,7 @@ services:
           "-h",
           "localhost",
           "-u",
-          "root",
+          "${DB_USER}",
           "-p${MYSQL_ROOT_PASSWORD}",
         ]
       interval: 10s
