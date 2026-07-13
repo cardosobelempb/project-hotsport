@@ -9,6 +9,11 @@ services:
     image: mysql:8.0
     container_name: hotspot-mysql
     restart: unless-stopped
+    # mysql_native_password (em vez do padrao caching_sha2_password do MySQL 8):
+    # o cliente "mysql" do Alpine (pacote mysql-client, na verdade cliente do
+    # MariaDB, usado pelo backend node:20-alpine em scripts/runMigrations.js
+    # pra aplicar o estrutura.sql) nao tem o plugin caching_sha2_password.
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}

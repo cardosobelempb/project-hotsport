@@ -42,6 +42,13 @@ async function aguardarMysql() {
 // no primeiro boot deixa o banco sem as tabelas base, e todas as migrations
 // que dependem delas - ex: 030_portal_campanhas.js precisando de "portais" -
 // falham com ER_FK_CANNOT_OPEN_PARENT).
+//
+// Usa o binario "mysql" (cliente CLI, via execFileSync) em vez do driver
+// mysql2 pra aplicar o dump inteiro - testado e confirmado que o mysql2 com
+// multipleStatements derruba a conexao ("Connection lost") no meio de um
+// arquivo deste tamanho (~80KB, centenas de statements), enquanto o cliente
+// oficial roda o arquivo inteiro sem problema (e' o mesmo mecanismo usado
+// pelo docker-entrypoint-initdb.d do proprio MySQL).
 async function seedEstruturaSeNecessario() {
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST,
@@ -49,25 +56,43 @@ async function seedEstruturaSeNecessario() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306,
-    multipleStatements: true,
   });
+  let precisaSeed;
   try {
     const [rows] = await conn.query(
       "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'empresas'"
     );
-    if (rows[0].cnt > 0) {
-      console.log("[seed] Schema base ja existe (tabela 'empresas' encontrada) - pulando estrutura.sql.");
-      return;
-    }
-    console.log("[seed] Banco vazio - aplicando backend/jobs/estrutura.sql...");
-    const caminhoSql = path.join(__dirname, "..", "jobs", "estrutura.sql");
-    const sql = fs.readFileSync(caminhoSql, "utf8");
-    await conn.query(sql);
+    precisaSeed = rows[0].cnt === 0;
+  } finally {
+    await conn.end();
+  }
+
+  if (!precisaSeed) {
+    console.log("[seed] Schema base ja existe (tabela 'empresas' encontrada) - pulando estrutura.sql.");
+    return;
+  }
+
+  console.log("[seed] Banco vazio - aplicando backend/jobs/estrutura.sql via cliente mysql...");
+  const caminhoSql = path.join(__dirname, "..", "jobs", "estrutura.sql");
+  const sql = fs.readFileSync(caminhoSql);
+  try {
+    execFileSync(
+      "mysql",
+      [
+        "-h", process.env.DB_HOST,
+        "-P", String(process.env.DB_PORT || 3306),
+        "-u", process.env.DB_USER,
+        process.env.DB_NAME,
+      ],
+      {
+        input: sql,
+        env: { ...process.env, MYSQL_PWD: process.env.DB_PASSWORD },
+        stdio: ["pipe", "inherit", "inherit"],
+      }
+    );
     console.log("[seed] estrutura.sql aplicada com sucesso.");
   } catch (err) {
     console.error("[seed] Erro ao aplicar estrutura.sql (seguindo mesmo assim, migrations abaixo tentam completar o schema):", err.message);
-  } finally {
-    await conn.end();
   }
 }
 

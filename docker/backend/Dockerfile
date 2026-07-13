@@ -15,7 +15,7 @@ WORKDIR /app
 # tem build arm64) e manda o puppeteer pular o download e apontar pra ele -
 # precisa estar em "base" (nao so em "deps") porque o binario e' usado em
 # tempo de execucao pelo wppconnect, nao so na instalacao.
-RUN apk add --no-cache curl chromium
+RUN apk add --no-cache curl chromium mysql-client
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 

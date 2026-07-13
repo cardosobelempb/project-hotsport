@@ -26,6 +26,14 @@ services:
   mysql:
     image: mysql:8.0
     restart: unless-stopped
+    # mysql_native_password (em vez do padrao caching_sha2_password do MySQL 8):
+    # o cliente "mysql" do Alpine (pacote mysql-client, na verdade o cliente do
+    # MariaDB) nao tem o plugin caching_sha2_password - falha com "ERROR 1045:
+    # Plugin caching_sha2_password could not be loaded" ao tentar autenticar.
+    # O backend (node:20-alpine) usa esse cliente pra aplicar o estrutura.sql
+    # (scripts/runMigrations.js) - sem isso o seed falha silenciosamente e o
+    # banco fica sem as tabelas base.
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME:-hotspot}
@@ -45,7 +53,7 @@ services:
           "-h",
           "localhost",
           "-u",
-          "${DB_USER}",
+          "root",
           "-p${MYSQL_ROOT_PASSWORD}",
         ]
       interval: 10s
