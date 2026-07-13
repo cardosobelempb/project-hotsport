@@ -7,14 +7,14 @@ const db = require('../../db');
 // Depois: http://wg-easy:51821   (nome do servico na rede Docker)
 //
 // WG_EASY_HOST -> nome do servico Docker (padrao: wg-easy)
-// WG_PANEL_PORT -> porta do painel wg-easy (padrao: 51821)
+// WG_PANEL_PORT -> porta do painel wg-easy (padrao: 51950)
 // WG_HOST       -> IP publico/dominio da VPS (para os peers)
 // WG_VPN_PORT   -> porta UDP do WireGuard (padrao: 51820)
 // WG_PASS       -> senha do painel wg-easy
 // -------------------------------------------------------
 
 const WG_EASY_HOST = process.env.WG_EASY_HOST || 'wg-easy';
-const WG_PANEL_PORT = process.env.WG_PANEL_PORT || '51821';
+const WG_PANEL_PORT = process.env.WG_PANEL_PORT || '51950';
 const WG_URL = `http://${WG_EASY_HOST}:${WG_PANEL_PORT}`;
 const WG_PASS = process.env.WG_PASS || '';
 

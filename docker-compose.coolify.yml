@@ -88,7 +88,7 @@ services:
       WG_EASY_HOST: wg-easy
       WG_HOST: ${WG_HOST}
       WG_PASS: ${WG_PASS}
-      WG_PANEL_PORT: ${WG_PANEL_PORT:-51821}
+      WG_PANEL_PORT: ${WG_PANEL_PORT:-51950}
       WG_VPN_PORT: ${WG_VPN_PORT:-51820}
       # freeradius compartilha a netns do wg-easy (ver servico abaixo) - o
       # health check do RADIUS usa o alias do wg-easy, nao "freeradius"
