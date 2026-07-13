@@ -108,10 +108,16 @@ services:
     # (app.use('/api/...')), entao o strip resultava em 404 pra tudo. Nomes de
     # entrypoint/certresolver (https/letsencrypt) confirmados inspecionando os
     # labels que o proprio Coolify gerou pro frontend deste mesmo recurso.
+    #
+    # ATENCAO: o dominio no rule abaixo esta FIXO (nao usa ${SYSTEM_DOMAIN}) -
+    # confirmado que o pre-processamento do Coolify NAO interpola variaveis
+    # dentro de "labels:" (o mesmo ${SYSTEM_DOMAIN} funciona normalmente no
+    # bloco "environment:" do mesmo servico, so falha aqui). Se o dominio
+    # mudar, editar a linha ".rule=" manualmente.
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=coolify"
-      - "traefik.http.routers.hotspot-backend.rule=Host(`${SYSTEM_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))"
+      - "traefik.http.routers.hotspot-backend.rule=Host(`hotspot.surb.com.br`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))"
       - "traefik.http.routers.hotspot-backend.entrypoints=https"
       - "traefik.http.routers.hotspot-backend.tls=true"
       - "traefik.http.routers.hotspot-backend.tls.certresolver=letsencrypt"
