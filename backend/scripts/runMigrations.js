@@ -33,12 +33,52 @@ async function aguardarMysql() {
   return false;
 }
 
+// Aplica o schema base (backend/jobs/estrutura.sql) se o banco ainda estiver
+// vazio. Serve de rede de seguranca pro deploy self-contained (docker-compose
+// coolify.yml sobe um MySQL do zero) - o mecanismo nativo do MySQL
+// (docker-entrypoint-initdb.d) so roda no PRIMEIRO boot com datadir
+// completamente vazio, e e dificil de auditar/depurar remotamente quando
+// falha silenciosamente (sem essa rede, um volume que nao ficou 100% vazio
+// no primeiro boot deixa o banco sem as tabelas base, e todas as migrations
+// que dependem delas - ex: 030_portal_campanhas.js precisando de "portais" -
+// falham com ER_FK_CANNOT_OPEN_PARENT).
+async function seedEstruturaSeNecessario() {
+  const conn = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+    multipleStatements: true,
+  });
+  try {
+    const [rows] = await conn.query(
+      "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'empresas'"
+    );
+    if (rows[0].cnt > 0) {
+      console.log("[seed] Schema base ja existe (tabela 'empresas' encontrada) - pulando estrutura.sql.");
+      return;
+    }
+    console.log("[seed] Banco vazio - aplicando backend/jobs/estrutura.sql...");
+    const caminhoSql = path.join(__dirname, "..", "jobs", "estrutura.sql");
+    const sql = fs.readFileSync(caminhoSql, "utf8");
+    await conn.query(sql);
+    console.log("[seed] estrutura.sql aplicada com sucesso.");
+  } catch (err) {
+    console.error("[seed] Erro ao aplicar estrutura.sql (seguindo mesmo assim, migrations abaixo tentam completar o schema):", err.message);
+  } finally {
+    await conn.end();
+  }
+}
+
 async function main() {
   const ok = await aguardarMysql();
   if (!ok) {
     console.error("[migrate] MySQL não respondeu a tempo - pulando migrations, backend sobe mesmo assim.");
     return;
   }
+
+  await seedEstruturaSeNecessario();
 
   const arquivos = fs.readdirSync(MIGRATIONS_DIR)
     .filter((f) => /^\d{3}_.*\.js$/.test(f))
