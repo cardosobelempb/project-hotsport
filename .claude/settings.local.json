@@ -122,7 +122,9 @@
       "Bash(python -m json.tool)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" \"http://localhost:3001/hotspot/redirect/3?mac=CA:DD:A4:A8:F5:41&ip=192.168.30.253\")",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" \"http://localhost:3001/hotspot/redirect/3?mac=CA:DD:A4:A8:F5:41&ip=192.168.30.253&saldo_visto=1\")",
-      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" \"http://localhost:3001/hotspot/redirect/3?mac=FF:FF:FF:FF:FF:99&ip=192.168.30.99\")"
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" \"http://localhost:3001/hotspot/redirect/3?mac=FF:FF:FF:FF:FF:99&ip=192.168.30.99\")",
+      "Bash(docker rm *)",
+      "Bash(docker run *)"
     ]
   }
 }
