@@ -42,18 +42,22 @@ WireGuard). Nunca commitar esses valores — o `.gitignore` ja bloqueia
 
 ### 3. Dominio por servico
 
-O compose **nao tem labels Traefik** — o Coolify gera o roteamento sozinho a
-partir do dominio (FQDN) configurado por servico na UI:
+- **`frontend`**: configurar o dominio raiz na UI do Coolify normalmente
+  (`https://hotspot.seudominio.com.br`) — usa o roteamento automatico do
+  Coolify, sem nenhum label manual.
+- **`backend`**: **NAO** usar o campo de dominio/paths da UI pra esse
+  servico. O compose ja vem com labels Traefik manuais fixas (`PathPrefix`
+  pra `/api`, `/uploads`, `/hotspot`, `/emergency`, prioridade 100, porta
+  3001) porque o recurso "multiplos paths" da UI do Coolify gera um
+  middleware `stripprefix` que remove o prefixo antes de encaminhar — o
+  backend registra as rotas COM o prefixo (`app.use('/api/...')`), entao
+  o strip fazia tudo cair em 404. Se o campo `docker_compose_domains` do
+  recurso ja tiver uma entrada `"backend"` (de uma tentativa anterior pela
+  UI), remova-a pra nao gerar routers duplicados/conflitantes — via UI ou
+  direto no banco do Coolify (ver Troubleshooting).
 
-| Servico    | Dominio a configurar                                               | Motivo                                                                |
-| ---------- | ------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `frontend` | `https://hotspot.seudominio.com.br` (raiz)                         | SPA React, serve tudo que nao bater nos paths do backend              |
-| `backend`  | mesmo dominio + paths `/api`, `/uploads`, `/hotspot`, `/emergency` | API, uploads publicos, redirect do captive portal, tela de emergencia |
-
-Se a versao do Coolify nao suportar path no campo de dominio do servico,
-usar a aba de "Routing/Labels" avancada do recurso pra adicionar uma regra
-`PathPrefix` equivalente apontando pro servico `backend` porta `3001`, com
-prioridade maior que a rota do `frontend`.
+`SYSTEM_DOMAIN` (variavel de ambiente do recurso) precisa bater com o
+dominio real usado, pois o label do backend usa `Host(\`${SYSTEM_DOMAIN}\`)`.
 
 `wg-easy` (porta 51950) e as portas RADIUS/WireGuard **nao** devem receber
 dominio — sao publicadas direto no host (ver secao seguinte).
@@ -141,6 +145,49 @@ problema subindo o MySQL como servico `mysql` dentro do proprio compose, na
 mesma rede `hotspot-internal` do backend - `DB_HOST` fica fixo em `mysql`,
 nao e' mais variavel de ambiente. So acontece de novo se alguem apontar
 `DB_HOST` pra um banco fora deste compose sem ajustar a rede.
+
+### `POST /api/...` retorna 404, mas o dominio abre normal (GET funciona)
+
+O backend esta configurado com labels manuais (ver secao "Dominio por
+servico" acima) exatamente pra evitar isso. Se aparecer mesmo assim, o
+recurso "multiplos paths" da UI do Coolify pro servico `backend` foi usado
+em algum momento e ficou uma entrada residual em `docker_compose_domains`
+gerando um router com middleware `stripprefix` que compete com o nosso.
+Verificar e remover:
+
+```bash
+docker exec coolify-db psql -U coolify -d coolify -c \
+  "SELECT docker_compose_domains FROM applications WHERE uuid = '<uuid-do-recurso>';"
+```
+
+Se aparecer uma chave `"backend"` nesse JSON, remover (deixando so
+`"frontend"`) e redeploy:
+
+```bash
+docker exec -i coolify-db psql -U coolify -d coolify <<'EOF'
+UPDATE applications
+SET docker_compose_domains = '{"frontend":{"domain":"https:\/\/SEUDOMINIO\/"}}'
+WHERE uuid = '<uuid-do-recurso>';
+EOF
+```
+
+### `POST /api/...` da Gateway Timeout, mas `GET /` (frontend) funciona
+
+Sintoma de que o proprio Traefik (`coolify-proxy`) parou de conseguir ler
+os containers do Docker e ficou com config desatualizada - nao chegou a
+enxergar os labels do backend. Confirmar no log:
+
+```bash
+docker logs coolify-proxy --tail 20 | grep -i "context canceled\|failed to list"
+```
+
+Se aparecer `Failed to list containers for docker: context canceled` (ou
+similar) sem nenhuma linha mais recente, reiniciar o proxy resolve (ele
+reconecta no socket do Docker e recarrega tudo):
+
+```bash
+docker restart coolify-proxy
+```
 
 ## Diferencas para o stack Portainer/Swarm existente
 

@@ -101,6 +101,22 @@ services:
       - backend_backups:/app/backups
     networks:
       - hotspot-internal
+    # Labels manuais (em vez de depender do campo de dominio/paths da UI do
+    # Coolify pro backend) porque o recurso "multiplos paths" do Coolify gera
+    # um middleware stripprefix que remove /api,/uploads,/hotspot,/emergency
+    # antes de encaminhar - o backend registra as rotas COM esses prefixos
+    # (app.use('/api/...')), entao o strip resultava em 404 pra tudo. Nomes de
+    # entrypoint/certresolver (https/letsencrypt) confirmados inspecionando os
+    # labels que o proprio Coolify gerou pro frontend deste mesmo recurso.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.routers.hotspot-backend.rule=Host(`${SYSTEM_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))"
+      - "traefik.http.routers.hotspot-backend.entrypoints=https"
+      - "traefik.http.routers.hotspot-backend.tls=true"
+      - "traefik.http.routers.hotspot-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hotspot-backend.priority=100"
+      - "traefik.http.services.hotspot-backend.loadbalancer.server.port=3001"
     depends_on:
       mysql:
         condition: service_healthy
