@@ -239,7 +239,7 @@ async function reiniciarHotspotServer(conn, serverId = null) {
     conn.write(path, args).then(() => 'ok').catch(e => 'err:' + e.message),
     new Promise(r => setTimeout(() => r('timeout'), ms)),
   ]);
-  const apiPrint = (ms = 5000) => Promise.race([
+  const apiPrint = (ms = 12000) => Promise.race([
     conn.write('/ip/hotspot/print').then(r => Array.isArray(r) ? r : []).catch(() => []),
     new Promise(r => setTimeout(() => r([]), ms)),
   ]);
@@ -717,7 +717,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           `=mode=${fetchMode}`,
           "=check-certificate=no",
         ], 30000);
-        if (r !== "timeout" && !r.startsWith('err:')) {
+        if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("login_page", "ok", `login.html baixado via fetch (${systemProto.toUpperCase()})`);
           ok = true;
         }
@@ -774,7 +774,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           `=mode=${fetchMode}`,
           "=check-certificate=no",
         ], 30000);
-        if (r !== "timeout" && !r.startsWith('err:')) {
+        if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("status_page", "ok", `status.html baixado via fetch (${systemProto.toUpperCase()})`);
           statusOk = true;
         }
