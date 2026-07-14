@@ -423,32 +423,40 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     try {
       const profiles = await safePrint("/ip/hotspot/profile/print");
       const prof = profiles && profiles.find(p => p.name === "hsprof-hotspot");
-      const profArgs = [
+      // Args core sempre compatíveis — advertise tratado separadamente (quebra RouterOS < 6.49)
+      const profCoreArgs = [
         "=login-by=http-chap,http-pap",
         "=use-radius=yes",
         "=radius-accounting=yes",
         "=html-directory=hotspot",
         ...(dnsName ? [`=dns-name=${dnsName}`] : []),
-        ...(popupPosLoginAtivo ? [
-          "=advertise=yes",
-          `=advertise-url=${baseUrl}/campanha-popup?mikrotik_id=${mikrotik.id}&mac=$(mac)&orig=$(link-orig-esc)`,
-          // "Uma vez por sessão" aproximado: dispara ~popupIntervaloMin min apos
-          // o login, depois só de novo em 10000 dias (nao deve ocorrer dentro
-          // de uma sessao normal). Semantica exata do RouterOS para repeticao
-          // de advertise-interval NAO foi validada em hardware real.
-          `=advertise-interval=${popupIntervaloMin}m,10000d`,
-          "=advertise-timeout=30s",
-        ] : [
-          "=advertise=no",
-        ]),
       ];
 
       if (prof) {
-        await safeWrite("/ip/hotspot/profile/set", [`=.id=${prof[".id"]}`, ...profArgs]);
+        await safeWrite("/ip/hotspot/profile/set", [`=.id=${prof[".id"]}`, ...profCoreArgs]);
         addStep("profile", "ok", "Profile hsprof-hotspot atualizado (RADIUS habilitado)");
       } else {
-        await safeWrite("/ip/hotspot/profile/add", ["=name=hsprof-hotspot", ...profArgs]);
+        await safeWrite("/ip/hotspot/profile/add", ["=name=hsprof-hotspot", ...profCoreArgs]);
         addStep("profile", "ok", "Profile hsprof-hotspot criado");
+      }
+
+      // Advertise (popup pós-login) — best-effort isolado: nao impede criacao do hotspot se falhar
+      if (popupPosLoginAtivo) {
+        try {
+          const profAtual = (await safePrint("/ip/hotspot/profile/print"))?.find(p => p.name === "hsprof-hotspot");
+          if (profAtual) {
+            await safeWrite("/ip/hotspot/profile/set", [
+              `=.id=${profAtual[".id"]}`,
+              "=advertise=yes",
+              `=advertise-url=${baseUrl}/campanha-popup?mikrotik_id=${mikrotik.id}&mac=$(mac)&orig=$(link-orig-esc)`,
+              `=advertise-interval=${popupIntervaloMin}m,10000d`,
+              "=advertise-timeout=30s",
+            ]);
+            addStep("profile_advertise", "ok", "Popup pos-login (advertise) configurado");
+          }
+        } catch (e) {
+          addStep("profile_advertise", "aviso", `Advertise nao suportado nesta versao do RouterOS: ${e.message}`);
+        }
       }
 
       // Força html-directory=hotspot em TODOS os outros perfis existentes
