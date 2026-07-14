@@ -270,7 +270,12 @@ router.post("/:id/enviar-hotspot", async (req, res) => {
 
     const [[empresa]] = await db.execute("SELECT id, slug FROM empresas WHERE id = ?", [req.empresa_id]);
 
-    const systemDomain = process.env.SYSTEM_DOMAIN || req.headers.host?.replace(/:\d+$/, "");
+    // Preferir x-forwarded-host (domínio público do Traefik/Coolify) quando SYSTEM_DOMAIN
+    // não está configurado no env — req.headers.host dentro do container Docker retorna
+    // o hostname interno (ex: hotspot-backend:3001), que não funciona como redirect externo.
+    const systemDomain = process.env.SYSTEM_DOMAIN
+      || req.headers['x-forwarded-host']?.split(',')[0]?.trim()?.replace(/:\d+$/, "")
+      || req.headers.host?.replace(/:\d+$/, "");
     const { configurarHotspot } = require("../utils/hotspotSetup");
 
     // Callback chamado a cada step - envia em tempo real via SSE
@@ -344,7 +349,9 @@ router.post("/:id/enviar-login", async (req, res) => {
 
     await conn.connect();
 
-    const systemDomain = process.env.SYSTEM_DOMAIN || req.headers.host?.replace(/:\d+$/, "");
+    const systemDomain = process.env.SYSTEM_DOMAIN
+      || req.headers['x-forwarded-host']?.split(',')[0]?.trim()?.replace(/:\d+$/, "")
+      || req.headers.host?.replace(/:\d+$/, "");
     const systemProto = process.env.SYSTEM_PROTO || 'https';
     const systemPort = process.env.SYSTEM_PORT ? `:${process.env.SYSTEM_PORT}` : '';
     const baseUrl = `${systemProto}://${systemDomain}${systemPort}`;
@@ -448,7 +455,9 @@ router.post("/:id/enviar-status", async (req, res) => {
 
     await conn.connect();
 
-    const systemDomain = process.env.SYSTEM_DOMAIN || req.headers.host?.replace(/:\d+$/, "");
+    const systemDomain = process.env.SYSTEM_DOMAIN
+      || req.headers['x-forwarded-host']?.split(',')[0]?.trim()?.replace(/:\d+$/, "")
+      || req.headers.host?.replace(/:\d+$/, "");
     const systemProto = process.env.SYSTEM_PROTO || 'https';
     const systemPort = process.env.SYSTEM_PORT ? `:${process.env.SYSTEM_PORT}` : '';
     const baseUrl = `${systemProto}://${systemDomain}${systemPort}`;

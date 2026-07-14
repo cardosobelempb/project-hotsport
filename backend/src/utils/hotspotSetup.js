@@ -196,7 +196,7 @@ async function escreverArquivoMikrotik(conn, filename, content) {
     await apiWrite('/file/add', [`=name=${dir}`, '=type=directory']).catch(() => {});
   }
 
-  // 1. Tentar criar o arquivo
+  // 1. Tentar criar o arquivo com conteúdo diretamente
   const r1 = await apiWrite('/file/add', [`=name=${filename}`, `=contents=${content}`]);
   if (r1 === 'ok') {
     const v = await verificar();
@@ -204,6 +204,28 @@ async function escreverArquivoMikrotik(conn, filename, content) {
     console.log(`[file] Criado mas verificacao falhou: ${JSON.stringify(v)}`);
   }
   console.log(`[file] /file/add resultado: ${r1}`);
+
+  // 1b. Dois passos: criar arquivo vazio primeiro, depois set contents
+  // (RouterOS 7.x aceita melhor este método; /file/add com =contents= pode ser rejeitado)
+  const rCreate = await apiWrite('/file/add', [`=name=${filename}`]);
+  if (rCreate === 'ok' || rCreate === 'exists') {
+    await new Promise(r => setTimeout(r, 800));
+    const fa = await apiPrint(12000);
+    const altNc = filename.startsWith('flash/') ? filename : `flash/${filename}`;
+    const fc = fa.find(f => f.name === filename || f.name === altNc);
+    if (fc) {
+      const rSet = await apiWrite('/file/set', [`=.id=${fc['.id']}`, `=contents=${content}`], 30000);
+      if (rSet === 'ok') {
+        const v = await verificar();
+        if (v.ok) { console.log(`[file] Criado (2 passos) e verificado: ${filename} (${v.size} bytes)`); return { ok: true, size: v.size, method: 'file/add+set' }; }
+        console.log(`[file] 2 passos: verificacao falhou: ${JSON.stringify(v)}`);
+      }
+      console.log(`[file] /file/set resultado: ${rSet}`);
+    } else {
+      console.log(`[file] Arquivo nao encontrado apos /file/add vazio. Listados: ${fa.map(f => f.name).join(', ') || '(nenhum)'}`);
+    }
+  }
+  console.log(`[file] /file/add (vazio) resultado: ${rCreate}`);
 
   // 2. Arquivo pode já existir — buscar .id para sobrescrever
   const files = await apiPrint();
@@ -345,6 +367,9 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     console.log(`[hotspot] ${status}: ${message}`);
     if (onStep) onStep(step);
   };
+
+  // Declarada aqui para ser acessível no bloco catch externo
+  let conn2 = null;
 
   try {
     await conn.connect();
@@ -698,6 +723,28 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
       addStep("bloqueio_quic", "aviso", e.message);
     }
 
+    // === Conexão dedicada para operações de arquivo (steps 9-11) ===
+    // A conn principal pode estar lenta/exausta após 30+ writes na walled garden.
+    // Uma conexão nova garante estado limpo para escrita de arquivo e restart.
+    // conn2 já declarada como null antes do try externo (necessário para o catch externo acessar)
+    try {
+      conn2 = new RouterOSAPI({
+        host: mikrotik.ip,
+        user: mikrotik.usuario,
+        password: mikrotik.senha,
+        port: mikrotik.porta || 8728,
+        keepalive: false,
+        timeout: 30,
+      });
+      conn2.on("error", (e) => console.warn("[hotspotSetup] conn2 error:", e.message));
+      await conn2.connect();
+      console.log("[hotspotSetup] conn2: conexão de arquivo estabelecida");
+    } catch (e) {
+      console.warn("[hotspotSetup] conn2 falhou, usando conn principal para arquivos:", e.message);
+      conn2 = null;
+    }
+    const connArquivos = conn2 || conn;
+
     // === 9. Login Page (download via /tool/fetch ou escrita direta via API) ===
     try {
       const empresaId = empresa.id || mikrotik.empresa_id || '';
@@ -720,14 +767,18 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
         if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("login_page", "ok", `login.html baixado via fetch (${systemProto.toUpperCase()})`);
           ok = true;
+        } else if (typeof r === "string" && r.startsWith('err:')) {
+          console.warn("[hotspotSetup] /tool/fetch login.html erro:", r);
         }
-      } catch (e) { /* fallback direto */ }
+      } catch (e) {
+        console.warn("[hotspotSetup] /tool/fetch login.html exception:", e.message);
+      }
 
-      // Fallback 1: escrever HTML completo diretamente via API RouterOS
+      // Fallback 1: escrever HTML completo via conn dedicada (connArquivos = conn2 ou conn)
       if (!ok) {
         try {
           const loginHtml = gerarLoginHtml(fullUrl, portal, systemDomain);
-          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/login.html", loginHtml);
+          const escrito = await escreverArquivoMikrotik(connArquivos, "flash/hotspot/login.html", loginHtml);
           if (escrito?.ok) {
             addStep("login_page", "ok", `login.html enviado via API (${escrito.size} bytes) → ${baseUrl}`);
             ok = true;
@@ -737,11 +788,11 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
         } catch (e) { /* tenta minimal abaixo */ }
       }
 
-      // Fallback 2: HTML mínimo (apenas redirect, < 300 bytes — contorna limite de tamanho da API RouterOS)
+      // Fallback 2: HTML mínimo (apenas redirect, < 300 bytes)
       if (!ok) {
         try {
           const minHtml = `<html><head><meta http-equiv="refresh" content="0;url=${fullUrl}"><script>location.replace("${fullUrl}")</script></head><body></body></html>`;
-          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/login.html", minHtml);
+          const escrito = await escreverArquivoMikrotik(connArquivos, "flash/hotspot/login.html", minHtml);
           if (escrito?.ok) {
             addStep("login_page", "ok", `login.html (minimal, ${escrito.size} bytes) enviado — versao completa requer acesso do MikroTik a ${baseUrl}`);
             ok = true;
@@ -777,14 +828,18 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
         if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("status_page", "ok", `status.html baixado via fetch (${systemProto.toUpperCase()})`);
           statusOk = true;
+        } else if (typeof r === "string" && r.startsWith('err:')) {
+          console.warn("[hotspotSetup] /tool/fetch status.html erro:", r);
         }
-      } catch (e) { /* fallback direto */ }
+      } catch (e) {
+        console.warn("[hotspotSetup] /tool/fetch status.html exception:", e.message);
+      }
 
-      // Fallback 1: escrever HTML completo diretamente via API RouterOS
+      // Fallback 1: escrever HTML via conn dedicada
       if (!statusOk) {
         try {
           const statusHtml = gerarStatusHtml(portal, systemDomain);
-          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/status.html", statusHtml);
+          const escrito = await escreverArquivoMikrotik(connArquivos, "flash/hotspot/status.html", statusHtml);
           if (escrito?.ok) {
             addStep("status_page", "ok", `status.html enviado via API (${escrito.size} bytes)`);
             statusOk = true;
@@ -794,11 +849,11 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
         } catch (e) { /* tenta minimal abaixo */ }
       }
 
-      // Fallback 2: status HTML mínimo (< 300 bytes — contorna limite de tamanho da API RouterOS)
+      // Fallback 2: status HTML mínimo (< 300 bytes)
       if (!statusOk) {
         try {
           const minStatus = `<html><head><title>Status WiFi</title></head><body style="font-family:sans-serif;padding:20px"><b>$(username)</b><br>IP: $(ip) | Tempo: $(uptime)<br><br><a href="$(link-logout)">Desconectar</a></body></html>`;
-          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/status.html", minStatus);
+          const escrito = await escreverArquivoMikrotik(connArquivos, "flash/hotspot/status.html", minStatus);
           if (escrito?.ok) {
             addStep("status_page", "ok", `status.html (minimal, ${escrito.size} bytes) enviado`);
             statusOk = true;
@@ -814,8 +869,9 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     }
 
     // === 11. Restart Hotspot Server (para forçar recarga dos arquivos HTML) ===
+    // Usa connArquivos (conn2 se disponível) — estado limpo garante que o /ip/hotspot/print retorna correto
     try {
-      const restartRes = await reiniciarHotspotServer(conn, hsServerId);
+      const restartRes = await reiniciarHotspotServer(connArquivos, hsServerId);
       if (restartRes.ok) {
         addStep("hotspot_restart", "ok", `Hotspot '${restartRes.serverName}' reiniciado — arquivos HTML recarregados`);
       } else {
@@ -825,6 +881,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
       addStep("hotspot_restart", "aviso", e.message);
     }
 
+    try { if (conn2) await conn2.close(); } catch (e) {}
     try { await conn.close(); } catch (e) {}
     addStep("finalizado", "ok", "Configuracao concluida!");
 
@@ -832,6 +889,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     return { success: !hasErrors, steps, log: steps.map(s => `[${s.status}] ${s.message}`) };
   } catch (err) {
     addStep("fatal", "erro", err.message);
+    try { if (conn2) await conn2.close(); } catch (e) {}
     try { await conn.close(); } catch (e) {}
     return { success: false, steps, log: steps.map(s => `[${s.status}] ${s.message}`), error: err.message };
   }
