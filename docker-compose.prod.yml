@@ -41,14 +41,13 @@ services:
       RADIUS_HOST: wg-easy
       # LIMITACAO CONHECIDA: o backend NAO tem rota pro tunel WireGuard
       # (10.8.0.x, onde ficam os MikroTiks atras de NAT) - so o freeradius
-      # tem, porque so ele compartilha a netns do wg-easy. Diferente do
-      # docker-compose.yml/coolify.yml, aqui nao da pra simplesmente botar
-      # o backend em network_mode: service:wg-easy porque ele PRECISA estar
-      # na rede traefik-public (roteamento HTTP do Traefik externo) e
-      # network_mode e' exclusivo com networks: - perderia o traefik-public.
-      # Corrigir isso exigiria colocar o wg-easy tambem em traefik-public
-      # (nao testado). Ver docker-compose.coolify.yml pra o fix ja aplicado
-      # la (ambiente sem essa restricao de rede dupla).
+      # tem, porque so ele compartilha a netns do wg-easy. Testado em
+      # docker-compose.coolify.yml: colocar o backend em
+      # "network_mode: service:wg-easy" da acesso ao tunel, mas quebra o
+      # roteamento de proxies baseados em Docker API (Traefik/Coolify) -
+      # o container perde o NetworkSettings.Networks proprio. Revertido la
+      # tambem. Acesso do backend ao tunel WireGuard continua pendente,
+      # precisa de outra estrategia (ex: rota especifica no boot).
       UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
     volumes:
       - backend_uploads:/app/uploads

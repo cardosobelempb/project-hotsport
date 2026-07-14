@@ -94,16 +94,21 @@ services:
       # health check do RADIUS usa o alias do wg-easy, nao "freeradius"
       RADIUS_HOST: wg-easy
       UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
+    expose:
+      - "3001"
     volumes:
       - backend_uploads:/app/uploads
       - backend_backups:/app/backups
-    # Compartilha a network namespace do wg-easy (igual o freeradius) -
-    # necessario pro backend alcancar MikroTiks atras de NAT pelo IP do
-    # tunel WireGuard (10.8.0.x). Sem isso o backend fica numa rede Docker
-    # separada sem rota nenhuma pro tunel (confirmado com ping/curl: 100%
-    # de perda). Como wg-easy tambem esta em hotspot-internal, o backend
-    # continua alcancando "mysql" normalmente atraves dele.
-    network_mode: "service:wg-easy"
+    networks:
+      - hotspot-internal
+    # REVERTIDO: "network_mode: service:wg-easy" (pra dar ao backend acesso
+    # ao tunel WireGuard, 10.8.0.x, dos MikroTiks atras de NAT) quebrou o
+    # roteamento do Traefik pro backend - container em network_mode:
+    # service:X nao tem NetworkSettings.Networks proprio, entao o Traefik
+    # nao acha IP nenhum pra ele (toda requisicao HTTP passou a dar 503).
+    # Testado e confirmado ao vivo. O acesso ao tunel WireGuard pro backend
+    # fica pendente - precisa de outra estrategia (ex: rota especifica via
+    # "ip route" no boot, sem trocar a rede principal do container).
     # Labels manuais (em vez de depender do campo de dominio/paths da UI do
     # Coolify pro backend) porque o recurso "multiplos paths" do Coolify gera
     # um middleware stripprefix que remove /api,/uploads,/hotspot,/emergency
