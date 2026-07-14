@@ -187,3 +187,4 @@ Gerenciam as redes utilizadas pelos containers.
 ---
 
 > 💡 **Dica:** Salve este documento como uma referência rápida (**Docker Cheat Sheet**) para consultar sempre que precisar lembrar a sintaxe ou a finalidade de um comando.
+

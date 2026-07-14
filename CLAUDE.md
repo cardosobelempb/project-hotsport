@@ -1840,6 +1840,7 @@ Container Docker `wg-easy:14` que gerencia peers WireGuard. Permite conectar Mik
 4. **`WG_HOST=localhost` gera peer inutilizavel** — MikroTik tenta conectar em si mesmo. Dev LAN: IP da maquina. Prod: IP publico da VPS.
 5. **Peers com `WG_HOST` errado precisam ser deletados e recriados** — endpoint fica gravado no momento do download do config.
 6. **NUNCA colocar `PASSWORD_HASH` no bloco `environment` do docker-compose** — causa dupla interpolacao: `${WG_PASS_HASH}` expande o valor do `.env`, depois o Docker interpola `$` dentro do valor e trunca o hash. Sempre usar `env_file: wg-password.env` como unica fonte do `PASSWORD_HASH`.
+7. **Firewall de nuvem e' camada separada do firewall do SO** — confirmado em producao (Oracle Cloud): mesmo com o Docker publicando a porta UDP corretamente e o `iptables` do SO com ACCEPT/DNAT certos, o peer nunca recebe handshake se o Security List/NSG do provedor nao tiver a porta liberada. Isso nao aparece em nenhum comando dentro da propria VPS — so no console web do provedor. Ver Gotcha 6 em `docs/WIREGUARD-VPN.md`.
 
 ---
 

@@ -190,6 +190,12 @@ async function escreverArquivoMikrotik(conn, filename, content) {
     return { ok: true, size, name: found.name };
   };
 
+  // Garante que o diretório pai existe antes de tentar criar o arquivo
+  if (filename.includes('/')) {
+    const dir = filename.split('/').slice(0, -1).join('/');
+    await apiWrite('/file/add', [`=name=${dir}`, '=type=directory']).catch(() => {});
+  }
+
   // 1. Tentar criar o arquivo
   const r1 = await apiWrite('/file/add', [`=name=${filename}`, `=contents=${content}`]);
   if (r1 === 'ok') {
@@ -322,14 +328,14 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     ]);
   };
 
-  const safeWrite = async (path, args) => {
+  const safeWrite = async (path, args, ms = WRITE_TIMEOUT) => {
     return Promise.race([
       conn.write(path, args).catch(e => {
         if (e.errno === "UNKNOWNREPLY") return "ok";
         if (e.message && e.message.includes("already")) return "exists";
         throw e;
       }),
-      new Promise(resolve => setTimeout(() => resolve("timeout"), WRITE_TIMEOUT))
+      new Promise(resolve => setTimeout(() => resolve("timeout"), ms))
     ]);
   };
 
@@ -492,12 +498,21 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           `=address-pool=${poolName}`,
           "=profile=hsprof-hotspot",
           "=disabled=no",
-        ]);
-        // Busca o ID do servidor recém-criado
-        const newServers = await safePrint("/ip/hotspot/print");
-        const newHs = newServers && newServers.find(s => s.name === "hotspot1");
-        if (newHs) hsServerId = newHs['.id'];
-        addStep("hotspot", "ok", `Hotspot server criado em ${ifName}`);
+        ], 30000);
+        if (r === "timeout") {
+          addStep("hotspot", "aviso", `Criacao do hotspot server demorou mais de 30s — verifique se a interface '${ifName}' existe e tem IP configurado no MikroTik`);
+        } else if (typeof r === "string" && r.startsWith('err:')) {
+          addStep("hotspot", "aviso", `Falha ao criar hotspot server: ${r.replace('err:', '')} — verifique a interface '${ifName}'`);
+        } else {
+          const newServers = await safePrint("/ip/hotspot/print");
+          const newHs = newServers && newServers.find(s => s.name === "hotspot1");
+          if (newHs) {
+            hsServerId = newHs['.id'];
+            addStep("hotspot", "ok", `Hotspot server criado em ${ifName}`);
+          } else {
+            addStep("hotspot", "aviso", `Hotspot server nao encontrado apos criacao — verifique se a interface '${ifName}' existe no MikroTik`);
+          }
+        }
       }
     } catch (e) {
       addStep("hotspot", "aviso", e.message);
@@ -693,14 +708,14 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           "=dst-path=flash/hotspot/login.html",
           `=mode=${fetchMode}`,
           "=check-certificate=no",
-        ]);
+        ], 30000);
         if (r !== "timeout" && !r.startsWith('err:')) {
           addStep("login_page", "ok", `login.html baixado via fetch (${systemProto.toUpperCase()})`);
           ok = true;
         }
       } catch (e) { /* fallback direto */ }
 
-      // Fallback: escrever HTML diretamente via API RouterOS (sem precisar de /tool/fetch)
+      // Fallback 1: escrever HTML completo diretamente via API RouterOS
       if (!ok) {
         try {
           const loginHtml = gerarLoginHtml(fullUrl, portal, systemDomain);
@@ -710,6 +725,18 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
             ok = true;
           } else if (escrito) {
             addStep("login_page", "aviso", `login.html escrita falhou: ${escrito.reason}`);
+          }
+        } catch (e) { /* tenta minimal abaixo */ }
+      }
+
+      // Fallback 2: HTML mínimo (apenas redirect, < 300 bytes — contorna limite de tamanho da API RouterOS)
+      if (!ok) {
+        try {
+          const minHtml = `<html><head><meta http-equiv="refresh" content="0;url=${fullUrl}"><script>location.replace("${fullUrl}")</script></head><body></body></html>`;
+          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/login.html", minHtml);
+          if (escrito?.ok) {
+            addStep("login_page", "ok", `login.html (minimal, ${escrito.size} bytes) enviado — versao completa requer acesso do MikroTik a ${baseUrl}`);
+            ok = true;
           }
         } catch (e) { /* aviso manual */ }
       }
@@ -738,14 +765,14 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           "=dst-path=flash/hotspot/status.html",
           `=mode=${fetchMode}`,
           "=check-certificate=no",
-        ]);
+        ], 30000);
         if (r !== "timeout" && !r.startsWith('err:')) {
           addStep("status_page", "ok", `status.html baixado via fetch (${systemProto.toUpperCase()})`);
           statusOk = true;
         }
       } catch (e) { /* fallback direto */ }
 
-      // Fallback: escrever HTML diretamente via API RouterOS
+      // Fallback 1: escrever HTML completo diretamente via API RouterOS
       if (!statusOk) {
         try {
           const statusHtml = gerarStatusHtml(portal, systemDomain);
@@ -755,6 +782,18 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
             statusOk = true;
           } else if (escrito) {
             addStep("status_page", "aviso", `status.html escrita falhou: ${escrito.reason}`);
+          }
+        } catch (e) { /* tenta minimal abaixo */ }
+      }
+
+      // Fallback 2: status HTML mínimo (< 300 bytes — contorna limite de tamanho da API RouterOS)
+      if (!statusOk) {
+        try {
+          const minStatus = `<html><head><title>Status WiFi</title></head><body style="font-family:sans-serif;padding:20px"><b>$(username)</b><br>IP: $(ip) | Tempo: $(uptime)<br><br><a href="$(link-logout)">Desconectar</a></body></html>`;
+          const escrito = await escreverArquivoMikrotik(conn, "flash/hotspot/status.html", minStatus);
+          if (escrito?.ok) {
+            addStep("status_page", "ok", `status.html (minimal, ${escrito.size} bytes) enviado`);
+            statusOk = true;
           }
         } catch (e) { /* aviso */ }
       }

@@ -78,6 +78,29 @@ liberadas manualmente no firewall da VPS (ex: `ufw allow`):
 Os MikroTiks usam `WG_HOST` (IP publico da VPS) como endpoint do peer
 WireGuard e como destino dos pacotes RADIUS — nao passam pelo dominio HTTP.
 
+> **Atencao (confirmado em producao na Oracle Cloud, 2026-07-14):** alem do
+> firewall do proprio SO, provedores de nuvem tem uma camada extra **fora da
+> VM** (Security Lists / Network Security Groups na Oracle Cloud; Security
+> Groups na AWS; etc.) que bloqueia por padrao qualquer porta UDP
+> customizada — mesmo com o Docker publicando a porta corretamente e o
+> `iptables` do SO com as regras certas. Muitas VPS provisionadas via
+> Coolify nem tem `ufw` instalado (`ufw allow` acima e' so um exemplo
+> generico, nao um requisito) — o Docker gerencia suas proprias regras de
+> `iptables` automaticamente ao publicar portas com `-p`, entao o SO
+> normalmente ja fica correto sozinho. Pra confirmar rapido onde esta o
+> bloqueio:
+> ```bash
+> docker ps -a | grep wg              # acha o nome real do container (Coolify usa UUID no nome)
+> docker port <container>             # confirma se a porta esta publicada
+> iptables -L DOCKER -n | grep udp    # confirma ACCEPT/DNAT no SO
+> ```
+> Se os tres passos acima estiverem OK e o peer ainda nao conectar, o
+> bloqueio esta no firewall de nuvem do provedor. Na Oracle Cloud: **Networking
+> → Virtual Cloud Networks → [sua VCN] → Security Lists (ou Network Security
+> Groups) → Ingress Rules → Add Ingress Rules**, uma regra UDP por porta
+> (Source `0.0.0.0/0`). Roteiro completo de diagnostico: Gotcha 6 em
+> `docs/WIREGUARD-VPN.md`.
+
 ### 5. Deploy
 
 Disparar o deploy pela UI do Coolify. O backend roda as migrations
@@ -217,6 +240,14 @@ do Docker e recarrega tudo):
 ```bash
 docker restart coolify-proxy
 ```
+
+### MikroTik nunca conecta na VPN/RADIUS, mesmo com as portas publicadas certinho no Docker
+
+Firewall de nuvem do provedor bloqueando por fora da VM (testado e confirmado
+na Oracle Cloud — Security List sem as Ingress Rules das portas UDP). Ver
+secao "4. Firewall da VPS" acima e Gotcha 6 em `docs/WIREGUARD-VPN.md` para
+o roteiro completo de diagnostico (`docker port`, `iptables -L DOCKER -n`,
+`tcpdump`).
 
 ## Diferencas para o stack Portainer/Swarm existente
 

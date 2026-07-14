@@ -285,6 +285,36 @@ PASSWORD_HASH=$$2a$$12$$NOi3JMyQKAF0Swv4MKHLeOcboUHY5pm9Urgzu/x6n9MGJLGheVVqG
 
 ---
 
+### Gotcha 6: Firewall de nuvem do provedor bloqueia a porta mesmo com Docker/iptables corretos (confirmado: Oracle Cloud)
+
+**Sintoma:** peer nunca recebe handshake. `docker port <container>` mostra `51820/udp` (e as portas RADIUS `1812`/`1813`/`3799`) publicadas corretamente. `iptables -L DOCKER -n` mostra `ACCEPT` e `iptables -t nat -L DOCKER -n` mostra `DNAT` certo pro IP interno do container. Mesmo assim, nenhum pacote chega.
+
+**Causa:** provedores de nuvem (Oracle Cloud, AWS, GCP, Azure, etc.) tem uma camada de firewall **fora da VM**, gerenciada pelo console web — Security Lists / Network Security Groups na Oracle Cloud, Security Groups na AWS, etc. — completamente independente do `iptables`/`ufw` rodando dentro do sistema operacional. Abrir a porta no SO nao abre a porta na nuvem. Em VPS provisionadas via Coolify pode nem existir `ufw` instalado — o Docker gerencia suas proprias regras de `iptables` automaticamente ao publicar portas com `-p`, entao o SO ja fica correto sem nenhuma acao manual, o que engana o diagnostico (tudo parece certo "por dentro").
+
+**Fix (Oracle Cloud):** Console OCI → **Networking → Virtual Cloud Networks → [sua VCN] → Security Lists** (ou **Network Security Groups**, se a instancia usar NSG em vez de Security List — confirmar em **Instance Details → Attached VNICs → sua VNIC**) → **Ingress Rules → Add Ingress Rules**, uma regra UDP por porta usada:
+
+| Source CIDR | Protocolo | Porta destino | Uso |
+|---|---|---|---|
+| `0.0.0.0/0` | UDP | `51820` | Tunel WireGuard |
+| `0.0.0.0/0` | UDP | `1812` | RADIUS Auth |
+| `0.0.0.0/0` | UDP | `1813` | RADIUS Accounting |
+| `0.0.0.0/0` | UDP | `3799` | RADIUS CoA/Disconnect |
+
+Em outros provedores, procurar o equivalente (Security Group na AWS, Cloud Armor/firewall rules na GCP, NSG no Azure).
+
+**Diagnostico que isola o problema (rodar antes de mexer em qualquer coisa):**
+```bash
+docker ps -a | grep wg                  # acha o nome real do container (Coolify usa UUID no nome, nao "hotspot-wireguard")
+docker port <container>                 # confirma se a porta esta publicada
+iptables -L DOCKER -n | grep udp        # confirma ACCEPT no SO
+tcpdump -ni any udp port 51820          # escuta em tempo real enquanto o peer tenta conectar
+```
+Se os tres primeiros comandos estiverem OK e mesmo assim **nenhum pacote aparecer no tcpdump** enquanto o MikroTik tenta conectar, o bloqueio esta antes de chegar na VM — firewall de nuvem, nao adianta mexer em mais nada dentro do servidor.
+
+**Como reproduzir:** criar instancia nova na Oracle Cloud, subir o stack via Coolify, confirmar Docker publicando a porta e `iptables -L DOCKER -n` com ACCEPT — sem tocar no Security List, o handshake WireGuard nunca completa.
+
+---
+
 ## 12. Troubleshooting
 
 | Sintoma | Causa provavel | Fix |
@@ -296,6 +326,7 @@ PASSWORD_HASH=$$2a$$12$$NOi3JMyQKAF0Swv4MKHLeOcboUHY5pm9Urgzu/x6n9MGJLGheVVqG
 | MikroTik conecta mas nao aparece online no painel | Peer criado quando `WG_HOST=localhost` | Deletar peer, atualizar `WG_HOST`, recriar peer, baixar novo config |
 | Hash aparece truncado no container | `$` nao escapados com `$$` | Atualizar `wg-password.env` com `$$` e `--force-recreate` |
 | Backend nao alcanca wg-easy | `WG_EASY_HOST` errado (ex: `localhost` em vez de `wg-easy`) | Verificar variavel; em Docker usa `wg-easy`; fora do Docker usa `localhost` |
+| Peer nunca recebe handshake, mas `docker port` e `iptables -L DOCKER -n` mostram tudo publicado/ACCEPT corretamente | Firewall de nuvem do provedor (Security List/NSG na Oracle Cloud, Security Group na AWS, etc.) bloqueando por fora da VM | Abrir Ingress Rules pra porta UDP no console do provedor (ver Gotcha 6); `tcpdump -ni any udp port <porta>` no servidor confirma se o pacote chega |
 
 **Query util para debug de peers:**
 ```sql
@@ -333,6 +364,11 @@ ORDER BY e.id;
 ---
 
 ## 15. Changelog
+
+### 2026-07-14
+- Documentado Gotcha 6: firewall de nuvem (confirmado em producao na Oracle Cloud) bloqueia portas UDP mesmo com Docker/iptables do SO configurados corretamente — precisa liberar Ingress Rules no Security List/NSG do provedor, camada totalmente separada do firewall do SO
+- Adicionada linha na tabela de Troubleshooting e roteiro de diagnostico (`docker ps -a | grep wg`, `docker port`, `iptables -L DOCKER -n`, `tcpdump`) pra isolar bloqueio de nuvem de bloqueio de config
+- Registrado que ambientes Coolify (`docker-compose.coolify.yml`) usam nome de container dinamico (sufixo com UUID do recurso) em vez do `hotspot-wireguard` fixo do compose antigo — usar `docker ps -a | grep wg` pra localizar
 
 ### 2026-06-22
 - Pinada versao do wg-easy em `:14` (v13 nao suporta `PASSWORD_HASH`; v15 exige migracao)
