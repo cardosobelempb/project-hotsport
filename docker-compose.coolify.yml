@@ -94,13 +94,16 @@ services:
       # health check do RADIUS usa o alias do wg-easy, nao "freeradius"
       RADIUS_HOST: wg-easy
       UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
-    expose:
-      - "3001"
     volumes:
       - backend_uploads:/app/uploads
       - backend_backups:/app/backups
-    networks:
-      - hotspot-internal
+    # Compartilha a network namespace do wg-easy (igual o freeradius) -
+    # necessario pro backend alcancar MikroTiks atras de NAT pelo IP do
+    # tunel WireGuard (10.8.0.x). Sem isso o backend fica numa rede Docker
+    # separada sem rota nenhuma pro tunel (confirmado com ping/curl: 100%
+    # de perda). Como wg-easy tambem esta em hotspot-internal, o backend
+    # continua alcancando "mysql" normalmente atraves dele.
+    network_mode: "service:wg-easy"
     # Labels manuais (em vez de depender do campo de dominio/paths da UI do
     # Coolify pro backend) porque o recurso "multiplos paths" do Coolify gera
     # um middleware stripprefix que remove /api,/uploads,/hotspot,/emergency
@@ -126,6 +129,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      wg-easy:
+        condition: service_started
     deploy:
       resources:
         limits:

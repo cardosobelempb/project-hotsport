@@ -107,6 +107,9 @@ services:
       - "1812:1812/udp"
       - "1813:1813/udp"
       - "3799:3799/udp"
+      # Backend tambem compartilha esta netns (acesso ao tunel WireGuard
+      # pros MikroTiks atras de NAT) - porta publicada aqui, nao no backend
+      - "${BACKEND_HOST_PORT:-3001}:3001/tcp"
     volumes:
       - wireguard_data:/etc/wireguard
     cap_add:
@@ -173,16 +176,19 @@ services:
       # nao existe mais na rede — o health check usa o alias do wg-easy
       RADIUS_HOST: wg-easy
       UPDATE_SERVER_URL: https://glpi.forumtelecom.com.br
-    ports:
-      - "${BACKEND_HOST_PORT:-3001}:3001"
     volumes:
       - backend_uploads:/app/uploads
       - backend_backups:/app/backups
-    networks:
-      - hotspot-net
+    # Compartilha a network namespace do wg-easy (igual o freeradius) -
+    # necessario pro backend alcancar MikroTiks atras de NAT pelo IP do
+    # tunel WireGuard (10.8.0.x). A porta 3001 e publicada no servico
+    # wg-easy (ver acima), nao aqui, porque quem "dono" da rede e' ele.
+    network_mode: "service:wg-easy"
     depends_on:
       mysql:
         condition: service_healthy
+      wg-easy:
+        condition: service_started
 
   # ---- Frontend ----
   frontend:

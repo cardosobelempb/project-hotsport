@@ -39,6 +39,16 @@ services:
       # freeradius compartilha a netns do wg-easy, entao o hostname 'freeradius'
       # nao existe mais na rede — o health check usa o alias do wg-easy
       RADIUS_HOST: wg-easy
+      # LIMITACAO CONHECIDA: o backend NAO tem rota pro tunel WireGuard
+      # (10.8.0.x, onde ficam os MikroTiks atras de NAT) - so o freeradius
+      # tem, porque so ele compartilha a netns do wg-easy. Diferente do
+      # docker-compose.yml/coolify.yml, aqui nao da pra simplesmente botar
+      # o backend em network_mode: service:wg-easy porque ele PRECISA estar
+      # na rede traefik-public (roteamento HTTP do Traefik externo) e
+      # network_mode e' exclusivo com networks: - perderia o traefik-public.
+      # Corrigir isso exigiria colocar o wg-easy tambem em traefik-public
+      # (nao testado). Ver docker-compose.coolify.yml pra o fix ja aplicado
+      # la (ambiente sem essa restricao de rede dupla).
       UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
     volumes:
       - backend_uploads:/app/uploads
