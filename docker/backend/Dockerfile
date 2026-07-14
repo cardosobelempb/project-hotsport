@@ -15,7 +15,7 @@ WORKDIR /app
 # tem build arm64) e manda o puppeteer pular o download e apontar pra ele -
 # precisa estar em "base" (nao so em "deps") porque o binario e' usado em
 # tempo de execucao pelo wppconnect, nao so na instalacao.
-RUN apk add --no-cache curl chromium mysql-client
+RUN apk add --no-cache curl chromium mysql-client iproute2
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
@@ -36,10 +36,13 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY backend ./
 ENV NODE_ENV=development
 EXPOSE 3001
+# Rota pro tunel WireGuard (10.8.0.x, onde ficam os MikroTiks atras de NAT)
+# via wg-easy como gateway - precisa de NET_ADMIN no compose. "|| true" pra
+# nao derrubar o boot se wg-easy nao existir/faltarcap (ex: dev sem VPN).
 # Roda as migrations pendentes automaticamente a cada boot do container antes
 # de subir o servidor - ";" (nao "&&") garante que o backend sobe mesmo se o
 # runner de migrations falhar por algum motivo inesperado.
-CMD ["sh", "-c", "node scripts/runMigrations.js; npx nodemon server.js"]
+CMD ["sh", "-c", "ip route add 10.8.0.0/24 via $(getent hosts wg-easy | awk '{print $1}') 2>/dev/null || true; node scripts/runMigrations.js; npx nodemon server.js"]
 
 # ---- BUILD / PRODUCAO ----
 FROM base AS production
@@ -51,7 +54,11 @@ ENV NODE_ENV=production
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3001/api/health || exit 1
+# Rota pro tunel WireGuard (10.8.0.x, onde ficam os MikroTiks atras de NAT)
+# via wg-easy como gateway - precisa de NET_ADMIN no compose. "|| true" pra
+# nao derrubar o boot se wg-easy nao existir/faltar capability (ex: ambiente
+# sem VPN configurada).
 # Roda as migrations pendentes automaticamente a cada boot do container antes
 # de subir o servidor - ";" (nao "&&") garante que o backend sobe mesmo se o
 # runner de migrations falhar por algum motivo inesperado.
-CMD ["sh", "-c", "node scripts/runMigrations.js; node server.js"]
+CMD ["sh", "-c", "ip route add 10.8.0.0/24 via $(getent hosts wg-easy | awk '{print $1}') 2>/dev/null || true; node scripts/runMigrations.js; node server.js"]

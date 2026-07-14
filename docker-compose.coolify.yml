@@ -101,14 +101,17 @@ services:
       - backend_backups:/app/backups
     networks:
       - hotspot-internal
-    # REVERTIDO: "network_mode: service:wg-easy" (pra dar ao backend acesso
-    # ao tunel WireGuard, 10.8.0.x, dos MikroTiks atras de NAT) quebrou o
-    # roteamento do Traefik pro backend - container em network_mode:
-    # service:X nao tem NetworkSettings.Networks proprio, entao o Traefik
-    # nao acha IP nenhum pra ele (toda requisicao HTTP passou a dar 503).
-    # Testado e confirmado ao vivo. O acesso ao tunel WireGuard pro backend
-    # fica pendente - precisa de outra estrategia (ex: rota especifica via
-    # "ip route" no boot, sem trocar a rede principal do container).
+    # NET_ADMIN: precisa pra "ip route add 10.8.0.0/24 via wg-easy" no boot
+    # do container (Dockerfile CMD) - da acesso ao tunel WireGuard (MikroTiks
+    # atras de NAT) SEM trocar a rede principal do backend (a tentativa
+    # anterior, network_mode: service:wg-easy, quebrou o roteamento do
+    # Traefik - container nesse modo nao tem NetworkSettings.Networks
+    # proprio, o Traefik nao achava IP pra ele, 503 em tudo. Revertido e
+    # confirmado ao vivo). Depende do servico wg-easy-nat-setup (ver abaixo)
+    # aplicar MASQUERADE no wg-easy pro caminho de volta da resposta
+    # funcionar - so a rota de ida nao basta.
+    cap_add:
+      - NET_ADMIN
     # Labels manuais (em vez de depender do campo de dominio/paths da UI do
     # Coolify pro backend) porque o recurso "multiplos paths" do Coolify gera
     # um middleware stripprefix que remove /api,/uploads,/hotspot,/emergency
@@ -147,6 +150,8 @@ services:
       mysql:
         condition: service_healthy
       wg-easy:
+        condition: service_started
+      wg-easy-nat-setup:
         condition: service_started
     deploy:
       resources:
@@ -226,6 +231,35 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     networks:
       - hotspot-internal
+
+  # Sidecar que aplica MASQUERADE/FORWARD no wg-easy pro backend conseguir
+  # usar o tunel WireGuard via rota especifica (ver "cap_add: NET_ADMIN" e
+  # o "ip route add" no Dockerfile do backend). So a rota de ida nao basta:
+  # o pacote chega no MikroTik, mas a resposta nao volta, porque o MikroTik
+  # so sabe rotear de volta pro peer da VPN (10.8.0.x), nao pro IP real do
+  # backend (outra rede Docker). O MASQUERADE faz o trafego do backend
+  # parecer que saiu do proprio wg-easy (10.8.0.1) ao entrar no tunel, entao
+  # a resposta volta certa. Roda como container separado (nao mexe no
+  # entrypoint/init do wg-easy oficial), compartilhando a mesma netns dele -
+  # aplica as regras uma vez (idempotente, "-C" checa antes de "-A") e fica
+  # vivo (restart nao duplica regra).
+  wg-easy-nat-setup:
+    image: alpine:3.20
+    network_mode: "service:wg-easy"
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    depends_on:
+      - wg-easy
+    command: >
+      sh -c "
+        apk add --no-cache iptables >/dev/null 2>&1;
+        iptables -t nat -C POSTROUTING -o wg0 -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE;
+        iptables -C FORWARD -o wg0 -j ACCEPT 2>/dev/null || iptables -A FORWARD -o wg0 -j ACCEPT;
+        iptables -C FORWARD -i wg0 -j ACCEPT 2>/dev/null || iptables -A FORWARD -i wg0 -j ACCEPT;
+        echo 'NAT/forward aplicados para o tunel WireGuard';
+        tail -f /dev/null
+      "
 
 volumes:
   mysql_data:
