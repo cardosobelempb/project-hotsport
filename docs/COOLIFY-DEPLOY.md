@@ -171,19 +171,48 @@ WHERE uuid = '<uuid-do-recurso>';
 EOF
 ```
 
-### `POST /api/...` da Gateway Timeout, mas `GET /` (frontend) funciona
+### `POST /api/...` da Gateway Timeout (ou fica pendurado sem responder), mas `GET /` (frontend) funciona
 
-Sintoma de que o proprio Traefik (`coolify-proxy`) parou de conseguir ler
-os containers do Docker e ficou com config desatualizada - nao chegou a
-enxergar os labels do backend. Confirmar no log:
+Duas causas possiveis, nessa ordem de probabilidade:
+
+**1. Label `traefik.docker.network` apontando pra rede errada.** Cada
+recurso "Docker Compose" do Coolify ganha uma rede implicita propria,
+nomeada com a UUID do recurso (ex: `a18a0r06eapf4tf6n3xk4ehz` - aparece no
+nome de cada container, tipo `backend-a18a0r06eapf4tf6n3xk4ehz-<ts>`). E'
+NESSA rede que o proxy consegue alcancar os containers - a rede literal
+`coolify` e' so do painel/infra do Coolify em si, os containers do seu
+projeto normalmente NAO estao nela. Se o label `traefik.docker.network`
+apontar pra rede errada, o Traefik encontra o router (TLS fecha normal,
+certificado bate) mas nunca acha um servidor valido pro service - fica
+pendurado sem responder e **sem logar nenhum erro**, o que torna esse
+sintoma dificil de distinguir de um problema de rede real. Diagnostico
+definitivo - comparar as duas redes do container:
+
+```bash
+docker inspect <nome-do-backend> --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}: {{$v.IPAddress}}{{println}}{{end}}'
+# testa cada IP que aparecer, de dentro do proxy:
+docker exec coolify-proxy wget -qO- --timeout=5 http://<IP>:3001/api/health
+```
+
+O IP que responder `{"status":"ok"}` esta na rede certa - usar o NOME
+dessa rede (a UUID do projeto) no label `traefik.docker.network` do
+`docker-compose.coolify.yml`, nao `coolify`. Esse valor muda por recurso/
+projeto, entao se este compose for reusado em outro deploy, atualizar a
+UUID (e o dominio hardcoded na regra do router, mesma secao) manualmente.
+
+**2. Traefik perdeu a conexao com o Docker.** O proprio `coolify-proxy`
+parou de conseguir listar os containers e ficou com config desatualizada.
+Confirmar no log:
 
 ```bash
 docker logs coolify-proxy --tail 20 | grep -i "context canceled\|failed to list"
 ```
 
 Se aparecer `Failed to list containers for docker: context canceled` (ou
-similar) sem nenhuma linha mais recente, reiniciar o proxy resolve (ele
-reconecta no socket do Docker e recarrega tudo):
+similar) **com timestamp recente** (cuidado: `docker logs --tail N` pode
+mostrar historico de dias atras se nao tiver log novo - conferir a data/
+hora antes de agir), reiniciar o proxy resolve (ele reconecta no socket
+do Docker e recarrega tudo):
 
 ```bash
 docker restart coolify-proxy

@@ -122,9 +122,21 @@ services:
     # dentro de "labels:" (o mesmo ${SYSTEM_DOMAIN} funciona normalmente no
     # bloco "environment:" do mesmo servico, so falha aqui). Se o dominio
     # mudar, editar a linha ".rule=" manualmente.
+    #
+    # traefik.docker.network: FIXO na UUID do projeto (nao "coolify"). Cada
+    # projeto do Coolify ganha sua propria rede implicita nomeada com a UUID
+    # do recurso (ex: a18a0r06eapf4tf6n3xk4ehz) - e' NELA que o container
+    # tem IP alcancavel pelo proxy, nao na rede "coolify" (essa e' so do
+    # painel do Coolify em si). Confirmado ao vivo: coolify-proxy alcancava
+    # o backend pelo IP da rede <uuid>, mas dava timeout pelo IP da rede
+    # hotspot-internal - com o label apontando "coolify" (rede errada, o
+    # container nem esta nela), o Traefik nunca achava servidor valido e
+    # ficava pendurado sem responder (sem nem logar erro). Se este compose
+    # for reusado noutro recurso Coolify, trocar pela UUID do recurso novo
+    # (aparece no nome dos containers, ex: backend-<uuid>-<timestamp>).
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=coolify"
+      - "traefik.docker.network=a18a0r06eapf4tf6n3xk4ehz"
       - "traefik.http.routers.hotspot-backend.rule=Host(`hotspot.surb.com.br`) && (PathPrefix(`/api`) || PathPrefix(`/uploads`) || PathPrefix(`/hotspot`) || Path(`/emergency`))"
       - "traefik.http.routers.hotspot-backend.entrypoints=https"
       - "traefik.http.routers.hotspot-backend.tls=true"
