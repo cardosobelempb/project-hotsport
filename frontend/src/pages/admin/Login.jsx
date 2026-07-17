@@ -39,8 +39,8 @@ export default function Login() {
     <div className="flex items-center justify-center h-screen bg-[#0f111a]">
       <form onSubmit={handleLogin} className="bg-[#1a1d27] border border-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-sm">
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-white">SpotControl Pro</h2>
-          <p className="text-sm text-gray-500">by Fórum Telecom</p>
+          <h2 className="text-2xl font-bold text-white">Surb SpotControl Pro</h2>
+          <p className="text-sm text-gray-500">by Surb Tech</p>
         </div>
         {erro && <p className="text-red-400 text-sm mb-4">{erro}</p>}
 

@@ -514,6 +514,23 @@ app.get('/hotspot/redirect/:mikrotikId', async (req, res) => {
       return res.redirect(`${portal.url_redirect}${separator}${params}`);
     }
 
+    // Fallback: portais tipo lgpd/lead/lead_passivo/login/reconexao dependem
+    // do campo livre url_redirect (preenchido manualmente em Portais.jsx).
+    // Se ficar vazio (portal criado antes do seed atual, ou editado sem essa
+    // rota), usa a mesma rota padrao criada por empresaController/registroController
+    // pra esse tipo, em vez de travar o cliente com erro generico na tela.
+    const ROTA_PADRAO_POR_TIPO = {
+      lgpd: '/cadastro',
+      lead: '/lead',
+      lead_passivo: '/lead-passivo',
+      login: '/login-hotspot',
+      reconexao: '/reconectar'
+    };
+    const rotaPadrao = ROTA_PADRAO_POR_TIPO[portal.tipo];
+    if (rotaPadrao) {
+      return res.redirect(`${rotaPadrao}?${params}`);
+    }
+
     res.status(400).send('<h1>Portal sem configuração de redirect</h1>');
   } catch (err) {
     console.error('Erro no redirect do captive portal:', err);
