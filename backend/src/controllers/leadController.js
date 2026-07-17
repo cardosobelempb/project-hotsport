@@ -1,5 +1,5 @@
 const db = require("../../db");
-const { verificarLeadExistente } = require("../utils/leadUtils");
+const { verificarLeadExistente, verificarLeadExistentePorContato } = require("../utils/leadUtils");
 const { notificarLiberacao } = require("../services/whatsappNotify");
 const { criarHotspotUser } = require("../utils/mikrotikClient");
 const radius = require("../services/radiusService");
@@ -21,14 +21,32 @@ exports.capturaPassiva = async (req, res) => {
 
     const cpfLimpo = cpf ? cpf.replace(/\D/g, "") : null;
 
-    // Salvar lead (permite reconexão: pula INSERT se CPF já existe)
-    const existingLeadPassivo = cpfLimpo ? await verificarLeadExistente(cpfLimpo, empresaId) : null;
+    // Salvar lead (permite reconexão: pula INSERT se já existe por CPF,
+    // telefone ou email — CPF é opcional nesse portal, então checar só CPF
+    // fazia toda reconexão sem CPF preenchido virar linha nova duplicada)
+    const existingLeadPassivo = await verificarLeadExistentePorContato({ cpf: cpfLimpo, telefone, email, empresaId });
     if (!existingLeadPassivo) {
       await db.execute(
         `INSERT INTO leads (empresa_id, nome, email, telefone, cpf, mac, ip, origem, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, 'portal_passivo', 'novo')`,
         [empresaId, nome || null, email || null, telefone || null, cpfLimpo, mac || null, ip || null]
       );
+    } else {
+      // Atualiza os dados do lead existente (mesmo raciocinio do cadastroCliente
+      // abaixo: sem isso, reconexoes sempre usariam nome/cpf/mac do 1o cadastro)
+      try {
+        await db.execute(
+          `UPDATE leads SET
+             nome = COALESCE(?, nome),
+             cpf = COALESCE(?, cpf),
+             mac = COALESCE(?, mac),
+             ip = COALESCE(?, ip)
+           WHERE id = ?`,
+          [nome || null, cpfLimpo, mac || null, ip || null, existingLeadPassivo.id]
+        );
+      } catch (updErr) {
+        console.warn("[capturaPassiva] falha ao atualizar lead existente:", updErr.message);
+      }
     }
 
     // Buscar config de redirect do portal lead_passivo desta empresa
@@ -218,23 +236,10 @@ exports.leadLogin = async (req, res) => {
       return res.status(404).json({ message: "Plano Lead não configurado. Crie um plano com nome 'Lead'." });
     }
 
-    // Salvar lead (permite reconexão: pula INSERT se CPF ou telefone já existe)
+    // Salvar lead (permite reconexão: pula INSERT se já existe por CPF,
+    // telefone ou email)
     const cpfLimpoLead = cpf ? cpf.replace(/\D/g, "") : null;
-    let leadExistenteLogin = cpfLimpoLead ? await verificarLeadExistente(cpfLimpoLead, empresaId) : null;
-
-    // Verificar duplicado por telefone (quando CPF não encontrou)
-    if (!leadExistenteLogin && telefone) {
-      const telNums = telefone.replace(/\D/g, '');
-      if (telNums.length >= 10) {
-        const [[leadByTel]] = await db.execute(
-          `SELECT id, nome FROM leads
-           WHERE REPLACE(REPLACE(REPLACE(REPLACE(telefone,'(',''),')',''),' ',''),'-','') = ?
-             AND empresa_id = ? LIMIT 1`,
-          [telNums, empresaId]
-        );
-        leadExistenteLogin = leadByTel || null;
-      }
-    }
+    let leadExistenteLogin = await verificarLeadExistentePorContato({ cpf: cpfLimpoLead, telefone, email, empresaId });
 
     let leadIdLogin = leadExistenteLogin?.id || null;
     if (!leadExistenteLogin) {

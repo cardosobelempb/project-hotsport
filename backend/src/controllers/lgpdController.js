@@ -1,5 +1,5 @@
 const db = require("../../db");
-const { verificarLeadExistente } = require("../utils/leadUtils");
+const { verificarLeadExistente, verificarLeadExistentePorContato } = require("../utils/leadUtils");
 const { notificarLiberacao } = require("../services/whatsappNotify");
 const { criarHotspotUser } = require("../utils/mikrotikClient");
 const radius = require("../services/radiusService");
@@ -46,22 +46,9 @@ exports.lgpdLogin = async (req, res) => {
       return res.status(404).json({ message: "Plano LGPD não configurado" });
     }
 
-    // Salvar na tabela leads (permite reconexão: pula INSERT se CPF ou telefone já existe)
-    let leadExistente = cpfLimpo ? await verificarLeadExistente(cpfLimpo, empresaId) : null;
-
-    // Verificar duplicado por telefone (quando CPF não encontrou)
-    if (!leadExistente && telefone) {
-      const telNums = telefone.replace(/\D/g, '');
-      if (telNums.length >= 10) {
-        const [[leadByTel]] = await db.execute(
-          `SELECT id, nome FROM leads
-           WHERE REPLACE(REPLACE(REPLACE(REPLACE(telefone,'(',''),')',''),' ',''),'-','') = ?
-             AND empresa_id = ? LIMIT 1`,
-          [telNums, empresaId]
-        );
-        leadExistente = leadByTel || null;
-      }
-    }
+    // Salvar na tabela leads (permite reconexão: pula INSERT se já existe
+    // por CPF, telefone ou email)
+    let leadExistente = await verificarLeadExistentePorContato({ cpf: cpfLimpo, telefone, email, empresaId });
 
     let leadId = leadExistente?.id || null;
     if (!leadExistente) {
