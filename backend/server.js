@@ -354,18 +354,26 @@ app.get('/hotspot/redirect/:mikrotikId', async (req, res) => {
     // conexao — o proprio CampanhaPlayer.jsx (modo nao-login) volta pra ca com
     // campanha_vista=1 apos o ultimo item, e ai sim seguimos pra checagem de MAC
     // conhecido e o dispatch normal. Portal "planos" (100% pago) fica sem anuncio.
+    // Opcional: exige campanha_previa_ativa=true em portal.configuracoes (toggle
+    // no PortalEditor). Default = desativado, ou seja, mesmo com campanha(s)
+    // vinculada(s) o cliente cai direto no portal escolhido.
     const TIPOS_COM_PROPAGANDA_PREVIA = [
       'lgpd',
       'lead',
       'lead_passivo',
       'trial_tempo'
     ];
+    let campanhaPreviaAtiva = false;
+    try {
+      campanhaPreviaAtiva = !!JSON.parse(portal.configuracoes || '{}').campanha_previa_ativa;
+    } catch (_) {}
     const [[campanhaVinculada]] = await db.execute(
       'SELECT 1 FROM portal_campanhas WHERE portal_id = ? LIMIT 1',
       [portal.id]
     );
     if (
       TIPOS_COM_PROPAGANDA_PREVIA.includes(portal.tipo) &&
+      campanhaPreviaAtiva &&
       campanhaVinculada &&
       req.query.campanha_vista !== '1'
     ) {

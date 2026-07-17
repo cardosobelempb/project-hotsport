@@ -869,6 +869,25 @@ export default function PortalEditor() {
                 Gerenciar campanhas →
               </a>
             </div>
+
+            <div className="flex items-center justify-between gap-4 mt-3 pt-3 border-t border-gray-700">
+              <div>
+                <p className="text-sm text-gray-300">Exibir pré-portal antes do cadastro</p>
+                <p className="text-xs text-gray-500">
+                  Quando desativado (padrão), o cliente vai direto para o portal escolhido, mesmo com campanha(s) vinculada(s) acima.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={!!config.campanha_previa_ativa}
+                  onChange={(e) => setConfig({ ...config, campanha_previa_ativa: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                <span className="ml-2 text-xs text-gray-400">{config.campanha_previa_ativa ? "Ativo" : "Inativo"}</span>
+              </label>
+            </div>
           </div>
       </div>
 
