@@ -1,4 +1,5 @@
 const { RouterOSAPI } = require("node-routeros");
+const dns = require("dns").promises;
 
 function gerarLoginHtml(redirectUrl, portal = null, systemDomain = '') {
   const corFundo = portal?.cor_fundo || '#0f111a';
@@ -637,6 +638,33 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
               addStep("walled_garden_ip", "ok", `Walled garden IP ja tem ${systemDomain}`);
             }
           } catch (e) { addStep("walled_garden_ip", "aviso", `IP walled garden: ${e.message}`); }
+        } else {
+          // systemDomain e hostname (nao IP): a regra dst-host acima so "casa"
+          // se o MikroTik conseguir espionar a resolucao DNS do cliente pra
+          // aprender o IP. Celulares/navegadores com DNS criptografado (DNS
+          // sobre HTTPS/TLS, padrao em Android/Chrome recentes) nunca deixam
+          // essa consulta passar em texto claro pelo roteador — o dominio fica
+          // "liberado" na lista mas com 0 hits pra sempre, e a conexao HTTPS
+          // e derrubada mesmo assim. Resolver aqui e liberar por IP direto
+          // remove essa dependencia por completo.
+          try {
+            const enderecos = await dns.resolve4(systemDomain);
+            const wgIp = await safePrint("/ip/hotspot/walled-garden/ip/print");
+            let novos = 0;
+            for (const addr of enderecos) {
+              const ipExists = wgIp && wgIp.find(w => w["dst-address"] === addr);
+              if (!ipExists) {
+                await safeWrite("/ip/hotspot/walled-garden/ip/add", [
+                  `=dst-address=${addr}`,
+                  "=action=accept",
+                ]);
+                novos++;
+              }
+            }
+            addStep("walled_garden_ip", "ok", `IP(s) de ${systemDomain} liberado(s) diretamente: ${enderecos.join(", ")}${novos < enderecos.length ? " (alguns ja existiam)" : ""} — evita depender de DNS snooping quando o cliente usa DNS criptografado`);
+          } catch (e) {
+            addStep("walled_garden_ip", "aviso", `Nao foi possivel resolver IP de ${systemDomain}: ${e.message}`);
+          }
         }
         // Dominios do Mercado Pago SDK (necessario para pagamento com cartao)
         // www.mercadopago.com hospeda o security.js (device fingerprint anti-fraude).
