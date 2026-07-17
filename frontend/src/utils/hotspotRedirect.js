@@ -21,6 +21,23 @@ export function redirecionarHotspot(gateway, username, password, delayMs = 0) {
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
     url = `http://${url}`;
   }
+
+  // Guarda: se o gateway apontar pro proprio dominio do sistema (end_hotspot
+  // desse mikrotik mal configurado — deveria ser o IP/DNS Name do roteador,
+  // nao o dominio do painel), redirecionar cai numa pagina em branco (loop
+  // de volta pro backend, que nao tem rota pra "/login"). Aborta e avisa no
+  // console em vez de navegar pra um lugar que nunca vai funcionar.
+  try {
+    if (new URL(url).hostname === window.location.hostname) {
+      console.error(
+        `redirecionarHotspot: gateway "${gateway}" e igual ao dominio do sistema (${window.location.hostname}). ` +
+        `O campo "end_hotspot" desse MikroTik esta mal configurado — deveria ser o IP ou DNS Name do proprio roteador. ` +
+        `Corrija em Mikrotiks > editar, ou rode o wizard de novo sem preencher "DNS Name" com o dominio do sistema.`
+      );
+      return;
+    }
+  } catch (_) { /* URL invalida, segue o fluxo normal abaixo */ }
+
   if (!url.includes("/login")) {
     url = url.replace(/\/$/, "") + "/login";
   }

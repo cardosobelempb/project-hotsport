@@ -295,7 +295,25 @@ router.post("/:id/enviar-hotspot", async (req, res) => {
     // bate em algo que tem cert e roteamento certo.
     const localAddr = config.localAddress || "10.5.50.1/24";
     const gatewayIp = localAddr.split("/")[0];
-    const endHotspot = (config.dnsName && config.dnsName.trim()) || gatewayIp;
+    const dnsNameTrimmed = (config.dnsName || "").trim();
+    const systemDomainClean = (systemDomain || "").replace(/:\d+$/, "").toLowerCase();
+    let endHotspot = dnsNameTrimmed || gatewayIp;
+
+    // Guarda: "DNS Name" aqui e o nome que o PRÓPRIO MikroTik usa como destino
+    // do redirect pos-login — nao pode ser igual ao dominio do sistema (backend).
+    // Se for, o cliente e mandado de volta pro backend em vez do MikroTik, e
+    // cai numa pagina em branco (nenhuma rota do frontend mapeia isso).
+    if (dnsNameTrimmed && dnsNameTrimmed.toLowerCase() === systemDomainClean) {
+      endHotspot = gatewayIp;
+      sendEvent({
+        type: "step",
+        step: "end_hotspot",
+        status: "aviso",
+        message: `DNS Name '${dnsNameTrimmed}' e igual ao dominio do sistema — isso quebraria o redirect pos-login (o cliente voltaria pro backend, nao pro MikroTik). Usando o IP do gateway (${gatewayIp}) em vez disso. Se este MikroTik tem um DNS proprio configurado no Server Profile, informe-o aqui.`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     await db.execute(
       "UPDATE mikrotiks SET end_hotspot = ? WHERE id = ? AND empresa_id = ?",
       [endHotspot, id, req.empresa_id]

@@ -170,12 +170,16 @@ function gerarStatusHtml(portal = null, systemDomain = '') {
 }
 
 async function escreverArquivoMikrotik(conn, filename, content) {
-  const apiWrite = (path, args, ms = 15000) => Promise.race([
+  // Timeouts curtos de propósito: se o RouterOS não responde a um método em
+  // poucos segundos, esperar 15-30s não muda o resultado — só atrasa a
+  // tentativa do próximo método (ou do próximo arquivo). Antes disso, um
+  // MikroTik sem resposta podia gastar quase 1min só nesta função.
+  const apiWrite = (path, args, ms = 6000) => Promise.race([
     conn.write(path, args).then(() => 'ok').catch(e => 'err:' + e.message),
     new Promise(r => setTimeout(() => r('timeout'), ms)),
   ]);
 
-  const apiPrint = (ms = 8000) => Promise.race([
+  const apiPrint = (ms = 4000) => Promise.race([
     conn.write('/file/print').then(r => Array.isArray(r) ? r : []).catch(() => []),
     new Promise(r => setTimeout(() => r([]), ms)),
   ]);
@@ -210,11 +214,11 @@ async function escreverArquivoMikrotik(conn, filename, content) {
   const rCreate = await apiWrite('/file/add', [`=name=${filename}`]);
   if (rCreate === 'ok' || rCreate === 'exists') {
     await new Promise(r => setTimeout(r, 800));
-    const fa = await apiPrint(12000);
+    const fa = await apiPrint(5000);
     const altNc = filename.startsWith('flash/') ? filename : `flash/${filename}`;
     const fc = fa.find(f => f.name === filename || f.name === altNc);
     if (fc) {
-      const rSet = await apiWrite('/file/set', [`=.id=${fc['.id']}`, `=contents=${content}`], 30000);
+      const rSet = await apiWrite('/file/set', [`=.id=${fc['.id']}`, `=contents=${content}`], 10000);
       if (rSet === 'ok') {
         const v = await verificar();
         if (v.ok) { console.log(`[file] Criado (2 passos) e verificado: ${filename} (${v.size} bytes)`); return { ok: true, size: v.size, method: 'file/add+set' }; }
@@ -374,6 +378,32 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
   try {
     await conn.connect();
     addStep("conexao", "ok", `Conectado a ${mikrotik.ip}`);
+
+    // === 0. Verificação da interface (falha rápido) ===
+    // Sem isso, um nome de interface errado só aparece como erro depois de ~10
+    // passos (RADIUS, ~26 dominios de walled garden, masquerade, QUIC, e ate 2
+    // tentativas de escrita de arquivo com retry pesado cada) — minutos de
+    // trabalho inutil, porque nenhum desses passos funciona sem a interface
+    // existir. Checar aqui evita o timeout de 30s do passo 5 (criar hotspot
+    // server) e todo o resto que dependeria dele.
+    try {
+      const interfaces = await safePrint("/interface/print");
+      const ifaceExiste = interfaces && interfaces.find(i => i.name === ifName);
+      if (!ifaceExiste) {
+        const nomes = (interfaces || []).map(i => i.name).join(", ") || "(nenhuma encontrada)";
+        addStep("interface", "erro", `Interface '${ifName}' nao existe neste MikroTik. Interfaces disponiveis: ${nomes}`);
+        try { await conn.close(); } catch (e) {}
+        return {
+          success: false,
+          steps,
+          log: steps.map(s => `[${s.status}] ${s.message}`),
+          error: `Interface '${ifName}' nao encontrada`,
+        };
+      }
+      addStep("interface", "ok", `Interface '${ifName}' encontrada`);
+    } catch (e) {
+      addStep("interface", "aviso", `Nao foi possivel verificar interfaces (seguindo mesmo assim): ${e.message}`);
+    }
 
     // === 1. IP na interface ===
     try {
@@ -745,6 +775,15 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     }
     const connArquivos = conn2 || conn;
 
+    // === 9-11. Login page, status page e restart só fazem sentido se o
+    // hotspot server existe (hsServerId setado no passo 5). Sem isso, cada
+    // escrita de arquivo ainda tenta 2-3 métodos com timeouts de até 30s
+    // (duas vezes, login + status) e o restart falha com "no_hotspot_server_found"
+    // no final — minutos gastos num resultado que já era previsível aqui.
+    if (!hsServerId) {
+      addStep("login_page", "aviso", "Hotspot server nao foi criado no passo anterior — login.html, status.html e restart pulados. Corrija a interface/servidor e rode o wizard novamente.");
+    } else {
+
     // === 9. Login Page (download via /tool/fetch ou escrita direta via API) ===
     try {
       const empresaId = empresa.id || mikrotik.empresa_id || '';
@@ -763,7 +802,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           "=dst-path=flash/hotspot/login.html",
           `=mode=${fetchMode}`,
           "=check-certificate=no",
-        ], 30000);
+        ], 15000);
         if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("login_page", "ok", `login.html baixado via fetch (${systemProto.toUpperCase()})`);
           ok = true;
@@ -824,7 +863,7 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
           "=dst-path=flash/hotspot/status.html",
           `=mode=${fetchMode}`,
           "=check-certificate=no",
-        ], 30000);
+        ], 15000);
         if (r !== "timeout" && (typeof r !== "string" || !r.startsWith('err:'))) {
           addStep("status_page", "ok", `status.html baixado via fetch (${systemProto.toUpperCase()})`);
           statusOk = true;
@@ -880,6 +919,8 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
     } catch (e) {
       addStep("hotspot_restart", "aviso", e.message);
     }
+
+    } // fim do if (hsServerId)
 
     try { if (conn2) await conn2.close(); } catch (e) {}
     try { await conn.close(); } catch (e) {}
