@@ -3,8 +3,8 @@ import { mascaraCPF, validarCPF } from "../../utils/cpfUtils";
 import { redirecionarHotspot } from "../../utils/hotspotRedirect";
 import { Alert } from "../../components/ui";
 
-// Etapas: "form" | "campanha" | "liberando" | "concluido"
-const ETAPA = { FORM: "form", CAMPANHA: "campanha", LIBERANDO: "liberando", CONCLUIDO: "concluido" };
+// Etapas: "form" | "campanha" | "pronto" | "liberando" | "concluido"
+const ETAPA = { FORM: "form", CAMPANHA: "campanha", PRONTO: "pronto", LIBERANDO: "liberando", CONCLUIDO: "concluido" };
 
 function fmtDuracao(min) {
   if (!min || min <= 0) return "60 min";
@@ -19,6 +19,7 @@ export default function CampanhaPreAcesso() {
   const [form, setForm] = useState({ nome: "", telefone: "", cpf: "", email: "", mac: "", ip: "" });
   const [mikrotikId, setMikrotikId] = useState("");
   const [portalId, setPortalId] = useState("");
+  const [empresaId, setEmpresaId] = useState("");
   const [cfg, setCfg] = useState({});
   const [cpfErro, setCpfErro] = useState("");
   const [erro, setErro] = useState(null);
@@ -48,6 +49,7 @@ export default function CampanhaPreAcesso() {
     setMikrotikId(params.get("mikrotik_id") || "");
     setPortalId(params.get("portal_id") || "");
     const empId = params.get("empresa_id");
+    setEmpresaId(empId || "");
     if (empId) {
       fetch(`/api/portal-config/campanha_pre_acesso?empresa_id=${empId}`)
         .then(r => r.json())
@@ -123,9 +125,23 @@ export default function CampanhaPreAcesso() {
       }
     } catch (err) {
       setErro(err.message);
-      setEtapa(ETAPA.CAMPANHA);
+      setEtapa(ETAPA.PRONTO);
     }
   }, [etapa, tokenAcesso]);
+
+  // "Contratar um plano": ainda não chamamos /liberar (sem gateway/username
+  // ainda), então navega direto pro cadastro do fluxo pago em vez de passar
+  // pela EscolhaAcesso (que espera credenciais já liberadas).
+  const handleContratarPlano = useCallback(() => {
+    const params = new URLSearchParams({
+      mac: form.mac || "",
+      ip: form.ip || "",
+      mikrotik_id: mikrotikId || "",
+      empresa_id: empresaId || "",
+    });
+    if (portalId) params.set("portal_id", portalId);
+    window.location.href = `/cadastro-cliente?${params.toString()}`;
+  }, [form.mac, form.ip, mikrotikId, empresaId, portalId]);
 
   // ---- Lógica de campanha (similar ao CampanhaPlayer) ----
   const avançarCampanha = useCallback((nextIdx) => {
@@ -134,11 +150,11 @@ export default function CampanhaPreAcesso() {
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     const idx = nextIdx !== undefined ? nextIdx : campanhaIdx + 1;
     if (idx >= campanhaItens.length) {
-      liberarAcesso();
+      setEtapa(ETAPA.PRONTO);
     } else {
       setCampanhaIdx(idx);
     }
-  }, [campanhaIdx, campanhaItens.length, liberarAcesso]);
+  }, [campanhaIdx, campanhaItens.length]);
 
   const startImageTimer = useCallback((ms) => {
     startRef.current = performance.now();
@@ -159,17 +175,17 @@ export default function CampanhaPreAcesso() {
     setContagemRegressiva(campanhaDuracaoSeg);
     const interval = setInterval(() => {
       setContagemRegressiva(prev => {
-        if (prev <= 1) { clearInterval(interval); liberarAcesso(); return 0; }
+        if (prev <= 1) { clearInterval(interval); setEtapa(ETAPA.PRONTO); return 0; }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [etapa, campanhaModoContagem, campanhaDuracaoSeg, liberarAcesso]);
+  }, [etapa, campanhaModoContagem, campanhaDuracaoSeg]);
 
   // Inicia timer ao mudar de item (com itens de campanha)
   useEffect(() => {
     if (etapa !== ETAPA.CAMPANHA || campanhaModoContagem) return;
-    if (campanhaItens.length === 0) { liberarAcesso(); return; }
+    if (campanhaItens.length === 0) { setEtapa(ETAPA.PRONTO); return; }
     if (campanhaIdx >= campanhaItens.length) return;
     const item = campanhaItens[campanhaIdx];
     setCampanhaProgress(0);
@@ -278,6 +294,37 @@ export default function CampanhaPreAcesso() {
             {contagemRegressiva != null ? contagemRegressiva : campanhaDuracaoSeg}
           </p>
           <p className="text-white/50 text-sm">segundos restantes</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- ETAPA: PRONTO (campanha/contagem terminou — aguarda clique) ----
+  if (etapa === ETAPA.PRONTO) {
+    return (
+      <div className={`fixed inset-0 flex items-center justify-center text-white px-4 ${!bgStyle ? "bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900" : ""}`} style={bgStyle}>
+        <div className="w-full max-w-sm bg-[#12141c] border border-white/10 rounded-2xl shadow-2xl p-8 text-center">
+          <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-xl font-bold mb-2">Tudo pronto!</p>
+          <p className="text-gray-400 text-sm mb-6">
+            Conecte agora com anúncios, ou contrate um plano pago sem interrupções.
+          </p>
+          <button
+            onClick={liberarAcesso}
+            className="w-full bg-green-500 text-black font-semibold py-3 rounded-full shadow hover:bg-green-400 active:bg-green-600 transition-colors mb-3"
+          >
+            Conectar agora
+          </button>
+          <button
+            onClick={handleContratarPlano}
+            className="w-full bg-white/10 border border-white/15 text-white font-semibold py-3 rounded-full hover:bg-white/15 active:bg-white/20 transition-colors"
+          >
+            Contratar um plano
+          </button>
         </div>
       </div>
     );

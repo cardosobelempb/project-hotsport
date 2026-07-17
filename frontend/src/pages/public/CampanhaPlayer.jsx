@@ -112,6 +112,18 @@ export default function CampanhaPlayer() {
     redirecionarHotspot(loginGateway, loginUsername, loginPassword);
   }, [loginGateway, loginUsername, loginPassword]);
 
+  // "Contratar um plano": ainda não conectou no MikroTik, então navega pro
+  // cadastro do fluxo pago em vez de usar as credenciais grátis já emitidas.
+  const handleContratarPlano = useCallback(() => {
+    const params = new URLSearchParams({
+      mac: searchParams.get("mac") || "",
+      ip: searchParams.get("ip") || "",
+      mikrotik_id: searchParams.get("mikrotik_id") || "",
+      empresa_id: searchParams.get("empresa_id") || "",
+    });
+    window.location.href = `/cadastro-cliente?${params.toString()}`;
+  }, [searchParams]);
+
   // Advance to next item or end
   const advance = useCallback((nextIndex) => {
     setProgress(0);
@@ -428,13 +440,19 @@ export default function CampanhaPlayer() {
           </div>
           <p className="text-xl font-bold mb-2">Tudo pronto!</p>
           <p className="text-gray-400 text-sm mb-6">
-            Clique no botão abaixo para liberar seu acesso à internet.
+            Conecte agora com anúncios, ou contrate um plano pago sem interrupções.
           </p>
           <button
             onClick={handleIrParaNavegacao}
-            className="w-full bg-green-500 text-black font-semibold py-3 rounded-full shadow hover:bg-green-400 active:bg-green-600 transition-colors"
+            className="w-full bg-green-500 text-black font-semibold py-3 rounded-full shadow hover:bg-green-400 active:bg-green-600 transition-colors mb-3"
           >
-            Liberar acesso à internet
+            Conectar agora
+          </button>
+          <button
+            onClick={handleContratarPlano}
+            className="w-full bg-white/10 border border-white/15 text-white font-semibold py-3 rounded-full hover:bg-white/15 active:bg-white/20 transition-colors"
+          >
+            Contratar um plano
           </button>
         </div>
       </div>
