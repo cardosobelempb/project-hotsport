@@ -32,11 +32,11 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
     const mikrotikId = planos[0]?.mikrotik_id;
 
     const [mtk] = await db.query(
-      "SELECT end_hotspot FROM mikrotiks WHERE id = ? LIMIT 1",
+      "SELECT end_hotspot, ip FROM mikrotiks WHERE id = ? LIMIT 1",
       [mikrotikId]
     );
 
-    const gateway = mtk[0]?.end_hotspot || "192.168.0.1";
+    const gateway = mtk[0]?.end_hotspot || mtk[0]?.ip || null;
 
     // Cria usuario temporario: modo 'sessao' = Session-Timeout no radcheck
     // (nao usa Max-Daily-Session, acesso e por sessao unica)

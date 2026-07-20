@@ -85,7 +85,7 @@ exports.capturaPassiva = async (req, res) => {
       senha = username;
 
       let planoQuery = `
-        SELECT p.id, p.duracao_minutos, p.velocidade_down, p.velocidade_up, p.mikrotik_id, p.shared_users, m.end_hotspot
+        SELECT p.id, p.duracao_minutos, p.velocidade_down, p.velocidade_up, p.mikrotik_id, p.shared_users, m.end_hotspot, m.ip
         FROM planos p
         LEFT JOIN mikrotiks m ON p.mikrotik_id = m.id
         WHERE LOWER(p.nome) = 'lead'`;
@@ -117,14 +117,15 @@ exports.capturaPassiva = async (req, res) => {
             limparSessoesDoDia: true,
           });
 
-          // Resolve gateway: end_hotspot do plano, fallback no mikrotik da requisição
-          // NUNCA usa ip do cliente (ip = cliente, não o gateway)
-          gateway = plano.end_hotspot || null;
+          // Resolve gateway: end_hotspot do plano (fallback ip de gerencia do
+          // mikrotik do plano), senao busca do mikrotik da requisicao.
+          // NUNCA usa a variavel `ip` (IP do cliente) como fallback aqui.
+          gateway = plano.end_hotspot || plano.ip || null;
           const mtkIdPassivo = nasIdPassivo && nasIdPassivo > 0 ? nasIdPassivo : (mikrotik_id ? parseInt(mikrotik_id) : null);
           if (!gateway && mtkIdPassivo) {
             try {
-              const [[reqMtk]] = await db.execute("SELECT end_hotspot FROM mikrotiks WHERE id = ?", [mtkIdPassivo]);
-              gateway = reqMtk?.end_hotspot || null;
+              const [[reqMtk]] = await db.execute("SELECT end_hotspot, ip FROM mikrotiks WHERE id = ?", [mtkIdPassivo]);
+              gateway = reqMtk?.end_hotspot || reqMtk?.ip || null;
             } catch (_) {}
           }
           const loginUrl = gateway ? `http://${gateway}/login?username=${username}&password=${senha}` : "";
@@ -218,7 +219,7 @@ exports.leadLogin = async (req, res) => {
 
     // Busca plano Lead da empresa (LEFT JOIN: funciona mesmo com mikrotik_id=0 no seed)
     let planoQuery = `
-      SELECT p.id, p.duracao_minutos, p.velocidade_down, p.velocidade_up, p.mikrotik_id, p.shared_users, m.end_hotspot
+      SELECT p.id, p.duracao_minutos, p.velocidade_down, p.velocidade_up, p.mikrotik_id, p.shared_users, m.end_hotspot, m.ip
       FROM planos p
       LEFT JOIN mikrotiks m ON p.mikrotik_id = m.id
       WHERE LOWER(p.nome) = 'lead'`;
@@ -275,14 +276,15 @@ exports.leadLogin = async (req, res) => {
       limparSessoesDoDia: true,
     });
 
-    // Resolve gateway pelo end_hotspot do plano; fallback: mikrotik_id da requisição
-    // NUNCA usa ip do cliente como fallback (ip = cliente, não o gateway)
-    let gateway = plano.end_hotspot || null;
+    // Resolve gateway pelo end_hotspot do plano (fallback ip de gerencia do
+    // mikrotik do plano), senao busca do mikrotik da requisicao.
+    // NUNCA usa a variavel `ip` (IP do cliente) como fallback aqui.
+    let gateway = plano.end_hotspot || plano.ip || null;
     const mtkIdLead = nasIdLead && nasIdLead > 0 ? nasIdLead : (mikrotik_id ? parseInt(mikrotik_id) : null);
     if (!gateway && mtkIdLead) {
       try {
-        const [[reqMtk]] = await db.execute("SELECT end_hotspot FROM mikrotiks WHERE id = ?", [mtkIdLead]);
-        gateway = reqMtk?.end_hotspot || null;
+        const [[reqMtk]] = await db.execute("SELECT end_hotspot, ip FROM mikrotiks WHERE id = ?", [mtkIdLead]);
+        gateway = reqMtk?.end_hotspot || reqMtk?.ip || null;
       } catch (_) {}
     }
     const loginUrl = gateway ? `http://${gateway}/login?username=${username}&password=${senha}` : "";

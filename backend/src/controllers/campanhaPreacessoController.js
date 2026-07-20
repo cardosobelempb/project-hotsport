@@ -175,7 +175,7 @@ exports.liberarAcesso = async (req, res) => {
     let gateway = null;
     if (mikrotikId) {
       const [[m]] = await db.execute("SELECT end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotikId]);
-      gateway = m?.end_hotspot || null;
+      gateway = m?.end_hotspot || m?.ip || null;
       if (m) {
         criarHotspotUser(m, { username, senha, rateLimit, duracaoMinutos: acessoDuracaoMin })
           .catch(e => console.warn("[campanha_pre_acesso] criarHotspotUser:", e.message));

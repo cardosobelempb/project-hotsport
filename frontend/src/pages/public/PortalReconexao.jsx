@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PublicBanners from "../../components/public/PublicBanners";
+import SaldoAcessoCard from "../../components/public/SaldoAcessoCard";
+import { redirecionarHotspot } from "../../utils/hotspotRedirect";
 
 function fmtPreco(v) {
   // valor vem em centavos do banco (ex: 500 = R$ 5,00)
@@ -37,6 +39,8 @@ export default function PortalReconexao() {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cfg, setCfg] = useState({});
+  const [saldo, setSaldo] = useState(null); // null enquanto carrega/sem saldo, objeto quando tem_saldo
+  const [conectando, setConectando] = useState(false);
 
   useEffect(() => {
     async function carregar() {
@@ -51,11 +55,25 @@ export default function PortalReconexao() {
           setUsuario(u);
         }
 
-        // Buscar planos pagos disponíveis da empresa
-        const planosUrl = empresaId
-          ? `/api/planos-publicos?empresa_id=${empresaId}`
-          : mikrotikId
+        // Checar saldo de tempo diario direto aqui — nao depende do pre-check
+        // do /hotspot/redirect ter enviado o mac corretamente. Se ainda tem
+        // saldo, oferece "continuar gratis" junto com os planos pagos.
+        if (mac && mikrotikId) {
+          fetch(
+            `/api/reconexao/saldo?mac=${encodeURIComponent(mac)}&mikrotik_id=${encodeURIComponent(mikrotikId)}`
+          )
+            .then((r) => r.json())
+            .then((data) => setSaldo(data?.tem_saldo ? data : null))
+            .catch(() => setSaldo(null));
+        }
+
+        // Buscar planos pagos disponíveis — sempre priorizando o mikrotik do
+        // cliente (planos de outros mikrotiks da empresa nao servem, pois o
+        // gateway de liberacao final e resolvido a partir do mikrotik do plano)
+        const planosUrl = mikrotikId
           ? `/api/planos-publicos?mikrotik_id=${mikrotikId}`
+          : empresaId
+          ? `/api/planos-publicos?empresa_id=${empresaId}`
           : null;
 
         if (planosUrl) {
@@ -83,6 +101,12 @@ export default function PortalReconexao() {
     }
     carregar();
   }, []); // eslint-disable-line
+
+  const handleContinuarGratis = () => {
+    if (!saldo?.gateway || !saldo?.username) return;
+    setConectando(true);
+    redirecionarHotspot(saldo.gateway, saldo.username, saldo.password, 300);
+  };
 
   const selecionarPlano = (plano) => {
     const cpf = usuario?.cpf || "";
@@ -224,27 +248,46 @@ export default function PortalReconexao() {
           )}
         </div>
 
+        {/* Saldo de tempo diario ainda disponivel: opcao de continuar gratis */}
+        {saldo?.tem_saldo && (
+          <div className="mb-8">
+            <SaldoAcessoCard
+              saldo={saldo}
+              onConectar={handleContinuarGratis}
+              conectando={conectando}
+            />
+          </div>
+        )}
+
+        {planos.length > 0 && (
+          <p className="text-center text-purple-300 text-sm font-medium mb-4">
+            {saldo?.tem_saldo ? "ou assine um plano" : "Planos disponíveis"}
+          </p>
+        )}
+
         {/* Cards de planos */}
         {planos.length === 0 ? (
-          <div className="text-center py-12 text-purple-300">
-            <svg
-              className="w-12 h-12 mx-auto mb-3 opacity-40"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="font-medium">Nenhum plano disponível no momento.</p>
-            <p className="text-xs mt-1 text-purple-400">
-              Fale com o responsável pela rede.
-            </p>
-          </div>
+          saldo?.tem_saldo ? null : (
+            <div className="text-center py-12 text-purple-300">
+              <svg
+                className="w-12 h-12 mx-auto mb-3 opacity-40"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p className="font-medium">Nenhum plano disponível no momento.</p>
+              <p className="text-xs mt-1 text-purple-400">
+                Fale com o responsável pela rede.
+              </p>
+            </div>
+          )
         ) : (
           <div className="space-y-3">
             {planos.map((plano) => (

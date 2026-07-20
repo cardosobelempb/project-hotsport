@@ -2,22 +2,22 @@
 import React, { useState } from "react";
 import { Ticket } from "lucide-react";
 import { buildAdSrcDoc } from "../../utils/adsense";
-
-function getYoutubeId(url) {
-  const m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(url || "");
-  return m ? m[1] : null;
-}
+import CampanhaStorySlide from "./CampanhaStorySlide";
 
 /**
- * Renderiza o conteúdo de um único item de campanha em formato de card,
- * sem barra de progresso/auto-avanço/timer — usado no pop-up (dispensável
- * pelo cliente), diferente do CampanhaPlayer (sequência com timer).
+ * Renderiza o conteúdo de um único item de campanha em formato de card.
+ * Tipos vídeo/YouTube usam o slide "story" (CampanhaStorySlide, com barra de
+ * progresso e sem controle de pular) — quem monta este componente (o pop-up
+ * pré-login) decide se/quando dispensar com base em `onConcluido`. Os demais
+ * tipos (afiliado/cupom/adsense/imagem) continuam sem timer, dispensáveis a
+ * qualquer momento.
  *
  * `onClique` é chamado quando o cliente interage com um link/CTA do card,
  * pra quem monta o componente (overlay pré-login ou página pós-login)
  * registrar o evento de clique sem duplicar a lógica por tipo aqui dentro.
+ * `onConcluido` é chamado quando um item de vídeo/YouTube termina de tocar.
  */
-export default function CampanhaPopupCard({ item, onClique }) {
+export default function CampanhaPopupCard({ item, onClique, onConcluido }) {
   const [imgErro, setImgErro] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
@@ -115,27 +115,8 @@ export default function CampanhaPopupCard({ item, onClique }) {
     );
   }
 
-  if (item.tipo === "video") {
-    return (
-      <div className="w-full bg-black flex items-center justify-center">
-        <video src={item.arquivo_url} autoPlay muted loop playsInline className="w-full max-h-72 object-contain" />
-      </div>
-    );
-  }
-
-  if (item.tipo === "youtube") {
-    const videoId = getYoutubeId(item.arquivo_url);
-    return videoId ? (
-      <div className="w-full aspect-video bg-black">
-        <iframe
-          title={item.titulo || "Vídeo"}
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&playsinline=1&rel=0`}
-          allow="autoplay; encrypted-media"
-          className="w-full h-full"
-          style={{ border: 0 }}
-        />
-      </div>
-    ) : null;
+  if (item.tipo === "video" || item.tipo === "youtube") {
+    return <CampanhaStorySlide item={item} onEnded={onConcluido} />;
   }
 
   if (item.tipo === "adsense") {

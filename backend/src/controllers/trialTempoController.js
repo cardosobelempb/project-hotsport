@@ -16,7 +16,7 @@ exports.cadastroTrial = async (req, res) => {
     let mtkRow = null;
     if (mikrotik_id) {
       const [[mtk]] = await db.execute(
-        "SELECT empresa_id, end_hotspot FROM mikrotiks WHERE id = ?",
+        "SELECT empresa_id, end_hotspot, ip FROM mikrotiks WHERE id = ?",
         [mikrotik_id]
       );
       mtkRow = mtk || null;
@@ -65,10 +65,10 @@ exports.cadastroTrial = async (req, res) => {
 
     if (sessaoAtiva) {
       // Trial ainda em andamento — resolve gateway e retorna credenciais
-      let gateway = mtkRow?.end_hotspot || null;
+      let gateway = mtkRow?.end_hotspot || mtkRow?.ip || null;
       if (!gateway && mikrotik_id) {
-        const [[m]] = await db.execute("SELECT end_hotspot FROM mikrotiks WHERE id = ?", [mikrotik_id]);
-        gateway = m?.end_hotspot || null;
+        const [[m]] = await db.execute("SELECT end_hotspot, ip FROM mikrotiks WHERE id = ?", [mikrotik_id]);
+        gateway = m?.end_hotspot || m?.ip || null;
       }
       const [[leadAtivo]] = await db.execute(
         "SELECT id FROM leads WHERE mac = ? AND empresa_id = ? AND origem = 'trial_tempo' LIMIT 1",
@@ -130,10 +130,10 @@ exports.cadastroTrial = async (req, res) => {
     });
 
     // Resolve gateway
-    let gateway = mtkRow?.end_hotspot || null;
+    let gateway = mtkRow?.end_hotspot || mtkRow?.ip || null;
     if (!gateway && mikrotik_id) {
-      const [[m]] = await db.execute("SELECT end_hotspot FROM mikrotiks WHERE id = ?", [mikrotik_id]);
-      gateway = m?.end_hotspot || null;
+      const [[m]] = await db.execute("SELECT end_hotspot, ip FROM mikrotiks WHERE id = ?", [mikrotik_id]);
+      gateway = m?.end_hotspot || m?.ip || null;
     }
 
     // Cria hotspot user no MikroTik (fire-and-forget)

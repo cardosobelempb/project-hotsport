@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { Plus, Pencil, Trash2, Copy, X, AlertTriangle, ArrowDown, ArrowUp } from "lucide-react";
 import { Button, IconButton, Input, Textarea, Select, Card, Table, StatusToggle } from "../../components/ui";
@@ -20,6 +20,7 @@ export default function Planos() {
   const [planos, setPlanos] = useState([]);
   const [mikrotiks, setMikrotiks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtroMikrotik, setFiltroMikrotik] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState({
@@ -68,7 +69,25 @@ export default function Planos() {
     carregarMikrotiks();
   }, []);
 
-  const { pageData, page, setPage, totalPages, total } = usePagination(planos, 12);
+  const mikrotikNomePorId = useMemo(
+    () => Object.fromEntries(mikrotiks.map((m) => [String(m.id), m.nome])),
+    [mikrotiks]
+  );
+
+  const planosFiltrados = useMemo(
+    () =>
+      filtroMikrotik
+        ? planos.filter((p) => String(p.mikrotik_id) === filtroMikrotik)
+        : planos,
+    [planos, filtroMikrotik]
+  );
+
+  const { pageData, page, setPage, totalPages, total } = usePagination(planosFiltrados, 12);
+
+  const handleFiltroMikrotikChange = (e) => {
+    setFiltroMikrotik(e.target.value);
+    setPage(1);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -244,7 +263,19 @@ export default function Planos() {
       )}
 
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Planos Cadastrados</h2>
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+          <h2 className="text-xl font-semibold">Planos Cadastrados</h2>
+          <Select
+            value={filtroMikrotik}
+            onChange={handleFiltroMikrotikChange}
+            containerClassName="w-full sm:w-64"
+          >
+            <option value="">Todos os Mikrotiks</option>
+            {mikrotiks.map((m) => (
+              <option key={m.id} value={String(m.id)}>{m.nome}</option>
+            ))}
+          </Select>
+        </div>
         {loading ? (
           <p className="text-gray-400">Carregando...</p>
         ) : (
@@ -264,7 +295,10 @@ export default function Planos() {
                 <Table.Row key={p.id}>
                   <Table.Cell>
                     <div className="font-semibold text-white">{p.nome}</div>
-                    <div className="text-xs text-gray-500">{p.descricao}</div>
+                    <div className="text-[11px] text-gray-500">
+                      {mikrotikNomePorId[String(p.mikrotik_id)] || "Sem Mikrotik"}
+                      {p.descricao ? ` · ${p.descricao}` : ""}
+                    </div>
                   </Table.Cell>
                   <Table.Cell>{p.duracao_minutos} min</Table.Cell>
                   <Table.Cell hideOn="md">

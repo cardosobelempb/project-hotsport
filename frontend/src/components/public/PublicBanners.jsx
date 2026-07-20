@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { buildAdSrcDoc } from "../../utils/adsense";
 import CampanhaPopupCard from "./CampanhaPopupCard";
 
@@ -65,10 +65,13 @@ function Bar({ banner }) {
  *   </PublicBanners>
  *
  * `portalId` (opcional) liga o pop-up de campanha (item com modo_exibicao
- * = 'popup'): um overlay dispensável mostrado 1x por sessão de navegador
- * (sessionStorage), por cima do conteúdo — não bloqueia o fluxo da página
- * como o CampanhaPlayer sequencial. `mikrotikId`/`mac` são opcionais, só
- * usados pra avaliar segmentação (dispositivo já é detectado aqui).
+ * = 'popup'), por cima do conteúdo. Itens de vídeo/YouTube são MANDATÓRIOS:
+ * sem X, sem dispensa por clique no fundo, só libera (e só marca como visto
+ * no sessionStorage) quando o vídeo termina — se o cliente sair no meio,
+ * a próxima tentativa mostra o pop-up de novo do zero. Os demais tipos
+ * (afiliado/cupom/adsense/imagem) continuam dispensáveis a qualquer momento,
+ * 1x por sessão de navegador. `mikrotikId`/`mac` são opcionais, só usados
+ * pra avaliar segmentação (dispositivo já é detectado aqui).
  */
 export default function PublicBanners({
   pagina,
@@ -83,6 +86,8 @@ export default function PublicBanners({
   const [banners, setBanners] = useState([]);
   const [popup, setPopup] = useState(null); // { campanha_id, item }
   const [popupAberto, setPopupAberto] = useState(false);
+  const [popupConcluido, setPopupConcluido] = useState(false);
+  const popupMandatorio = popup?.item?.tipo === "video" || popup?.item?.tipo === "youtube";
 
   useEffect(() => {
     if (!empresaId) return;
@@ -91,6 +96,11 @@ export default function PublicBanners({
       .then((d) => setBanners(Array.isArray(d?.data) ? d.data : []))
       .catch(() => {});
   }, [empresaId, pagina]);
+
+  // Guarda a chave de sessionStorage do pop-up atual — só marcada como
+  // "visto" na hora certa: imediatamente pra tipos dispensaveis, só ao
+  // concluir o vídeo/YouTube pros mandatórios (ver handleConcluirVideo).
+  const chaveVistoRef = useRef(null);
 
   useEffect(() => {
     if (!portalId && !mikrotikId) return;
@@ -109,7 +119,13 @@ export default function PublicBanners({
         if (!d?.data?.item) return;
         setPopup(d.data);
         setPopupAberto(true);
-        sessionStorage.setItem(chaveVisto, "1");
+        setPopupConcluido(false);
+        chaveVistoRef.current = chaveVisto;
+        const mandatorio = d.data.item.tipo === "video" || d.data.item.tipo === "youtube";
+        // Dispensável: marca como visto já, não aparece de novo nesta sessão.
+        // Mandatório: só marca quando handleConcluirVideo rodar — se o
+        // cliente sair antes, a próxima carga busca de novo do zero.
+        if (!mandatorio) sessionStorage.setItem(chaveVisto, "1");
         if (portalId) {
           fetch(`/api/public/campanha/${portalId}/evento`, {
             method: "POST",
@@ -124,6 +140,11 @@ export default function PublicBanners({
       })
       .catch(() => {});
   }, [portalId, mikrotikId]);
+
+  const handleConcluirVideo = useCallback(() => {
+    setPopupConcluido(true);
+    if (chaveVistoRef.current) sessionStorage.setItem(chaveVistoRef.current, "1");
+  }, []);
 
   const registrarClique = useCallback(() => {
     if (!popup || !portalId) return;
@@ -149,21 +170,38 @@ export default function PublicBanners({
 
       {popupAberto && popup && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-          onClick={() => setPopupAberto(false)}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${popupMandatorio ? "bg-black/95" : "bg-black/70"}`}
+          onClick={popupMandatorio ? undefined : () => setPopupAberto(false)}
         >
           <div
             className="w-full max-w-sm bg-[#12141c] border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setPopupAberto(false)}
-              aria-label="Fechar"
-              className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
-            >
-              ×
-            </button>
-            <CampanhaPopupCard item={popup.item} onClique={registrarClique} />
+            {!popupMandatorio && (
+              <button
+                onClick={() => setPopupAberto(false)}
+                aria-label="Fechar"
+                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+              >
+                ×
+              </button>
+            )}
+            <CampanhaPopupCard
+              item={popup.item}
+              onClique={registrarClique}
+              onConcluido={popupMandatorio ? handleConcluirVideo : undefined}
+            />
+            {popupMandatorio && (
+              <div className="p-4">
+                <button
+                  onClick={() => setPopupAberto(false)}
+                  disabled={!popupConcluido}
+                  className="w-full bg-green-500 disabled:bg-white/10 disabled:text-gray-400 text-black font-semibold py-3 rounded-full shadow disabled:shadow-none hover:enabled:bg-green-400 active:enabled:bg-green-600 transition-colors disabled:cursor-not-allowed"
+                >
+                  {popupConcluido ? "Continuar" : "Assista para continuar"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

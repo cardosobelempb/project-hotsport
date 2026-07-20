@@ -1350,7 +1350,9 @@ export default function CampanhaEditor() {
           />
           <p className="text-gray-500 text-xs mt-1">
             {modoExibicao === "popup"
-              ? "Não entra na sequência normal da campanha — aparece como um pop-up dispensável (1x por sessão), antes e depois do login."
+              ? (modalTab === "youtube" || (modalTab === "arquivo" && arquivoEhVideo)
+                  ? "Não entra na sequência normal da campanha — aparece como pop-up antes do login. Para vídeo/YouTube o pop-up é OBRIGATÓRIO: sem botão de fechar, o cliente só segue em frente depois de assistir até o fim; se sair no meio, a próxima tentativa mostra o vídeo de novo do zero."
+                  : "Não entra na sequência normal da campanha — aparece como um pop-up dispensável (1x por sessão), antes e depois do login.")
               : "Entra na sequência de slides tocada em ordem antes do login (comportamento atual)."}
           </p>
         </div>
