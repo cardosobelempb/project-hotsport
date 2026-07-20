@@ -1,5 +1,6 @@
 const db = require("../../db");
 const radius = require("../services/radiusService");
+const { criarHotspotUser } = require("../utils/mikrotikClient");
 
 function gerarUsernameAleatorio(empresaId) {
   const timestamp = Date.now().toString().slice(-6);
@@ -32,11 +33,12 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
     const mikrotikId = planos[0]?.mikrotik_id;
 
     const [mtk] = await db.query(
-      "SELECT end_hotspot, ip FROM mikrotiks WHERE id = ? LIMIT 1",
+      "SELECT end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ? LIMIT 1",
       [mikrotikId]
     );
+    const mtkData = mtk[0] || null;
 
-    const gateway = mtk[0]?.end_hotspot || mtk[0]?.ip || null;
+    const gateway = mtkData?.end_hotspot || mtkData?.ip || null;
 
     // Cria usuario temporario: modo 'sessao' = Session-Timeout no radcheck
     // (nao usa Max-Daily-Session, acesso e por sessao unica)
@@ -51,6 +53,15 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
       sharedUsers: 1,
       modo: "sessao",
     });
+
+    // RADIUS sozinho nao libera internet nesse ambiente — precisa tambem do
+    // usuario local no hotspot do MikroTik (fire-and-forget, ver mikrotikClient.js)
+    if (mtkData?.ip) {
+      criarHotspotUser(
+        { ip: mtkData.ip, usuario: mtkData.usuario, senha: mtkData.senha, porta: mtkData.porta },
+        { username, senha, rateLimit, duracaoMinutos: Math.ceil(tempoSegundos / 60) }
+      ).catch(e => console.warn("[gerarAcessoTemporario] criarHotspotUser:", e.message));
+    }
 
     return { username, password: senha, gateway };
   } catch (err) {
