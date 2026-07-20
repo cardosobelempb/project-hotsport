@@ -33,7 +33,7 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
     const mikrotikId = planos[0]?.mikrotik_id;
 
     const [mtk] = await db.query(
-      "SELECT end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ? LIMIT 1",
+      "SELECT end_hotspot, ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ? LIMIT 1",
       [mikrotikId]
     );
     const mtkData = mtk[0] || null;
@@ -58,7 +58,7 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
     // usuario local no hotspot do MikroTik (fire-and-forget, ver mikrotikClient.js)
     if (mtkData?.ip) {
       criarHotspotUser(
-        { ip: mtkData.ip, usuario: mtkData.usuario, senha: mtkData.senha, porta: mtkData.porta },
+        { ip: mtkData.ip, vpn_ip: mtkData.vpn_ip, usuario: mtkData.usuario, senha: mtkData.senha, porta: mtkData.porta },
         { username, senha, rateLimit, duracaoMinutos: Math.ceil(tempoSegundos / 60) }
       ).catch(e => console.warn("[gerarAcessoTemporario] criarHotspotUser:", e.message));
     }

@@ -40,7 +40,7 @@ exports.login = async (req, res) => {
 
     // Pega o domínio do gateway (Mikrotik) para redirecionamento
     const [[mk]] = await db.query(
-      "SELECT ip, usuario, senha, porta, end_hotspot FROM mikrotiks WHERE id = ?",
+      "SELECT ip, vpn_ip, usuario, senha, porta, end_hotspot FROM mikrotiks WHERE id = ?",
       [mtkIdConexao]
     );
 

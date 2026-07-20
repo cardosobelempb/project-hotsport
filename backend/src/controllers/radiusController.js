@@ -66,7 +66,7 @@ const vincularPlano = async (req, res) => {
       )
         .then(([[cred]]) => {
           if (!cred) return;
-          return db.query("SELECT ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [plano.mikrotik_id])
+          return db.query("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [plano.mikrotik_id])
             .then(([[mtkRow]]) => {
               if (!mtkRow) return;
               const rateLimit = `${plano.velocidade_up}M/${plano.velocidade_down}M`;

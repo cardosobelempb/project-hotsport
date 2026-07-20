@@ -465,7 +465,7 @@ async function liberarDominiosAfiliado(campanhaId, empresaId, urls) {
 
     const portalIds = portais.map((p) => p.id);
     const [mikrotiks] = await db.query(
-      `SELECT ip, usuario, senha, porta FROM mikrotiks WHERE portal_id IN (?)`,
+      `SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE portal_id IN (?)`,
       [portalIds]
     );
     if (mikrotiks.length === 0) {

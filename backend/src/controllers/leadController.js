@@ -132,7 +132,7 @@ exports.capturaPassiva = async (req, res) => {
 
           // Criar hotspot user no MikroTik com rate-limit do plano (fire-and-forget)
           if (mtkIdPassivo) {
-            db.execute("SELECT ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdPassivo])
+            db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdPassivo])
               .then(([[mtkRow]]) => {
                 if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
               })
@@ -291,7 +291,7 @@ exports.leadLogin = async (req, res) => {
 
     // Criar hotspot user no MikroTik com rate-limit do plano (fire-and-forget)
     if (mtkIdLead) {
-      db.execute("SELECT ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdLead])
+      db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdLead])
         .then(([[mtkRow]]) => {
           if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
         })

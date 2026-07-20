@@ -91,7 +91,7 @@ async function liberarUsuario({ mac, ip, plano, empresa_id, cpf, telefone, clien
 
     // Monta URL de auto-login do hotspot e cria hotspot user no MikroTik
     const [mkInfo] = await db.query(
-      "SELECT end_hotspot, ip, usuario, senha AS senha_mtk, porta FROM mikrotiks WHERE id = ? LIMIT 1",
+      "SELECT end_hotspot, ip, vpn_ip, usuario, senha AS senha_mtk, porta FROM mikrotiks WHERE id = ? LIMIT 1",
       [p.mikrotik_id]
     );
     const mtkData = mkInfo[0] || null;
@@ -100,7 +100,7 @@ async function liberarUsuario({ mac, ip, plano, empresa_id, cpf, telefone, clien
     // Criar hotspot user no MikroTik com rate-limit do plano (fire-and-forget)
     if (mtkData?.ip) {
       criarHotspotUser(
-        { ip: mtkData.ip, usuario: mtkData.usuario, senha: mtkData.senha_mtk, porta: mtkData.porta },
+        { ip: mtkData.ip, vpn_ip: mtkData.vpn_ip, usuario: mtkData.usuario, senha: mtkData.senha_mtk, porta: mtkData.porta },
         { username, senha, rateLimit, duracaoMinutos: p.duracao_minutos }
       ).catch(e => console.warn("[liberarUsuario] criarHotspotUser:", e.message));
     }

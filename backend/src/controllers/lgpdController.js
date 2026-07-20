@@ -101,7 +101,7 @@ exports.lgpdLogin = async (req, res) => {
 
     // Criar hotspot user no MikroTik com rate-limit do plano (fire-and-forget)
     if (mtkIdConexao) {
-      db.execute("SELECT ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdConexao])
+      db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdConexao])
         .then(([[mtkRow]]) => {
           if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
         })

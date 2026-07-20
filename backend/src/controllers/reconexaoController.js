@@ -61,7 +61,7 @@ exports.reconectar = async (req, res) => {
 
   try {
     const [[mtk]] = await db.execute(
-      "SELECT empresa_id, end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ?",
+      "SELECT empresa_id, end_hotspot, ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?",
       [mikrotik_id]
     );
     if (!mtk?.empresa_id) {
@@ -85,7 +85,7 @@ exports.reconectar = async (req, res) => {
     }
 
     const resultado = await criarHotspotUser(
-      { ip: mtk.ip, usuario: mtk.usuario, senha: mtk.senha, porta: mtk.porta },
+      { ip: mtk.ip, vpn_ip: mtk.vpn_ip, usuario: mtk.usuario, senha: mtk.senha, porta: mtk.porta },
       {
         username: saldo.username,
         senha: saldo.password,

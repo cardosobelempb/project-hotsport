@@ -138,7 +138,7 @@ exports.cadastroTrial = async (req, res) => {
 
     // Cria hotspot user no MikroTik (fire-and-forget)
     if (mikrotik_id) {
-      db.execute("SELECT ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotik_id])
+      db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotik_id])
         .then(([[mtkConn]]) => {
           if (mtkConn) criarHotspotUser(mtkConn, { username, senha, rateLimit, duracaoMinutos: trialDuracaoMin });
         })

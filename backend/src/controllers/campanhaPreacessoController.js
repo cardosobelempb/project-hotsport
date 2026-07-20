@@ -174,7 +174,7 @@ exports.liberarAcesso = async (req, res) => {
     // Resolve gateway
     let gateway = null;
     if (mikrotikId) {
-      const [[m]] = await db.execute("SELECT end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotikId]);
+      const [[m]] = await db.execute("SELECT end_hotspot, ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotikId]);
       gateway = m?.end_hotspot || m?.ip || null;
       if (m) {
         criarHotspotUser(m, { username, senha, rateLimit, duracaoMinutos: acessoDuracaoMin })

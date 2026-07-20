@@ -7,9 +7,11 @@ function guardarErros(conn, contexto) {
   return conn;
 }
 
-async function testarConexao({ ip, usuario, senha, porta }) {
+async function testarConexao({ ip, vpn_ip, usuario, senha, porta }) {
   const conn = guardarErros(new RouterOSAPI({
-    host: ip,
+    // MikroTik atras de NAT so e alcancavel pelo backend via VPN (WireGuard) —
+    // vpn_ip tem prioridade sobre o ip local quando preenchido.
+    host: vpn_ip || ip,
     user: usuario,
     password: senha,
     port: porta || 8728,
@@ -31,12 +33,16 @@ async function testarConexao({ ip, usuario, senha, porta }) {
  * Cria (ou atualiza) o usuário no hotspot do MikroTik com rate-limit do plano.
  * Deve ser chamado de forma fire-and-forget (.catch()) para não bloquear o fluxo principal.
  *
- * @param {{ ip, usuario, senha, porta }} mikrotik  Credenciais do MikroTik
+ * @param {{ ip, vpn_ip, usuario, senha, porta }} mikrotik  Credenciais do MikroTik
  * @param {{ username, senha, rateLimit, duracaoMinutos }} opts  Dados do usuário
  */
 async function criarHotspotUser(mikrotik, { username, senha, rateLimit, duracaoMinutos }) {
   const conn = guardarErros(new RouterOSAPI({
-    host: mikrotik.ip,
+    // MikroTik atras de NAT so e alcancavel pelo backend via VPN (WireGuard) —
+    // vpn_ip tem prioridade sobre o ip local quando preenchido. Sem isso, o
+    // backend tenta conectar no IP local (inalcancavel) e falha em silencio
+    // (fire-and-forget), deixando o cliente com RADIUS ok mas sem internet.
+    host: mikrotik.vpn_ip || mikrotik.ip,
     user: mikrotik.usuario,
     password: mikrotik.senha,
     port: mikrotik.porta || 8728,
@@ -81,7 +87,7 @@ async function criarHotspotUser(mikrotik, { username, senha, rateLimit, duracaoM
  * de setup pra Mercado Pago/AdSense/YouTube, em hotspotSetup.js). Idempotente
  * — checa o que já existe antes de adicionar. Deve ser chamado fire-and-forget.
  *
- * @param {{ ip, usuario, senha, porta }} mikrotik  Credenciais do MikroTik
+ * @param {{ ip, vpn_ip, usuario, senha, porta }} mikrotik  Credenciais do MikroTik
  * @param {string[]} hosts  Domínios (sem wildcard, ex: "mercadolivre.com.br")
  */
 async function liberarWalledGarden(mikrotik, hosts) {
@@ -89,7 +95,7 @@ async function liberarWalledGarden(mikrotik, hosts) {
   if (lista.length === 0) return { ok: true, adicionados: [] };
 
   const conn = guardarErros(new RouterOSAPI({
-    host: mikrotik.ip,
+    host: mikrotik.vpn_ip || mikrotik.ip,
     user: mikrotik.usuario,
     password: mikrotik.senha,
     port: mikrotik.porta || 8728,
