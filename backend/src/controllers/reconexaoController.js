@@ -1,5 +1,6 @@
 const db = require("../../db");
 const radius = require("../services/radiusService");
+const { criarHotspotUser } = require("../utils/mikrotikClient");
 
 // Saldo de tempo diario do cliente (identificado por MAC) — usado pela pagina
 // /acesso-ativo: se o cliente reconecta ao WiFi e ainda tem tempo, mostra as
@@ -41,6 +42,74 @@ exports.verificarSaldo = async (req, res) => {
   } catch (err) {
     console.error("Erro verificarSaldo:", err);
     return res.json({ tem_saldo: false });
+  }
+};
+
+// Reconecta um cliente que ainda tem saldo diario: RE-CRIA o usuario local
+// no hotspot do MikroTik antes de devolver as credenciais pro frontend
+// redirecionar. So ter RADIUS (radcheck/radreply) nao basta nesse ambiente —
+// se o hotspot user local sumiu do roteador (uptime anterior esgotou,
+// reboot, limpeza), o login em /login falha e o cliente cai num loop de
+// volta pro /hotspot/redirect (RADIUS "com saldo" mas nunca autentica de
+// verdade no MikroTik). Ver criarHotspotUser em utils/mikrotikClient.js.
+exports.reconectar = async (req, res) => {
+  const { mac, mikrotik_id } = req.body || {};
+
+  if (!mac || !mikrotik_id) {
+    return res.status(400).json({ success: false, message: "Dados incompletos" });
+  }
+
+  try {
+    const [[mtk]] = await db.execute(
+      "SELECT empresa_id, end_hotspot, ip, usuario, senha, porta FROM mikrotiks WHERE id = ?",
+      [mikrotik_id]
+    );
+    if (!mtk?.empresa_id) {
+      return res.status(404).json({ success: false, message: "MikroTik não encontrado" });
+    }
+
+    const saldo = await radius.getAccessBalanceByMac({ mac, empresaId: mtk.empresa_id });
+    if (!saldo) {
+      return res.status(409).json({ success: false, message: "Seu tempo gratuito de hoje acabou" });
+    }
+
+    const [[reply]] = await db.execute(
+      "SELECT value FROM radreply WHERE username = ? AND attribute = 'Mikrotik-Rate-Limit' LIMIT 1",
+      [saldo.username]
+    );
+    const rateLimit = reply?.value || "2M/2M";
+    const gateway = mtk.end_hotspot || mtk.ip || null;
+
+    if (!mtk.ip) {
+      return res.status(500).json({ success: false, message: "MikroTik sem IP de gerência configurado" });
+    }
+
+    const resultado = await criarHotspotUser(
+      { ip: mtk.ip, usuario: mtk.usuario, senha: mtk.senha, porta: mtk.porta },
+      {
+        username: saldo.username,
+        senha: saldo.password,
+        rateLimit,
+        duracaoMinutos: Math.max(1, Math.ceil(saldo.restanteSegundos / 60)),
+      }
+    );
+
+    if (!resultado.ok) {
+      return res.status(502).json({
+        success: false,
+        message: "Não foi possível liberar a conexão no roteador. Tente novamente em instantes.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      gateway,
+      username: saldo.username,
+      password: saldo.password,
+    });
+  } catch (err) {
+    console.error("Erro reconectar:", err);
+    return res.status(500).json({ success: false, message: "Erro interno ao reconectar" });
   }
 };
 

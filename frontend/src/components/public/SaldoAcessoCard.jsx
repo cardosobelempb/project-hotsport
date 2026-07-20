@@ -15,7 +15,7 @@ function fmtTempo(segundos) {
  * AcessoAtivo.jsx (fluxo saldo-only) e PortalReconexao.jsx (saldo + planos
  * pagos na mesma tela).
  */
-export default function SaldoAcessoCard({ saldo, onConectar, conectando, urlEscape }) {
+export default function SaldoAcessoCard({ saldo, onConectar, conectando, urlEscape, erro }) {
   if (!saldo) return null;
 
   const pctRestante = saldo.max_diario_segundos
@@ -62,6 +62,10 @@ export default function SaldoAcessoCard({ saldo, onConectar, conectando, urlEsca
           </>
         )}
       </button>
+
+      {erro && (
+        <p className="mt-3 text-sm text-red-600 text-center">{erro}</p>
+      )}
 
       {urlEscape && (
         <div className="mt-5 text-center">

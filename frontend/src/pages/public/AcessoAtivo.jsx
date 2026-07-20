@@ -10,6 +10,7 @@ export default function AcessoAtivo() {
   const [params] = useState(() => new URLSearchParams(window.location.search));
   const [saldo, setSaldo] = useState(null); // null=carregando, false=sem saldo, obj=ok
   const [conectando, setConectando] = useState(false);
+  const [erro, setErro] = useState("");
 
   const urlPortal = () => {
     const mikrotikId = params.get("mikrotik_id");
@@ -39,12 +40,31 @@ export default function AcessoAtivo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleConectar = () => {
-    if (!saldo?.gateway || !saldo?.username) return;
+  const handleConectar = async () => {
+    if (!saldo) return;
+    setErro("");
     setConectando(true);
-    // A propaganda (se o portal tiver) já foi exibida antes desta tela, no
-    // pré-portal do /hotspot/redirect — aqui conecta direto, sem repetir o anúncio.
-    redirecionarHotspot(saldo.gateway, saldo.username, saldo.password, 300);
+    try {
+      // Re-cria o usuario local no hotspot do MikroTik antes de redirecionar
+      // (RADIUS sozinho nao basta nesse ambiente — ver reconexaoController.reconectar).
+      // A propaganda (se o portal tiver) já foi exibida antes desta tela, no
+      // pré-portal do /hotspot/redirect — aqui conecta direto, sem repetir o anúncio.
+      const r = await fetch("/api/reconexao/reconectar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mac: params.get("mac"), mikrotik_id: params.get("mikrotik_id") }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.success) {
+        setErro(data.message || "Não foi possível reconectar. Tente novamente.");
+        setConectando(false);
+        return;
+      }
+      redirecionarHotspot(data.gateway, data.username, data.password, 300);
+    } catch {
+      setErro("Falha de conexão. Tente novamente.");
+      setConectando(false);
+    }
   };
 
   return (
@@ -84,6 +104,7 @@ export default function AcessoAtivo() {
               onConectar={handleConectar}
               conectando={conectando}
               urlEscape={urlPortal()}
+              erro={erro}
             />
           </>
         ) : null}

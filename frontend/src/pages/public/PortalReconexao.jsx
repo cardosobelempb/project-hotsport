@@ -41,6 +41,7 @@ export default function PortalReconexao() {
   const [cfg, setCfg] = useState({});
   const [saldo, setSaldo] = useState(null); // null enquanto carrega/sem saldo, objeto quando tem_saldo
   const [conectando, setConectando] = useState(false);
+  const [erroConexao, setErroConexao] = useState("");
 
   useEffect(() => {
     async function carregar() {
@@ -102,10 +103,29 @@ export default function PortalReconexao() {
     carregar();
   }, []); // eslint-disable-line
 
-  const handleContinuarGratis = () => {
-    if (!saldo?.gateway || !saldo?.username) return;
+  const handleContinuarGratis = async () => {
+    if (!saldo) return;
+    setErroConexao("");
     setConectando(true);
-    redirecionarHotspot(saldo.gateway, saldo.username, saldo.password, 300);
+    try {
+      // Re-cria o usuario local no hotspot do MikroTik antes de redirecionar
+      // (RADIUS sozinho nao basta nesse ambiente — ver reconexaoController.reconectar).
+      const r = await fetch("/api/reconexao/reconectar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mac, mikrotik_id: mikrotikId }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.success) {
+        setErroConexao(data.message || "Não foi possível reconectar. Tente novamente.");
+        setConectando(false);
+        return;
+      }
+      redirecionarHotspot(data.gateway, data.username, data.password, 300);
+    } catch {
+      setErroConexao("Falha de conexão. Tente novamente.");
+      setConectando(false);
+    }
   };
 
   const selecionarPlano = (plano) => {
@@ -255,6 +275,7 @@ export default function PortalReconexao() {
               saldo={saldo}
               onConectar={handleContinuarGratis}
               conectando={conectando}
+              erro={erroConexao}
             />
           </div>
         )}
