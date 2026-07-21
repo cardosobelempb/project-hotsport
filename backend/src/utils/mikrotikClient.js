@@ -30,13 +30,23 @@ async function testarConexao({ ip, vpn_ip, usuario, senha, porta }) {
 }
 
 /**
- * Cria (ou atualiza) o usuário no hotspot do MikroTik com rate-limit do plano.
- * Deve ser chamado de forma fire-and-forget (.catch()) para não bloquear o fluxo principal.
+ * Cria (ou atualiza) o usuário no hotspot do MikroTik. Deve ser chamado de
+ * forma fire-and-forget (.catch()) para não bloquear o fluxo principal.
+ *
+ * NAO seta rate-limit aqui: `/ip/hotspot/user/add` rejeita esse parametro em
+ * pelo menos uma versao de RouterOS testada em producao ("expected end of
+ * command" no CLI, "unknown parameter rate-limit" na API) - so existe em
+ * `/ip/hotspot/user/profile`, nao no usuario individual. O rate-limit real
+ * ja vem do RADIUS via o atributo Mikrotik-Rate-Limit no radreply
+ * (radiusService.provisionUser); este usuario local so precisa existir pra
+ * a autenticacao no hotspot funcionar (ver memoria "RADIUS sozinho nao
+ * libera internet"). limit-uptime continua aqui pois foi confirmado como
+ * suportado.
  *
  * @param {{ ip, vpn_ip, usuario, senha, porta }} mikrotik  Credenciais do MikroTik
- * @param {{ username, senha, rateLimit, duracaoMinutos }} opts  Dados do usuário
+ * @param {{ username, senha, duracaoMinutos }} opts  Dados do usuário
  */
-async function criarHotspotUser(mikrotik, { username, senha, rateLimit, duracaoMinutos }) {
+async function criarHotspotUser(mikrotik, { username, senha, duracaoMinutos }) {
   const conn = guardarErros(new RouterOSAPI({
     // MikroTik atras de NAT so e alcancavel pelo backend via VPN (WireGuard) —
     // vpn_ip tem prioridade sobre o ip local quando preenchido. Sem isso, o
@@ -60,19 +70,17 @@ async function criarHotspotUser(mikrotik, { username, senha, rateLimit, duracaoM
       await conn.write('/ip/hotspot/user/remove', [`=.id=${existing['.id']}`]).catch(() => {});
     }
 
-    // Cria usuário com rate-limit do plano
-    // rate-limit formato: rx-rate/tx-rate onde rx=upload do cliente, tx=download do cliente
+    // Cria usuário (rate-limit real vem do RADIUS, ver comentario da funcao acima)
     const args = [
       `=name=${username}`,
       `=password=${senha}`,
-      `=rate-limit=${rateLimit}`,
     ];
     if (duracaoMinutos) {
       args.push(`=limit-uptime=${duracaoMinutos}m`);
     }
 
     await conn.write('/ip/hotspot/user/add', args);
-    console.log(`[mikrotik] Hotspot user criado: ${username} | rate: ${rateLimit} | uptime: ${duracaoMinutos || '∞'}m`);
+    console.log(`[mikrotik] Hotspot user criado: ${username} | uptime: ${duracaoMinutos || '∞'}m`);
     return { ok: true };
   } catch (err) {
     console.warn(`[mikrotik] criarHotspotUser falhou (${username}):`, err.message);

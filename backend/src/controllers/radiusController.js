@@ -69,8 +69,7 @@ const vincularPlano = async (req, res) => {
           return db.query("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [plano.mikrotik_id])
             .then(([[mtkRow]]) => {
               if (!mtkRow) return;
-              const rateLimit = `${plano.velocidade_up}M/${plano.velocidade_down}M`;
-              return criarHotspotUser(mtkRow, { username, senha: cred.value, rateLimit, duracaoMinutos: plano.duracao_minutos });
+              return criarHotspotUser(mtkRow, { username, senha: cred.value, duracaoMinutos: plano.duracao_minutos });
             });
         })
         .catch(e => console.warn('[vincularPlano] criarHotspotUser:', e.message));

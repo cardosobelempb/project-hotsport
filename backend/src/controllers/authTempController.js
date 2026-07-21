@@ -59,7 +59,7 @@ async function gerarAcessoTemporario(mac, ip, planoId, empresaId, opts = {}) {
     if (mtkData?.ip) {
       criarHotspotUser(
         { ip: mtkData.ip, vpn_ip: mtkData.vpn_ip, usuario: mtkData.usuario, senha: mtkData.senha, porta: mtkData.porta },
-        { username, senha, rateLimit, duracaoMinutos: Math.ceil(tempoSegundos / 60) }
+        { username, senha, duracaoMinutos: Math.ceil(tempoSegundos / 60) }
       ).catch(e => console.warn("[gerarAcessoTemporario] criarHotspotUser:", e.message));
     }
 

@@ -140,7 +140,7 @@ exports.cadastroTrial = async (req, res) => {
     if (mikrotik_id) {
       db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mikrotik_id])
         .then(([[mtkConn]]) => {
-          if (mtkConn) criarHotspotUser(mtkConn, { username, senha, rateLimit, duracaoMinutos: trialDuracaoMin });
+          if (mtkConn) criarHotspotUser(mtkConn, { username, senha, duracaoMinutos: trialDuracaoMin });
         })
         .catch(e => console.warn("[trialTempo] criarHotspotUser:", e.message));
     }

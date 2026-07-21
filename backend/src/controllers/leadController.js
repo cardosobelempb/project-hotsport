@@ -134,7 +134,7 @@ exports.capturaPassiva = async (req, res) => {
           if (mtkIdPassivo) {
             db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdPassivo])
               .then(([[mtkRow]]) => {
-                if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
+                if (mtkRow) criarHotspotUser(mtkRow, { username, senha, duracaoMinutos: plano.duracao_minutos });
               })
               .catch(e => console.warn("[capturaPassiva] criarHotspotUser:", e.message));
           }
@@ -293,7 +293,7 @@ exports.leadLogin = async (req, res) => {
     if (mtkIdLead) {
       db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdLead])
         .then(([[mtkRow]]) => {
-          if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
+          if (mtkRow) criarHotspotUser(mtkRow, { username, senha, duracaoMinutos: plano.duracao_minutos });
         })
         .catch(e => console.warn("[leadLogin] criarHotspotUser:", e.message));
     }

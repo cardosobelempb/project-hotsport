@@ -73,11 +73,6 @@ exports.reconectar = async (req, res) => {
       return res.status(409).json({ success: false, message: "Seu tempo gratuito de hoje acabou" });
     }
 
-    const [[reply]] = await db.execute(
-      "SELECT value FROM radreply WHERE username = ? AND attribute = 'Mikrotik-Rate-Limit' LIMIT 1",
-      [saldo.username]
-    );
-    const rateLimit = reply?.value || "2M/2M";
     const gateway = mtk.end_hotspot || mtk.ip || null;
 
     if (!mtk.ip) {
@@ -89,7 +84,6 @@ exports.reconectar = async (req, res) => {
       {
         username: saldo.username,
         senha: saldo.password,
-        rateLimit,
         duracaoMinutos: Math.max(1, Math.ceil(saldo.restanteSegundos / 60)),
       }
     );

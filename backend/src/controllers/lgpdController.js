@@ -103,7 +103,7 @@ exports.lgpdLogin = async (req, res) => {
     if (mtkIdConexao) {
       db.execute("SELECT ip, vpn_ip, usuario, senha, porta FROM mikrotiks WHERE id = ?", [mtkIdConexao])
         .then(([[mtkRow]]) => {
-          if (mtkRow) criarHotspotUser(mtkRow, { username, senha, rateLimit, duracaoMinutos: plano.duracao_minutos });
+          if (mtkRow) criarHotspotUser(mtkRow, { username, senha, duracaoMinutos: plano.duracao_minutos });
         })
         .catch(e => console.warn("[lgpd] criarHotspotUser:", e.message));
     }

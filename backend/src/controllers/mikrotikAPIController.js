@@ -101,7 +101,7 @@ async function liberarUsuario({ mac, ip, plano, empresa_id, cpf, telefone, clien
     if (mtkData?.ip) {
       criarHotspotUser(
         { ip: mtkData.ip, vpn_ip: mtkData.vpn_ip, usuario: mtkData.usuario, senha: mtkData.senha_mtk, porta: mtkData.porta },
-        { username, senha, rateLimit, duracaoMinutos: p.duracao_minutos }
+        { username, senha, duracaoMinutos: p.duracao_minutos }
       ).catch(e => console.warn("[liberarUsuario] criarHotspotUser:", e.message));
     }
     const loginUrl = gateway ? `http://${gateway}/login?username=${username}&password=${username}` : "";

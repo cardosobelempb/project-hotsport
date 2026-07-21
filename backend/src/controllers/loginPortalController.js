@@ -54,10 +54,9 @@ exports.login = async (req, res) => {
 
     // Reforça o usuário como hotspot user local no MikroTik a cada login (fire-and-forget) —
     // garante acesso mesmo se o usuário foi cadastrado direto no RADIUS ou se o roteador
-    // perdeu o cadastro local (reboot). Sem plano vinculado não há rate-limit/router pra aplicar.
+    // perdeu o cadastro local (reboot). Sem plano vinculado nao ha duracao/router pra aplicar.
     if (vinculo && vinculo.velocidade_down != null && vinculo.velocidade_up != null) {
-      const rateLimit = `${vinculo.velocidade_up}M/${vinculo.velocidade_down}M`;
-      criarHotspotUser(mk, { username, senha: password, rateLimit, duracaoMinutos: vinculo.duracao_minutos })
+      criarHotspotUser(mk, { username, senha: password, duracaoMinutos: vinculo.duracao_minutos })
         .catch(e => console.warn("[login-portal] criarHotspotUser:", e.message));
     }
 
