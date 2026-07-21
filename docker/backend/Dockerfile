@@ -37,12 +37,17 @@ COPY backend ./
 ENV NODE_ENV=development
 EXPOSE 3001
 # Rota pro tunel WireGuard (10.8.0.x, onde ficam os MikroTiks atras de NAT)
-# via wg-easy como gateway - precisa de NET_ADMIN no compose. "|| true" pra
-# nao derrubar o boot se wg-easy nao existir/faltarcap (ex: dev sem VPN).
+# via wg-easy como gateway - precisa de NET_ADMIN no compose. Tenta em loop
+# (ate 30s) em vez de uma unica tentativa "|| true": se o wg-easy ainda nao
+# tiver DNS/rede prontos no exato instante em que este container sobe (corrida
+# de boot entre servicos), a tentativa unica falhava em silencio e a rota
+# nunca mais era criada ate alguem reiniciar o container manualmente - mesmo
+# com wg-easy saudavel horas depois. Nao derruba o boot se wg-easy nao existir
+# (ex: dev sem VPN) - so avisa no log e segue.
 # Roda as migrations pendentes automaticamente a cada boot do container antes
 # de subir o servidor - ";" (nao "&&") garante que o backend sobe mesmo se o
 # runner de migrations falhar por algum motivo inesperado.
-CMD ["sh", "-c", "ip route add 10.8.0.0/24 via $(getent hosts wg-easy | awk '{print $1}') 2>/dev/null || true; node scripts/runMigrations.js; npx nodemon server.js"]
+CMD ["sh", "-c", "i=0; while [ $i -lt 15 ]; do WG_IP=$(getent hosts wg-easy | awk '{print $1}'); if [ -n \"$WG_IP\" ] && ip route add 10.8.0.0/24 via \"$WG_IP\" 2>/dev/null; then echo \"[boot] rota VPN 10.8.0.0/24 via $WG_IP ok (tentativa $((i+1)))\"; break; fi; i=$((i+1)); sleep 2; done; if ! ip route show | grep -q '^10.8.0.0/24'; then echo '[boot] AVISO: nao foi possivel adicionar rota pro tunel WireGuard (wg-easy indisponivel apos 30s)'; fi; node scripts/runMigrations.js; npx nodemon server.js"]
 
 # ---- BUILD / PRODUCAO ----
 FROM base AS production
@@ -55,10 +60,14 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3001/api/health || exit 1
 # Rota pro tunel WireGuard (10.8.0.x, onde ficam os MikroTiks atras de NAT)
-# via wg-easy como gateway - precisa de NET_ADMIN no compose. "|| true" pra
-# nao derrubar o boot se wg-easy nao existir/faltar capability (ex: ambiente
-# sem VPN configurada).
+# via wg-easy como gateway - precisa de NET_ADMIN no compose. Tenta em loop
+# (ate 30s) em vez de uma unica tentativa "|| true": se o wg-easy ainda nao
+# tiver DNS/rede prontos no exato instante em que este container sobe (corrida
+# de boot entre servicos), a tentativa unica falhava em silencio e a rota
+# nunca mais era criada ate alguem reiniciar o container manualmente - mesmo
+# com wg-easy saudavel horas depois. Nao derruba o boot se wg-easy nao existir
+# (ex: ambiente sem VPN configurada) - so avisa no log e segue.
 # Roda as migrations pendentes automaticamente a cada boot do container antes
 # de subir o servidor - ";" (nao "&&") garante que o backend sobe mesmo se o
 # runner de migrations falhar por algum motivo inesperado.
-CMD ["sh", "-c", "ip route add 10.8.0.0/24 via $(getent hosts wg-easy | awk '{print $1}') 2>/dev/null || true; node scripts/runMigrations.js; node server.js"]
+CMD ["sh", "-c", "i=0; while [ $i -lt 15 ]; do WG_IP=$(getent hosts wg-easy | awk '{print $1}'); if [ -n \"$WG_IP\" ] && ip route add 10.8.0.0/24 via \"$WG_IP\" 2>/dev/null; then echo \"[boot] rota VPN 10.8.0.0/24 via $WG_IP ok (tentativa $((i+1)))\"; break; fi; i=$((i+1)); sleep 2; done; if ! ip route show | grep -q '^10.8.0.0/24'; then echo '[boot] AVISO: nao foi possivel adicionar rota pro tunel WireGuard (wg-easy indisponivel apos 30s)'; fi; node scripts/runMigrations.js; node server.js"]
