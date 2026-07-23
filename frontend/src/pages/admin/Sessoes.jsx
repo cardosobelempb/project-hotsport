@@ -50,10 +50,11 @@ export default function Sessoes() {
       const res = await fetch("/api/radius/sessoes", { headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao carregar sessões");
-      setSessoes(data);
+      setSessoes(Array.isArray(data) ? data : []);
       setUltimaAtualizacao(new Date());
     } catch (err) {
       console.error("Erro ao carregar sessões:", err);
+      showError(err.message || "Erro ao carregar sessões ativas");
     } finally {
       setLoading(false);
     }
