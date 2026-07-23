@@ -74,7 +74,7 @@ exports.listarLogs = async (req, res) => {
     res.json({ data: rows, total, page, per_page });
   } catch (err) {
     console.error("Erro ao buscar logs do RADIUS:", err);
-    res.status(500).json({ message: "Erro ao buscar logs do RADIUS." });
+    res.status(500).json({ error: "Erro ao buscar logs do RADIUS." });
   }
 };
 
@@ -157,6 +157,6 @@ exports.exportarCSV = async (req, res) => {
     res.send(csv);
   } catch (err) {
     console.error("Erro ao exportar CSV:", err);
-    res.status(500).json({ message: "Erro ao exportar CSV." });
+    res.status(500).json({ error: "Erro ao exportar CSV." });
   }
 };

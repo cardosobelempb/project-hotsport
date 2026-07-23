@@ -3,6 +3,7 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { Download } from "lucide-react";
 import { Button, Input, Card, Table } from "../../components/ui";
 import Pagination from "../../components/ui/Pagination";
+import { useFeedback } from "../../contexts/FeedbackContext";
 
 function formatDuracao(segundos) {
   if (!segundos) return "0h 0m";
@@ -27,6 +28,7 @@ function formatDateTime(dt) {
 }
 
 export default function Compliance() {
+  const { showError } = useFeedback();
   const [cpf, setCpf] = useState("");
   const [mac, setMac] = useState("");
   const [ip, setIp] = useState("");
@@ -50,23 +52,27 @@ export default function Compliance() {
     if (username.trim()) params.set("username", username.trim());
     if (dataInicio) params.set("data_inicio", dataInicio);
     if (dataFim) params.set("data_fim", dataFim);
-    params.set("page", extraPage || page);
-    params.set("per_page", perPage);
-    return params.toString();
+    if (extraPage !== undefined) {
+      params.set("page", extraPage);
+      params.set("per_page", perPage);
+    }
+    return params;
   };
 
   const buscar = async (pg = 1) => {
     try {
       setLoading(true);
       setPage(pg);
-      const res = await fetch(`/api/compliance?${buildParams(pg)}`, {
+      const res = await fetch(`/api/compliance?${buildParams(pg).toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro ao buscar logs de compliance.");
       setLogs(json.data || []);
       setTotal(json.total || 0);
     } catch (err) {
       console.error("Erro ao buscar logs:", err);
+      showError(err.message || "Erro ao buscar logs de compliance.");
       setLogs([]);
     } finally {
       setLoading(false);
@@ -75,17 +81,13 @@ export default function Compliance() {
 
   const exportarCSV = async () => {
     try {
-      const params = new URLSearchParams();
-      if (cpf.trim()) params.set("cpf", cpf.trim());
-      if (mac.trim()) params.set("mac", mac.trim());
-      if (ip.trim()) params.set("ip", ip.trim());
-      if (username.trim()) params.set("username", username.trim());
-      if (dataInicio) params.set("data_inicio", dataInicio);
-      if (dataFim) params.set("data_fim", dataFim);
-
-      const res = await fetch(`/api/compliance/export?${params.toString()}`, {
+      const res = await fetch(`/api/compliance/export?${buildParams().toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || "Erro ao exportar CSV.");
+      }
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -97,6 +99,7 @@ export default function Compliance() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Erro ao exportar CSV:", err);
+      showError(err.message || "Erro ao exportar CSV.");
     }
   };
 
@@ -148,11 +151,6 @@ export default function Compliance() {
             <span className="text-sm text-gray-400">
               {total > 0 ? `${total} registro(s) encontrado(s)` : "Nenhum registro"}
             </span>
-            {totalPages > 1 && (
-              <span className="text-xs text-gray-500">
-                Pagina {page} de {totalPages}
-              </span>
-            )}
           </div>
 
           <Table>

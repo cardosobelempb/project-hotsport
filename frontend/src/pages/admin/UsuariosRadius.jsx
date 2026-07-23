@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Plus, RefreshCw, Search, WifiOff, Trash2, Loader2 } from 'lucide-react';
-import { Button, IconButton, Input, Select, Card, Table } from '../../components/ui';
+import { Plus, RefreshCw, Search, WifiOff, Trash2, Eye, EyeOff, Pencil } from 'lucide-react';
+import { Button, IconButton, Input, Select, Card, Table, Modal } from '../../components/ui';
 import Pagination from '../../components/ui/Pagination';
 import { useFeedback } from '../../contexts/FeedbackContext';
 
@@ -15,6 +15,11 @@ function fmtDuracao(min) {
   const h = Math.floor(min / 60);
   const m = min % 60;
   return m ? `${h}h ${m}min` : `${h}h`;
+}
+
+function fmtData(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('pt-BR');
 }
 
 // Usuarios sem plano vinculado (trial, campanha, pix) tem os valores reais nos
@@ -41,13 +46,24 @@ const UsuariosRadius = () => {
   const [radiusStatus,        setRadiusStatus]        = useState(null); // null=carregando, {online, latencia_ms, erro}
   const [testando,            setTestando]            = useState(false);
 
-  // ── criação ─────────────────────────────────────────────────────────────────
-  const [novoUsername,      setNovoUsername]      = useState('');
-  const [novoPassword,      setNovoPassword]      = useState('');
-  const [planos,            setPlanos]            = useState([]);
-  const [planoSelecionado,  setPlanoSelecionado]  = useState('');
-  const [statusModal,       setStatusModal]       = useState('');
-  const [mostrarModal,      setMostrarModal]      = useState(false);
+  // ── planos (usado no form) ───────────────────────────────────────────────────
+  const [planos, setPlanos] = useState([]);
+
+  // ── form criar/editar ────────────────────────────────────────────────────────
+  const [formOpen,        setFormOpen]        = useState(false);
+  const [formMode,        setFormMode]        = useState('create'); // 'create' | 'edit'
+  const [formUsername,    setFormUsername]    = useState('');
+  const [formPassword,    setFormPassword]    = useState('');
+  const [formPlanoId,     setFormPlanoId]     = useState('');
+  const [formErro,        setFormErro]        = useState('');
+  const [formCarregando,  setFormCarregando]  = useState(false);
+  const [salvando,        setSalvando]        = useState(false);
+
+  // ── ver detalhes ─────────────────────────────────────────────────────────────
+  const [detalheOpen,       setDetalheOpen]       = useState(false);
+  const [detalhe,           setDetalhe]           = useState(null);
+  const [detalheCarregando, setDetalheCarregando] = useState(false);
+  const [senhaVisivel,      setSenhaVisivel]      = useState(false);
 
   // ── listagem ─────────────────────────────────────────────────────────────────
   const [usuarios,   setUsuarios]   = useState([]);
@@ -101,10 +117,13 @@ const UsuariosRadius = () => {
     }
   }, [filtroUsername, filtroPlano]); // eslint-disable-line
 
-  // Reinicia na pág 1 quando filtros mudam
+  // Reinicia na pág 1 quando filtros mudam (com debounce pra não disparar 1 req/tecla)
   useEffect(() => {
-    setPage(1);
-    carregarUsuarios(1);
+    const t = setTimeout(() => {
+      setPage(1);
+      carregarUsuarios(1);
+    }, 400);
+    return () => clearTimeout(t);
   }, [filtroUsername, filtroPlano]); // eslint-disable-line
 
   // Carrega quando page muda (exceto quando foi reset pelo filtro acima)
@@ -112,21 +131,90 @@ const UsuariosRadius = () => {
     carregarUsuarios(page);
   }, [page]); // eslint-disable-line
 
-  // ── criar usuário ────────────────────────────────────────────────────────────
-  const handleSubmit = async () => {
-    if (!novoUsername || !novoPassword || !planoSelecionado) {
-      setStatusModal('Preencha usuário, senha e plano.');
+  const buscarDetalhe = async (username) => {
+    const res = await axios.get(`/api/radius/usuarios/${username}`, { headers });
+    return res.data.data;
+  };
+
+  // ── abrir form (criar/editar) ────────────────────────────────────────────────
+  const abrirCriar = () => {
+    setFormMode('create');
+    setFormUsername('');
+    setFormPassword('');
+    setFormPlanoId('');
+    setFormErro('');
+    setFormOpen(true);
+  };
+
+  const abrirEditar = async (u) => {
+    setFormMode('edit');
+    setFormUsername(u.username);
+    setFormPassword('');
+    setFormPlanoId('');
+    setFormErro('');
+    setFormOpen(true);
+    setFormCarregando(true);
+    try {
+      const d = await buscarDetalhe(u.username);
+      setFormPlanoId(d.plano_id || '');
+    } catch (err) {
+      setFormErro(err.response?.data?.error || 'Erro ao carregar dados do usuário.');
+    } finally {
+      setFormCarregando(false);
+    }
+  };
+
+  // ── ver detalhes ─────────────────────────────────────────────────────────────
+  const abrirDetalhe = async (u) => {
+    setDetalheOpen(true);
+    setDetalheCarregando(true);
+    setSenhaVisivel(false);
+    setDetalhe(null);
+    try {
+      const d = await buscarDetalhe(u.username);
+      setDetalhe(d);
+    } catch (err) {
+      showError(err.response?.data?.error || 'Erro ao carregar detalhes do usuário.');
+      setDetalheOpen(false);
+    } finally {
+      setDetalheCarregando(false);
+    }
+  };
+
+  // ── salvar (criar ou editar) ─────────────────────────────────────────────────
+  const salvarUsuario = async () => {
+    if (formMode === 'create') {
+      if (!formUsername || !formPassword || !formPlanoId) {
+        setFormErro('Preencha usuário, senha e plano.');
+        return;
+      }
+    } else if (!formPassword && !formPlanoId) {
+      setFormErro('Altere a senha e/ou o plano.');
       return;
     }
+
+    setSalvando(true);
+    setFormErro('');
     try {
-      await axios.post('/api/radius/criar-usuario', { username: novoUsername, password: novoPassword }, { headers });
-      await axios.post('/api/radius/vincular-plano', { username: novoUsername, planoId: planoSelecionado }, { headers });
-      setStatusModal('Usuário criado com sucesso!');
-      setNovoUsername(''); setNovoPassword(''); setPlanoSelecionado('');
-      setTimeout(() => { setMostrarModal(false); setStatusModal(''); }, 800);
-      carregarUsuarios(1);
+      if (formMode === 'create') {
+        await axios.post('/api/radius/criar-usuario', { username: formUsername, password: formPassword }, { headers });
+        await axios.post('/api/radius/vincular-plano', { username: formUsername, planoId: formPlanoId }, { headers });
+        showSuccess('Usuário criado com sucesso.');
+        setFormOpen(false);
+        carregarUsuarios(1);
+      } else {
+        const body = {};
+        if (formPassword) body.password = formPassword;
+        if (formPlanoId)  body.plano_id = formPlanoId;
+        await axios.put(`/api/radius/usuarios/${formUsername}`, body, { headers });
+        showSuccess('Usuário atualizado com sucesso.');
+        setFormOpen(false);
+        carregarUsuarios(page);
+      }
     } catch (err) {
-      setStatusModal(err.response?.data?.error || 'Erro ao criar usuário.');
+      setFormErro(err.response?.data?.error || 'Erro ao salvar usuário.');
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -158,6 +246,8 @@ const UsuariosRadius = () => {
       setDesconectando(null);
     }
   };
+
+  const detalheExibicao = detalhe ? resolverExibicao(detalhe) : null;
 
   return (
     <AdminLayout>
@@ -196,7 +286,7 @@ const UsuariosRadius = () => {
           </Button>
         </div>
 
-        <Button icon={Plus} className="mb-4 !bg-green-600 hover:!bg-green-700" onClick={() => setMostrarModal(true)}>
+        <Button icon={Plus} className="mb-4 !bg-green-600 hover:!bg-green-700" onClick={abrirCriar}>
           Novo Usuário
         </Button>
 
@@ -219,43 +309,115 @@ const UsuariosRadius = () => {
           <span className="text-gray-400 text-sm">{total} usuário(s)</span>
         </div>
 
-        {/* ── modal criação ───────────────────────────────────────────────────── */}
-        {mostrarModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-            <Card className="p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Novo Usuário RADIUS</h3>
-              <Input
-                placeholder="Usuário"
-                containerClassName="mb-2"
-                value={novoUsername} onChange={e => setNovoUsername(e.target.value)}
-              />
-              <Input
-                type="password" placeholder="Senha"
-                containerClassName="mb-2"
-                value={novoPassword} onChange={e => setNovoPassword(e.target.value)}
-              />
-              <Select
-                containerClassName="mb-4"
-                value={planoSelecionado} onChange={e => setPlanoSelecionado(e.target.value)}
-              >
-                <option value="">Selecione um plano *</option>
-                {planos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
-              </Select>
-              <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={() => { setMostrarModal(false); setStatusModal(''); }}>Cancelar</Button>
-                <Button variant="primary" onClick={handleSubmit}>Salvar</Button>
+        {/* ── modal criar/editar ───────────────────────────────────────────────── */}
+        <Modal
+          open={formOpen}
+          onClose={() => setFormOpen(false)}
+          title={formMode === 'create' ? 'Novo Usuário RADIUS' : `Editar ${formUsername}`}
+          footer={(
+            <>
+              <Button variant="secondary" onClick={() => setFormOpen(false)}>Cancelar</Button>
+              <Button variant="primary" loading={salvando} disabled={formCarregando} onClick={salvarUsuario}>Salvar</Button>
+            </>
+          )}
+        >
+          <Input
+            placeholder="Usuário"
+            containerClassName="mb-2"
+            value={formUsername}
+            disabled={formMode === 'edit'}
+            onChange={e => setFormUsername(e.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder={formMode === 'edit' ? 'Nova senha (deixe em branco para manter)' : 'Senha'}
+            containerClassName="mb-2"
+            value={formPassword}
+            disabled={formCarregando}
+            onChange={e => setFormPassword(e.target.value)}
+          />
+          <Select
+            containerClassName="mb-2"
+            value={formPlanoId}
+            disabled={formCarregando}
+            onChange={e => setFormPlanoId(e.target.value)}
+          >
+            <option value="">{formMode === 'edit' ? 'Manter plano atual' : 'Selecione um plano *'}</option>
+            {planos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
+          </Select>
+          {formErro && <p className="text-sm text-red-400 mt-2">{formErro}</p>}
+        </Modal>
+
+        {/* ── modal ver detalhes ────────────────────────────────────────────────── */}
+        <Modal
+          open={detalheOpen}
+          onClose={() => setDetalheOpen(false)}
+          title={detalhe ? `Detalhes de ${detalhe.username}` : 'Detalhes do usuário'}
+          footer={detalhe && (
+            <Button variant="secondary" icon={Pencil} onClick={() => { setDetalheOpen(false); abrirEditar(detalhe); }}>
+              Editar
+            </Button>
+          )}
+        >
+          {detalheCarregando && <p className="text-sm text-gray-400">Carregando...</p>}
+          {!detalheCarregando && detalhe && (
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+              <div className="col-span-2">
+                <dt className="text-gray-500">Senha</dt>
+                <dd className="flex items-center gap-2 font-mono text-gray-200">
+                  {senhaVisivel ? detalhe.senha : '••••••••'}
+                  <IconButton
+                    icon={senhaVisivel ? EyeOff : Eye}
+                    title={senhaVisivel ? 'Ocultar senha' : 'Revelar senha'}
+                    onClick={() => setSenhaVisivel(v => !v)}
+                  />
+                </dd>
               </div>
-              {statusModal && <p className="text-sm text-gray-400 mt-2">{statusModal}</p>}
-            </Card>
-          </div>
-        )}
+              <div>
+                <dt className="text-gray-500">Plano</dt>
+                <dd className="text-gray-200">{detalheExibicao.plano}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">NAS</dt>
+                <dd className="text-gray-200">{detalhe.nas || '-'}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Download</dt>
+                <dd className="text-gray-200">{detalheExibicao.download}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Upload</dt>
+                <dd className="text-gray-200">{detalheExibicao.upload}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Duração</dt>
+                <dd className="text-gray-200">{detalheExibicao.duracao}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Sessões simultâneas</dt>
+                <dd className="text-gray-200">{detalhe.simultaneous_use || '-'}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Rate limit (RADIUS)</dt>
+                <dd className="text-gray-200">{detalhe.rate_limit || '-'}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">Session timeout (s)</dt>
+                <dd className="text-gray-200">{detalhe.session_timeout || '-'}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="text-gray-500">Criado em</dt>
+                <dd className="text-gray-200">{fmtData(detalhe.criado_em)}</dd>
+              </div>
+            </dl>
+          )}
+        </Modal>
 
         {/* ── tabela ─────────────────────────────────────────────────────────── */}
         <Card className="overflow-hidden mt-2">
           <Table>
             <Table.Head>
               <Table.HeadCell>Usuário</Table.HeadCell>
-              <Table.HeadCell hideOn="md">Senha</Table.HeadCell>
               <Table.HeadCell>Plano</Table.HeadCell>
               <Table.HeadCell hideOn="lg">Download</Table.HeadCell>
               <Table.HeadCell hideOn="lg">Upload</Table.HeadCell>
@@ -269,7 +431,6 @@ const UsuariosRadius = () => {
                 return (
                 <Table.Row key={idx}>
                   <Table.Cell className="font-mono text-xs">{u.username}</Table.Cell>
-                  <Table.Cell hideOn="md">{u.senha}</Table.Cell>
                   <Table.Cell>
                     {ex.plano}
                     {!u.plano && ex.plano !== '-' && (
@@ -283,10 +444,22 @@ const UsuariosRadius = () => {
                   <Table.Cell>
                     <div className="flex items-center gap-1">
                       <IconButton
-                        icon={desconectando === u.username ? Loader2 : WifiOff}
+                        icon={Eye}
                         variant="default"
-                        className={desconectando === u.username ? 'animate-spin' : ''}
-                        disabled={desconectando === u.username || !u.nas_ip}
+                        title="Ver detalhes"
+                        onClick={() => abrirDetalhe(u)}
+                      />
+                      <IconButton
+                        icon={Pencil}
+                        variant="default"
+                        title="Editar usuário"
+                        onClick={() => abrirEditar(u)}
+                      />
+                      <IconButton
+                        icon={WifiOff}
+                        variant="default"
+                        loading={desconectando === u.username}
+                        disabled={!u.nas_ip}
                         title={!u.nas_ip ? 'Sem NAS associado' : 'Desconectar sessão ativa (conta RADIUS mantida)'}
                         onClick={() => handleDesconectar(u)}
                       />
@@ -302,7 +475,7 @@ const UsuariosRadius = () => {
                 );
               })}
               {usuarios.length === 0 && (
-                <Table.Empty colSpan={8}>Nenhum usuário encontrado.</Table.Empty>
+                <Table.Empty colSpan={7}>Nenhum usuário encontrado.</Table.Empty>
               )}
             </Table.Body>
           </Table>

@@ -3,6 +3,7 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { Download, Search } from "lucide-react";
 import { Button, Input, Card, Table } from "../../components/ui";
 import Pagination from "../../components/ui/Pagination";
+import { useFeedback } from "../../contexts/FeedbackContext";
 
 function formatBytes(bytes) {
   if (bytes === null || bytes === undefined || bytes === 0) return "0 B";
@@ -40,6 +41,7 @@ function fmtDateTime(iso) {
 }
 
 export default function SessoesLog() {
+  const { showError } = useFeedback();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -77,11 +79,13 @@ export default function SessoesLog() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Erro ao buscar logs do RADIUS.");
       setLogs(Array.isArray(json.data) ? json.data : []);
       setTotal(json.total || 0);
       setPage(json.page || 1);
     } catch (err) {
       console.error("Erro ao buscar logs:", err);
+      showError(err.message || "Erro ao buscar logs do RADIUS.");
       setLogs([]);
       setTotal(0);
     } finally {
@@ -118,21 +122,28 @@ export default function SessoesLog() {
     fetchLogs(p);
   };
 
-  const exportCSV = () => {
+  const exportCSV = async () => {
     const params = buildParams();
     const url = `/api/radius-logs/export?${params.toString()}`;
-    const a = document.createElement("a");
-    // Use fetch to include auth header, then trigger download
-    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => res.blob())
-      .then((blob) => {
-        const blobUrl = URL.createObjectURL(blob);
-        a.href = blobUrl;
-        a.download = "radius-logs.csv";
-        a.click();
-        URL.revokeObjectURL(blobUrl);
-      })
-      .catch((err) => console.error("Erro ao exportar CSV:", err));
+    try {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || "Erro ao exportar CSV.");
+      }
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = "radius-logs.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Erro ao exportar CSV:", err);
+      showError(err.message || "Erro ao exportar CSV.");
+    }
   };
 
   return (

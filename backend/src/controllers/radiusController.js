@@ -147,6 +147,84 @@ const listarUsuarios = async (req, res) => {
   }
 };
 
+const obterUsuario = async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const [[usuario]] = await db.query(
+      `SELECT
+         rc.username,
+         rc.value AS senha,
+         ru.plano_id,
+         p.nome AS plano,
+         p.duracao_minutos,
+         p.velocidade_down,
+         p.velocidade_up,
+         p.shared_users,
+         m.nome AS nas,
+         m.ip   AS nas_ip,
+         ru.criado_em,
+         (SELECT rr.value FROM radreply rr
+           WHERE rr.username = rc.username AND rr.attribute = 'Mikrotik-Rate-Limit' LIMIT 1) AS rate_limit,
+         (SELECT rc2.value FROM radcheck rc2
+           WHERE rc2.username = rc.username AND rc2.attribute = 'Max-Daily-Session' LIMIT 1) AS max_daily_session,
+         (SELECT rc3.value FROM radcheck rc3
+           WHERE rc3.username = rc.username AND rc3.attribute = 'Session-Timeout' LIMIT 1) AS session_timeout,
+         (SELECT rc4.value FROM radcheck rc4
+           WHERE rc4.username = rc.username AND rc4.attribute = 'Simultaneous-Use' LIMIT 1) AS simultaneous_use
+       FROM radcheck rc
+       INNER JOIN radius_users ru ON ru.username = rc.username
+       LEFT JOIN planos p ON p.id = ru.plano_id
+       LEFT JOIN mikrotiks m ON m.id = ru.nas_id
+       WHERE rc.attribute = 'Cleartext-Password' AND rc.username = ? AND ru.empresa_id = ?`,
+      [username, req.empresa_id]
+    );
+
+    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    res.json({ data: usuario });
+  } catch (error) {
+    console.error('Erro ao buscar usuário RADIUS:', error);
+    res.status(500).json({ error: 'Erro ao buscar usuário RADIUS.' });
+  }
+};
+
+const atualizarUsuario = async (req, res) => {
+  const { username } = req.params;
+  const { password, plano_id } = req.body;
+
+  if (!password && !plano_id) {
+    return res.status(400).json({ error: 'Informe ao menos a nova senha ou o novo plano.' });
+  }
+
+  try {
+    const [[ru]] = await db.query(
+      'SELECT id FROM radius_users WHERE username = ? AND empresa_id = ?',
+      [username, req.empresa_id]
+    );
+    if (!ru) return res.status(404).json({ error: 'Usuário não encontrado nesta empresa' });
+
+    if (password) {
+      await radius.updatePassword(username, password);
+    }
+
+    if (plano_id) {
+      const [[plano]] = await db.query(
+        'SELECT id, nome, velocidade_down, velocidade_up, duracao_minutos, mikrotik_id, shared_users FROM planos WHERE id = ? AND empresa_id = ?',
+        [plano_id, req.empresa_id]
+      );
+      if (!plano) return res.status(404).json({ error: 'Plano não encontrado' });
+
+      await radius.applyPlan({ username, empresaId: req.empresa_id, plano });
+    }
+
+    res.status(200).json({ message: 'Usuário atualizado com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao atualizar usuário RADIUS:', error);
+    res.status(500).json({ error: 'Erro ao atualizar usuário RADIUS.' });
+  }
+};
+
 async function deletarUsuarioRadius(req, res) {
   const { username } = req.params;
 
@@ -260,6 +338,8 @@ module.exports = {
   criarUsuarioRadius,
   vincularPlano,
   listarUsuarios,
+  obterUsuario,
+  atualizarUsuario,
   deletarUsuarioRadius,
   listarSessoesAtivas,
   desconectarSessao,

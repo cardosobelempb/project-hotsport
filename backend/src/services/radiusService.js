@@ -327,6 +327,25 @@ async function applyPlan({ username, empresaId, plano }) {
   }
 }
 
+// Troca a senha de um usuario ja existente, preservando os demais atributos.
+async function updatePassword(username, novaSenha) {
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query("DELETE FROM radcheck WHERE username = ? AND attribute = 'Cleartext-Password'", [username]);
+    await conn.query(
+      "INSERT INTO radcheck (username, attribute, op, value) VALUES (?, 'Cleartext-Password', ':=', ?)",
+      [username, novaSenha]
+    );
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
 // Remove o usuario de TODAS as tabelas RADIUS + radius_users.
 async function deleteUser(username, { incluirPostauth = false } = {}) {
   await db.query("DELETE FROM radcheck WHERE username = ?", [username]);
@@ -563,6 +582,7 @@ module.exports = {
   getUserAttributes,
   provisionUser,
   applyPlan,
+  updatePassword,
   deleteUser,
   deleteUsersByEmpresa,
   cleanupTempUsers,

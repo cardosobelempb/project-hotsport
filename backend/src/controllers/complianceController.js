@@ -76,7 +76,7 @@ exports.buscarLogs = async (req, res) => {
     });
   } catch (err) {
     console.error("Erro ao buscar logs de compliance:", err);
-    res.status(500).json({ message: "Erro ao buscar logs de compliance." });
+    res.status(500).json({ error: "Erro ao buscar logs de compliance." });
   }
 };
 
@@ -156,7 +156,7 @@ exports.exportarCSV = async (req, res) => {
     res.send(csv);
   } catch (err) {
     console.error("Erro ao exportar CSV de compliance:", err);
-    res.status(500).json({ message: "Erro ao exportar CSV." });
+    res.status(500).json({ error: "Erro ao exportar CSV." });
   }
 };
 
