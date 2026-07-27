@@ -39,6 +39,7 @@ services:
       # freeradius compartilha a netns do wg-easy, entao o hostname 'freeradius'
       # nao existe mais na rede — o health check usa o alias do wg-easy
       RADIUS_HOST: wg-easy
+      RADIUS_SECRET: ${RADIUS_SECRET:-testing123}
       # LIMITACAO CONHECIDA: o backend NAO tem rota pro tunel WireGuard
       # (10.8.0.x, onde ficam os MikroTiks atras de NAT) - so o freeradius
       # tem, porque so ele compartilha a netns do wg-easy. Testado em

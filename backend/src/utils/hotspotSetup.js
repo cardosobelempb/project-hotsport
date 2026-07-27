@@ -322,7 +322,10 @@ async function configurarHotspot(mikrotik, portal, systemDomain, config = {}, em
   const poolRange = config.poolRange || "10.5.50.10-10.5.50.254";
   const dnsName = config.dnsName || "";
   const radiusServerIp = config.radiusServerIp || process.env.RADIUS_SERVER_IP || "10.8.0.1";
-  const radiusSecret = config.radiusSecret || mikrotik.senha;
+  // Segredo compartilhado RADIUS — deve bater com clients.conf (docker_bridge_10 = 10.0.0.0/8 testing123).
+  // Usar mikrotik.senha causava mismatch porque FreeRADIUS inicia sem SQL NAS (tabela vazia)
+  // e usa o clients.conf estático com 'testing123' para toda a faixa WireGuard.
+  const radiusSecret = config.radiusSecret || process.env.RADIUS_SECRET || 'testing123';
 
   const gateway = localAddress.split("/")[0];
   const mask = localAddress.split("/")[1] || "24";

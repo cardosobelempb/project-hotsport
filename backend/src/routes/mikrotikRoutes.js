@@ -51,10 +51,12 @@ router.post("/", async (req, res) => {
       [req.empresa_id, nome, ip, usuario, senha, porta, end_hotspot || null, portal_id || null, vpn_ip || null]
     );
 
-    // Inserir NAS usando vpn_ip quando disponível (MikroTik via VPN usa vpn_ip como source)
+    // Inserir NAS — secret é o segredo RADIUS compartilhado (deve bater com clients.conf
+    // e com o que o wizard configura no MikroTik). NÃO usar a senha admin do MikroTik.
+    const radiusSecret = process.env.RADIUS_SECRET || 'testing123';
     await db.execute(
       "INSERT INTO nas (empresa_id, nasname, shortname, type, secret, description) VALUES (?, ?, ?, 'other', ?, 'RADIUS Client')",
-      [req.empresa_id, nasName, nome, senha]
+      [req.empresa_id, nasName, nome, radiusSecret]
     );
 
     console.log("✅ Mikrotik e NAS cadastrados com sucesso. NAS nasname:", nasName);
@@ -105,10 +107,11 @@ router.put("/:id", async (req, res) => {
       [nome, ip, usuario, senha, porta, end_hotspot || null, portal_id || null, vpn_ip || null, id, req.empresa_id]
     );
 
-    // Atualiza NAS usando o nasname antigo como chave de busca
+    // Atualiza NAS — secret é o segredo RADIUS compartilhado (não a senha admin do MikroTik)
+    const radiusSecretUpd = process.env.RADIUS_SECRET || 'testing123';
     await db.execute(
       "UPDATE nas SET nasname = ?, shortname = ?, secret = ? WHERE nasname = ?",
-      [newNasName, nome, senha, oldNasName]
+      [newNasName, nome, radiusSecretUpd, oldNasName]
     );
 
     reloadFreeRADIUS();
