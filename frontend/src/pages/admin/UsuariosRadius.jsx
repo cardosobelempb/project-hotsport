@@ -524,13 +524,32 @@ const UsuariosRadius = () => {
 
               {/* Alerta principal */}
               <div className={`px-4 py-3 rounded-lg border font-medium ${
-                diagData.diagnostico.radacct_vazio
+                !diagData.diagnostico.freeradius_online
                   ? 'bg-red-900/30 border-red-700 text-red-300'
+                  : diagData.diagnostico.postauth_vazio || diagData.diagnostico.radacct_vazio
+                  ? 'bg-yellow-900/30 border-yellow-700 text-yellow-300'
                   : diagData.sessoes_visiveis_empresa === 0
                   ? 'bg-yellow-900/30 border-yellow-700 text-yellow-300'
                   : 'bg-green-900/30 border-green-700 text-green-300'
               }`}>
                 {diagData.diagnostico.problema_provavel}
+              </div>
+
+              {/* FreeRADIUS status */}
+              <div className="flex items-center gap-3">
+                <p className="text-gray-400 font-semibold">FreeRADIUS:</p>
+                {diagData.freeradius?.online ? (
+                  <span className="flex items-center gap-1.5 text-green-400 text-xs font-medium">
+                    <span className="w-2 h-2 rounded-full bg-green-400" />
+                    Online ({diagData.freeradius.latencia_ms}ms)
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-red-400 text-xs font-medium">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    Offline — {diagData.freeradius?.erro || 'sem resposta'}
+                    <span className="text-red-300 font-normal ml-1">→ reiniciar container <code className="bg-gray-900 px-1 rounded">hotspot-freeradius</code></span>
+                  </span>
+                )}
               </div>
 
               {/* NAS */}
@@ -551,33 +570,66 @@ const UsuariosRadius = () => {
                 }
               </div>
 
-              {/* radacct */}
+              {/* Contadores RADIUS */}
               <div>
-                <p className="text-gray-400 font-semibold mb-1">Tabela radacct (contabilidade RADIUS)</p>
-                <div className="grid grid-cols-3 gap-3 mb-2">
+                <p className="text-gray-400 font-semibold mb-2">Contadores RADIUS</p>
+                <div className="grid grid-cols-2 gap-3 mb-2">
                   {[
-                    { label: 'Total de registros', val: diagData.radacct.total, ok: diagData.radacct.total > 0 },
-                    { label: 'Sessões ativas (global)', val: diagData.radacct.sessoes_ativas, ok: true },
-                    { label: 'Visíveis nesta empresa', val: diagData.sessoes_visiveis_empresa, ok: diagData.sessoes_visiveis_empresa > 0 },
+                    {
+                      label: 'Auth recebidas (radpostauth)',
+                      val: diagData.radpostauth?.total ?? '—',
+                      ok: (diagData.radpostauth?.total ?? 0) > 0,
+                      hint: (diagData.radpostauth?.total ?? 0) === 0 ? 'MikroTik não está enviando RADIUS' : null,
+                    },
+                    {
+                      label: 'Sessões gravadas (radacct)',
+                      val: diagData.radacct.total,
+                      ok: diagData.radacct.total > 0,
+                      hint: diagData.radacct.total === 0 && (diagData.radpostauth?.total ?? 0) > 0 ? 'Auth chegando mas accounting não grava' : null,
+                    },
+                    {
+                      label: 'Sessões ativas (global)',
+                      val: diagData.radacct.sessoes_ativas,
+                      ok: true,
+                      hint: null,
+                    },
+                    {
+                      label: 'Visíveis nesta empresa',
+                      val: diagData.sessoes_visiveis_empresa,
+                      ok: diagData.sessoes_visiveis_empresa > 0 || diagData.radacct.total === 0,
+                      hint: null,
+                    },
                   ].map((item, i) => (
                     <div key={i} className="bg-gray-800/50 rounded px-3 py-2 text-center">
                       <p className={`text-lg font-bold ${item.ok ? 'text-white' : 'text-red-400'}`}>{item.val}</p>
                       <p className="text-gray-400 text-xs">{item.label}</p>
+                      {item.hint && <p className="text-yellow-400 text-xs mt-0.5">{item.hint}</p>}
                     </div>
                   ))}
                 </div>
-                {diagData.radacct.total === 0 ? (
+
+                {/* Instruções contextuais */}
+                {!diagData.diagnostico.freeradius_online ? (
                   <div className="bg-red-900/20 border border-red-700/40 rounded p-3 text-red-300 text-xs space-y-1">
-                    <p className="font-semibold">radacct vazio — o FreeRADIUS não está gravando sessões. O que fazer:</p>
+                    <p className="font-semibold">FreeRADIUS offline. O que fazer:</p>
                     <ol className="list-decimal ml-4 space-y-1">
-                      <li>Rebuilde o backend: <code className="bg-gray-900 px-1 rounded">docker compose up -d --build backend</code></li>
-                      <li>Re-execute o wizard do MikroTik (botão Wifi na lista de MikroTiks)</li>
-                      <li>Peça para um cliente passar pelo portal e conectar</li>
+                      <li>No Coolify → reiniciar o container <code className="bg-gray-900 px-1 rounded">hotspot-freeradius</code></li>
+                      <li>Se reiniciar não resolver, verificar logs do container no Coolify</li>
+                      <li>Se o wg-easy foi recriado recentemente, recriar também o freeradius</li>
                     </ol>
                   </div>
-                ) : (
+                ) : (diagData.radpostauth?.total ?? 0) === 0 ? (
+                  <div className="bg-yellow-900/20 border border-yellow-700/40 rounded p-3 text-yellow-300 text-xs space-y-1">
+                    <p className="font-semibold">FreeRADIUS online mas o MikroTik não está enviando pacotes RADIUS. O que fazer:</p>
+                    <ol className="list-decimal ml-4 space-y-1">
+                      <li><strong>Re-executar o wizard</strong> de cada MikroTik (botão Wifi na lista de MikroTiks) — reconfigura o secret RADIUS no roteador</li>
+                      <li>Após o wizard, pedir para um cliente conectar ao WiFi e passar pelo portal</li>
+                      <li>Abrir diagnóstico novamente para confirmar que radpostauth aumentou</li>
+                    </ol>
+                  </div>
+                ) : diagData.radacct.total > 0 ? (
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">Últimas entradas (qualquer empresa):</p>
+                    <p className="text-gray-400 text-xs mb-1">Últimas sessões (qualquer empresa):</p>
                     <div className="bg-gray-900 rounded p-2 overflow-x-auto">
                       <table className="text-xs w-full">
                         <thead><tr className="text-gray-500">
@@ -597,7 +649,7 @@ const UsuariosRadius = () => {
                       </table>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
 
               {/* radius_users */}

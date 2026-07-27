@@ -254,30 +254,27 @@ const listarSessoesAtivas = async (req, res) => {
   }
 };
 
-const verificarStatusRadius = async (req, res) => {
+async function pingFreeRadius() {
   const host = process.env.RADIUS_HOST || 'freeradius';
   const port = parseInt(process.env.RADIUS_PORT || '1812', 10);
   const secret = process.env.RADIUS_SECRET || 'testing123';
   const inicio = Date.now();
 
   try {
-    const latencia = await new Promise((resolve, reject) => {
+    const latencia_ms = await new Promise((resolve, reject) => {
       const socket = dgram.createSocket('udp4');
       const timer = setTimeout(() => {
         try { socket.close(); } catch (_) {}
         reject(new Error('timeout'));
       }, 3000);
 
-      // Status-Server packet (Code=12) com Message-Authenticator obrigatorio
       const id = Math.floor(Math.random() * 256);
-      const packet = Buffer.alloc(38); // 20 header + 18 Message-Authenticator
+      const packet = Buffer.alloc(38);
       packet[0] = 12; // Code: Status-Server
       packet[1] = id;
-      packet.writeUInt16BE(38, 2); // Length
-      // Bytes 4-19: Request Authenticator = zeros (padrao para Status-Server)
+      packet.writeUInt16BE(38, 2);
       packet[20] = 80;  // Type: Message-Authenticator
       packet[21] = 18;  // Length: 18
-      // Bytes 22-37: HMAC-MD5 (comeca zerado para calculo)
 
       const hmac = crypto.createHmac('md5', secret);
       hmac.update(packet);
@@ -303,14 +300,21 @@ const verificarStatusRadius = async (req, res) => {
         }
       });
     });
-
-    res.json({ online: true, latencia_ms: latencia });
+    return { online: true, latencia_ms };
   } catch (err) {
-    const motivo = err.message === 'timeout'
-      ? 'Sem resposta (timeout 3s) — verifique se o FreeRADIUS está rodando'
-      : err.message;
-    res.json({ online: false, erro: motivo });
+    return {
+      online: false,
+      erro: err.message === 'timeout' ? 'Sem resposta (timeout 3s)' : err.message,
+    };
   }
+}
+
+const verificarStatusRadius = async (req, res) => {
+  const resultado = await pingFreeRadius();
+  if (!resultado.online) {
+    return res.json({ online: false, erro: resultado.erro + ' — verifique se o container freeradius está rodando' });
+  }
+  res.json(resultado);
 };
 
 const desconectarSessao = async (req, res) => {
@@ -334,33 +338,31 @@ const desconectarSessao = async (req, res) => {
   }
 };
 
-// Diagnóstico completo do RADIUS para esta empresa:
-// mostra o estado real das tabelas radacct / radius_users / nas
-// sem depender de SSH ao servidor.
+// Diagnóstico completo do RADIUS: tabelas, ping ao FreeRADIUS e tentativas de auth.
 const diagnosticarRadius = async (req, res) => {
   try {
     const empresaId = req.empresa_id;
     const radiusSecretEsperado = process.env.RADIUS_SECRET || 'testing123';
 
-    // 1. Entradas NAS desta empresa
+    // 1. NAS desta empresa
     const [nasRows] = await db.query(
       "SELECT nasname, shortname, secret = ? AS secret_ok FROM nas WHERE empresa_id = ?",
       [radiusSecretEsperado, empresaId]
     );
 
-    // 2. Quantidade total em radacct (sem filtro de empresa — vemos tudo)
-    const [[{ total_radacct }]] = await db.query(
-      "SELECT COUNT(*) AS total_radacct FROM radacct"
-    );
-    const [[{ sessoes_ativas }]] = await db.query(
-      "SELECT COUNT(*) AS sessoes_ativas FROM radacct WHERE acctstoptime IS NULL"
-    );
-
-    // 3. Últimas 5 entradas em radacct (qualquer empresa)
+    // 2. radacct (global — não filtra por empresa pra enxergar tudo)
+    const [[{ total_radacct }]] = await db.query("SELECT COUNT(*) AS total_radacct FROM radacct");
+    const [[{ sessoes_ativas }]] = await db.query("SELECT COUNT(*) AS sessoes_ativas FROM radacct WHERE acctstoptime IS NULL");
     const [ultimasRadacct] = await db.query(
       `SELECT username, callingstationid AS mac, framedipaddress AS ip,
               nasipaddress AS nas_ip, acctstarttime, acctstoptime
        FROM radacct ORDER BY radacctid DESC LIMIT 5`
+    );
+
+    // 3. radpostauth — confirma se alguma tentativa de auth chegou ao FreeRADIUS
+    const [[{ total_postauth }]] = await db.query("SELECT COUNT(*) AS total_postauth FROM radpostauth");
+    const [ultimasPostauth] = await db.query(
+      "SELECT username, reply, authdate FROM radpostauth ORDER BY id DESC LIMIT 5"
     );
 
     // 4. radius_users desta empresa
@@ -369,14 +371,37 @@ const diagnosticarRadius = async (req, res) => {
       [empresaId]
     );
 
-    // 5. Sessões visíveis para esta empresa (same query que listarSessoesAtivas)
+    // 5. Sessões visíveis desta empresa
     const [[{ sessoes_empresa }]] = await db.query(
       `SELECT COUNT(*) AS sessoes_empresa FROM radacct ra
        WHERE ra.acctstoptime IS NULL
-         AND EXISTS (SELECT 1 FROM radius_users ru
-                     WHERE ru.username = ra.username AND ru.empresa_id = ?)`,
+         AND EXISTS (SELECT 1 FROM radius_users ru WHERE ru.username = ra.username AND ru.empresa_id = ?)`,
       [empresaId]
     );
+
+    // 6. Ping FreeRADIUS (Status-Server UDP)
+    const freeradiusStatus = await pingFreeRadius();
+
+    const totalPostauth = Number(total_postauth);
+    const totalRadacct  = Number(total_radacct);
+    const totalRU       = Number(total_radius_users);
+    const sessoesEmp    = Number(sessoes_empresa);
+    const sessoesAt     = Number(sessoes_ativas);
+
+    let problema_provavel;
+    if (!freeradiusStatus.online) {
+      problema_provavel = 'FreeRADIUS offline — reiniciar o container hotspot-freeradius.';
+    } else if (totalPostauth === 0) {
+      problema_provavel = 'FreeRADIUS online mas sem nenhuma tentativa de autenticação — re-executar o wizard do MikroTik (botão Wifi) para reconfigurar o secret RADIUS.';
+    } else if (totalRadacct === 0) {
+      problema_provavel = 'Autenticações chegando ao RADIUS mas sem accounting — verificar módulo sql no FreeRADIUS.';
+    } else if (totalRU === 0) {
+      problema_provavel = 'radius_users vazio — nenhum cliente passou pelo portal ainda.';
+    } else if (sessoesEmp === 0 && sessoesAt > 0) {
+      problema_provavel = 'radacct tem sessões mas nenhuma pertence a esta empresa (radius_users.empresa_id não bate).';
+    } else {
+      problema_provavel = 'Nenhum problema detectado — verifique se há clientes conectados agora.';
+    }
 
     res.json({
       empresa_id: empresaId,
@@ -386,25 +411,24 @@ const diagnosticarRadius = async (req, res) => {
         secret_correto: !!n.secret_ok,
         secret_esperado: radiusSecretEsperado,
       })),
+      freeradius: freeradiusStatus,
       radacct: {
-        total: Number(total_radacct),
-        sessoes_ativas: Number(sessoes_ativas),
+        total: totalRadacct,
+        sessoes_ativas: sessoesAt,
         ultimas: ultimasRadacct,
       },
-      radius_users: {
-        total_empresa: Number(total_radius_users),
+      radpostauth: {
+        total: totalPostauth,
+        ultimas: ultimasPostauth,
       },
-      sessoes_visiveis_empresa: Number(sessoes_empresa),
+      radius_users: { total_empresa: totalRU },
+      sessoes_visiveis_empresa: sessoesEmp,
       diagnostico: {
-        radacct_vazio: Number(total_radacct) === 0,
+        radacct_vazio: totalRadacct === 0,
         nas_sem_secret_correto: nasRows.filter(n => !n.secret_ok).length,
-        problema_provavel: Number(total_radacct) === 0
-          ? 'radacct vazio — FreeRADIUS não está recebendo accounting do MikroTik (secret errado ou MikroTik não configurado com RADIUS)'
-          : Number(total_radius_users) === 0
-          ? 'radius_users vazio — clientes não passaram pelo portal ainda'
-          : Number(sessoes_empresa) === 0 && Number(sessoes_ativas) > 0
-          ? 'radacct tem sessões mas nenhuma pertence a esta empresa (radius_users.empresa_id não bate)'
-          : 'nenhum problema detectado — verifique se clientes estão conectados agora',
+        freeradius_online: freeradiusStatus.online,
+        postauth_vazio: totalPostauth === 0,
+        problema_provavel,
       },
     });
   } catch (err) {

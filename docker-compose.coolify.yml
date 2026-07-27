@@ -93,6 +93,9 @@ services:
       # freeradius compartilha a netns do wg-easy (ver servico abaixo) - o
       # health check do RADIUS usa o alias do wg-easy, nao "freeradius"
       RADIUS_HOST: wg-easy
+      # Segredo RADIUS compartilhado: DEVE bater com freeradius_conf/3.0/clients.conf
+      # (docker_bridge_10 = 10.0.0.0/8, secret = testing123). Default alinhado.
+      RADIUS_SECRET: ${RADIUS_SECRET:-testing123}
       UPDATE_SERVER_URL: ${UPDATE_SERVER_URL:-https://glpi.forumtelecom.com.br}
     expose:
       - "3001"
