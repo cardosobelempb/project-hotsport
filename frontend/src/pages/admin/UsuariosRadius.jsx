@@ -46,6 +46,11 @@ const UsuariosRadius = () => {
   const [radiusStatus,        setRadiusStatus]        = useState(null); // null=carregando, {online, latencia_ms, erro}
   const [testando,            setTestando]            = useState(false);
 
+  // ── diagnóstico RADIUS ───────────────────────────────────────────────────────
+  const [diagOpen,     setDiagOpen]     = useState(false);
+  const [diagData,     setDiagData]     = useState(null);
+  const [diagLoading,  setDiagLoading]  = useState(false);
+
   // ── planos (usado no form) ───────────────────────────────────────────────────
   const [planos, setPlanos] = useState([]);
 
@@ -92,6 +97,19 @@ const UsuariosRadius = () => {
   }, []); // eslint-disable-line
 
   useEffect(() => { testarRadius(); }, []); // eslint-disable-line
+
+  const abrirDiagnostico = async () => {
+    setDiagOpen(true);
+    setDiagLoading(true);
+    try {
+      const res = await axios.get('/api/radius/diagnostico', { headers });
+      setDiagData(res.data);
+    } catch {
+      setDiagData({ erro: 'Não foi possível obter diagnóstico.' });
+    } finally {
+      setDiagLoading(false);
+    }
+  };
 
   // Carrega planos uma vez
   useEffect(() => {
@@ -283,6 +301,16 @@ const UsuariosRadius = () => {
             onClick={testarRadius}
           >
             {radiusStatus?.online ? 'Testar novamente' : 'Reconectar'}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={diagLoading}
+            className="ml-auto !text-blue-400 !border-blue-700 hover:!bg-blue-900/30"
+            onClick={abrirDiagnostico}
+          >
+            Diagnóstico RADIUS
           </Button>
         </div>
 
@@ -484,6 +512,107 @@ const UsuariosRadius = () => {
         {/* ── paginação ──────────────────────────────────────────────────────── */}
         <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} itemLabel="usuários" />
       </div>
+
+      {/* ── modal diagnóstico RADIUS ─────────────────────────────────────────── */}
+      <Modal open={diagOpen} onClose={() => setDiagOpen(false)} title="Diagnóstico RADIUS" size="lg">
+        {diagLoading && <p className="text-gray-400 text-sm p-4">Carregando diagnóstico...</p>}
+        {diagData && !diagLoading && (
+          diagData.erro ? (
+            <p className="text-red-400 p-4">{diagData.erro}</p>
+          ) : (
+            <div className="p-4 space-y-4 text-sm">
+
+              {/* Alerta principal */}
+              <div className={`px-4 py-3 rounded-lg border font-medium ${
+                diagData.diagnostico.radacct_vazio
+                  ? 'bg-red-900/30 border-red-700 text-red-300'
+                  : diagData.sessoes_visiveis_empresa === 0
+                  ? 'bg-yellow-900/30 border-yellow-700 text-yellow-300'
+                  : 'bg-green-900/30 border-green-700 text-green-300'
+              }`}>
+                {diagData.diagnostico.problema_provavel}
+              </div>
+
+              {/* NAS */}
+              <div>
+                <p className="text-gray-400 font-semibold mb-1">Entradas NAS desta empresa ({diagData.nas.length})</p>
+                {diagData.nas.length === 0
+                  ? <p className="text-red-400">Nenhum NAS registrado — cadastre um MikroTik primeiro.</p>
+                  : diagData.nas.map((n, i) => (
+                    <div key={i} className="flex items-center gap-3 bg-gray-800/50 rounded px-3 py-2 mb-1">
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${n.secret_correto ? 'bg-green-400' : 'bg-red-500'}`} />
+                      <span className="font-mono text-xs text-gray-200">{n.nasname}</span>
+                      <span className="text-gray-400">{n.shortname}</span>
+                      <span className={`ml-auto text-xs ${n.secret_correto ? 'text-green-400' : 'text-red-400'}`}>
+                        {n.secret_correto ? `✓ secret = ${n.secret_esperado}` : `✗ secret errado (esperado: ${n.secret_esperado}) — rode o wizard novamente`}
+                      </span>
+                    </div>
+                  ))
+                }
+              </div>
+
+              {/* radacct */}
+              <div>
+                <p className="text-gray-400 font-semibold mb-1">Tabela radacct (contabilidade RADIUS)</p>
+                <div className="grid grid-cols-3 gap-3 mb-2">
+                  {[
+                    { label: 'Total de registros', val: diagData.radacct.total, ok: diagData.radacct.total > 0 },
+                    { label: 'Sessões ativas (global)', val: diagData.radacct.sessoes_ativas, ok: true },
+                    { label: 'Visíveis nesta empresa', val: diagData.sessoes_visiveis_empresa, ok: diagData.sessoes_visiveis_empresa > 0 },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-gray-800/50 rounded px-3 py-2 text-center">
+                      <p className={`text-lg font-bold ${item.ok ? 'text-white' : 'text-red-400'}`}>{item.val}</p>
+                      <p className="text-gray-400 text-xs">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+                {diagData.radacct.total === 0 ? (
+                  <div className="bg-red-900/20 border border-red-700/40 rounded p-3 text-red-300 text-xs space-y-1">
+                    <p className="font-semibold">radacct vazio — o FreeRADIUS não está gravando sessões. O que fazer:</p>
+                    <ol className="list-decimal ml-4 space-y-1">
+                      <li>Rebuilde o backend: <code className="bg-gray-900 px-1 rounded">docker compose up -d --build backend</code></li>
+                      <li>Re-execute o wizard do MikroTik (botão Wifi na lista de MikroTiks)</li>
+                      <li>Peça para um cliente passar pelo portal e conectar</li>
+                    </ol>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-gray-400 text-xs mb-1">Últimas entradas (qualquer empresa):</p>
+                    <div className="bg-gray-900 rounded p-2 overflow-x-auto">
+                      <table className="text-xs w-full">
+                        <thead><tr className="text-gray-500">
+                          <th className="text-left pr-3">Username</th>
+                          <th className="text-left pr-3">MAC</th>
+                          <th className="text-left pr-3">NAS IP</th>
+                          <th className="text-left">Início</th>
+                        </tr></thead>
+                        <tbody>{diagData.radacct.ultimas.map((r, i) => (
+                          <tr key={i} className="text-gray-300">
+                            <td className="font-mono pr-3">{r.username}</td>
+                            <td className="font-mono pr-3">{r.mac}</td>
+                            <td className="font-mono pr-3">{r.nas_ip}</td>
+                            <td>{r.acctstarttime ? new Date(r.acctstarttime).toLocaleString('pt-BR') : '-'}</td>
+                          </tr>
+                        ))}</tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* radius_users */}
+              <div>
+                <p className="text-gray-400 font-semibold mb-1">Usuários RADIUS desta empresa</p>
+                <div className={`rounded px-3 py-2 ${diagData.radius_users.total_empresa > 0 ? 'bg-gray-800/50 text-white' : 'bg-red-900/20 border border-red-700/40 text-red-300'}`}>
+                  {diagData.radius_users.total_empresa} usuário(s) provisionado(s)
+                  {diagData.radius_users.total_empresa === 0 && ' — nenhum cliente passou pelo portal ainda.'}
+                </div>
+              </div>
+
+            </div>
+          )
+        )}
+      </Modal>
     </AdminLayout>
   );
 };

@@ -334,6 +334,85 @@ const desconectarSessao = async (req, res) => {
   }
 };
 
+// Diagnóstico completo do RADIUS para esta empresa:
+// mostra o estado real das tabelas radacct / radius_users / nas
+// sem depender de SSH ao servidor.
+const diagnosticarRadius = async (req, res) => {
+  try {
+    const empresaId = req.empresa_id;
+    const radiusSecretEsperado = process.env.RADIUS_SECRET || 'testing123';
+
+    // 1. Entradas NAS desta empresa
+    const [nasRows] = await db.query(
+      "SELECT nasname, shortname, secret = ? AS secret_ok FROM nas WHERE empresa_id = ?",
+      [radiusSecretEsperado, empresaId]
+    );
+
+    // 2. Quantidade total em radacct (sem filtro de empresa — vemos tudo)
+    const [[{ total_radacct }]] = await db.query(
+      "SELECT COUNT(*) AS total_radacct FROM radacct"
+    );
+    const [[{ sessoes_ativas }]] = await db.query(
+      "SELECT COUNT(*) AS sessoes_ativas FROM radacct WHERE acctstoptime IS NULL"
+    );
+
+    // 3. Últimas 5 entradas em radacct (qualquer empresa)
+    const [ultimasRadacct] = await db.query(
+      `SELECT username, callingstationid AS mac, framedipaddress AS ip,
+              nasipaddress AS nas_ip, acctstarttime, acctstoptime
+       FROM radacct ORDER BY radacctid DESC LIMIT 5`
+    );
+
+    // 4. radius_users desta empresa
+    const [[{ total_radius_users }]] = await db.query(
+      "SELECT COUNT(*) AS total_radius_users FROM radius_users WHERE empresa_id = ?",
+      [empresaId]
+    );
+
+    // 5. Sessões visíveis para esta empresa (same query que listarSessoesAtivas)
+    const [[{ sessoes_empresa }]] = await db.query(
+      `SELECT COUNT(*) AS sessoes_empresa FROM radacct ra
+       WHERE ra.acctstoptime IS NULL
+         AND EXISTS (SELECT 1 FROM radius_users ru
+                     WHERE ru.username = ra.username AND ru.empresa_id = ?)`,
+      [empresaId]
+    );
+
+    res.json({
+      empresa_id: empresaId,
+      nas: nasRows.map(n => ({
+        nasname: n.nasname,
+        shortname: n.shortname,
+        secret_correto: !!n.secret_ok,
+        secret_esperado: radiusSecretEsperado,
+      })),
+      radacct: {
+        total: Number(total_radacct),
+        sessoes_ativas: Number(sessoes_ativas),
+        ultimas: ultimasRadacct,
+      },
+      radius_users: {
+        total_empresa: Number(total_radius_users),
+      },
+      sessoes_visiveis_empresa: Number(sessoes_empresa),
+      diagnostico: {
+        radacct_vazio: Number(total_radacct) === 0,
+        nas_sem_secret_correto: nasRows.filter(n => !n.secret_ok).length,
+        problema_provavel: Number(total_radacct) === 0
+          ? 'radacct vazio — FreeRADIUS não está recebendo accounting do MikroTik (secret errado ou MikroTik não configurado com RADIUS)'
+          : Number(total_radius_users) === 0
+          ? 'radius_users vazio — clientes não passaram pelo portal ainda'
+          : Number(sessoes_empresa) === 0 && Number(sessoes_ativas) > 0
+          ? 'radacct tem sessões mas nenhuma pertence a esta empresa (radius_users.empresa_id não bate)'
+          : 'nenhum problema detectado — verifique se clientes estão conectados agora',
+      },
+    });
+  } catch (err) {
+    console.error('Erro ao diagnosticar RADIUS:', err);
+    res.status(500).json({ error: 'Erro ao executar diagnóstico RADIUS.' });
+  }
+};
+
 module.exports = {
   criarUsuarioRadius,
   vincularPlano,
@@ -344,4 +423,5 @@ module.exports = {
   listarSessoesAtivas,
   desconectarSessao,
   verificarStatusRadius,
+  diagnosticarRadius,
 };
